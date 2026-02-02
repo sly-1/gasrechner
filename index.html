@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GasZähler Pro</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GasZähler">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-red: #FF3B30;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--ios-bg);
+            margin: 0;
+            padding: 20px;
+            color: #000;
+            line-height: 1.4;
+        }
+
+        h1 { font-size: 26px; text-align: center; margin-bottom: 20px; }
+        h3 { margin-top: 0; font-size: 18px; color: #333; }
+
+        .card {
+            background: var(--ios-card);
+            padding: 18px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 13px; color: #8E8E93; text-transform: uppercase; font-weight: 600; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D1D1D6;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 17px;
+            background: #FFF;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .result-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--ios-blue);
+            display: block;
+        }
+
+        .result-kwh {
+            font-size: 16px;
+            color: #8E8E93;
+        }
+
+        button {
+            width: 100%;
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active { opacity: 0.7; }
+
+        .btn-secondary {
+            background: #E5E5EA;
+            color: var(--ios-blue);
+            margin-top: 10px;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--ios-red);
+            font-size: 14px;
+            padding: 8px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th { text-align: left; font-size: 12px; color: #8E8E93; border-bottom: 1px solid #E5E5EA; padding: 8px 0; }
+        td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 15px; }
+
+        .export-box { text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>⛽ GasZähler</h1>
+
+    <div class="card">
+        <div class="input-group">
+            <label>Aktueller Zählerstand (m³)</label>
+            <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>Preis pro kWh (€)</label>
+            <input type="number" id="price" step="0.0001" placeholder="z.B. 0.1250" oninput="calculate()">
+        </div>
+        
+        <details>
+            <summary style="font-size: 13px; color: var(--ios-blue); margin-bottom: 10px;">Erweiterte Faktoren (Brennwert/Z-Zahl)</summary>
+            <div class="input-group">
+                <label>Brennwert</label>
+                <input type="number" id="brennwert" step="0.001" value="11.250" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>Zustandszahl</label>
+                <input type="number" id="zzahl" step="0.0001" value="0.9500" oninput="calculate()">
+            </div>
+        </details>
+    </div>
+
+    <div class="card">
+        <div class="result-container">
+            <span class="result-price" id="output">0,00 €</span>
+            <span class="result-kwh" id="kwhOutput">0 kWh</span>
+        </div>
+    </div>
+
+    <button onclick="saveData()">Ablesung speichern</button>
+    <button class="btn-secondary" onclick="exportCSV()">Als CSV exportieren</button>
+
+    <div class="card" style="margin-top: 20px;">
+        <h3>Verlauf</h3>
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>m³</th>
+                    <th>Euro</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                </tbody>
+        </table>
+        <button class="btn-danger" onclick="clearHistory()">Verlauf löschen</button>
+    </div>
+
+    <script>
+        // Daten aus LocalStorage laden oder leeres Array erstellen
+        let history = JSON.parse(localStorage.getItem('gas_history')) || [];
+
+        function calculate() {
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const meter = parseFloat(document.getElementById('meter').value) || 0;
+            const brennwert = parseFloat(document.getElementById('brennwert').value) || 1;
+            const zzahl = parseFloat(document.getElementById('zzahl').value) || 1;
+            
+            const kwh = meter * brennwert * zzahl;
+            const cost = kwh * price;
+
+            document.getElementById('output').innerText = cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+            document.getElementById('kwhOutput').innerText = Math.round(kwh).toLocaleString('de-DE') + " kWh";
+            
+            return { cost, meter, kwh };
+        }
+
+        function saveData() {
+            const data = calculate();
+            if (data.meter === 0) {
+                alert("Bitte gib einen Zählerstand ein.");
+                return;
+            }
+
+            const entry = {
+                date: new Date().toLocaleDateString('de-DE'),
+                meter: data.meter,
+                cost: data.cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'}),
+                rawCost: data.cost
+            };
+
+            history.push(entry);
+            localStorage.setItem('gas_history', JSON.stringify(history));
+            
+            // Einstellungen speichern
+            localStorage.setItem('gas_price', document.getElementById('price').value);
+            localStorage.setItem('gas_brennwert', document.getElementById('brennwert').value);
+            localStorage.setItem('gas_zzahl', document.getElementById('zzahl').value);
+            
+            renderHistory();
+            alert("Gespeichert!");
+        }
+
+        function renderHistory() {
+            const body = document.getElementById('historyBody');
+            body.innerHTML = '';
+            // Neueste zuerst zeigen
+            [...history].reverse().forEach(entry => {
+                const row = `<tr>
+                    <td>${entry.date}</td>
+                    <td>${entry.meter}</td>
+                    <td>${entry.cost}</td>
+                </tr>`;
+                body.innerHTML += row;
+            });
+        }
+
+        function exportCSV() {
+            if (history.length === 0) return;
+            let csvContent = "data:text/csv;charset=utf-8,Datum;m3;Kosten\n";
+            history.forEach(e => {
+                csvContent += `${e.date};${e.meter};${e.cost}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "gaszaehler_export.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function clearHistory() {
+            if(confirm("Möchtest du wirklich alle gespeicherten Daten löschen?")) {
+                history = [];
+                localStorage.removeItem('gas_history');
+                renderHistory();
+            }
+        }
+
+        // Beim Laden der Seite
+        window.onload = function() {
+            document.getElementById('price').value = localStorage.getItem('gas_price') || "";
+            document.getElementById('brennwert').value = localStorage.getItem('gas_brennwert') || "11.250";
+            document.getElementById('zzahl').value = localStorage.getItem('gas_zzahl') || "0.9500";
+            renderHistory();
+        };
+    </script>
+</body>
+</html>
