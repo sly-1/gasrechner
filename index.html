@@ -17,7 +17,6 @@
         :root {
             --ios-blue: #007AFF;
             --ios-red: #FF3B30;
-            --ios-green: #34C759;
             --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF;
             --ios-text-secondary: #8E8E93;
@@ -231,7 +230,6 @@
             const labels = [];
             const dataValues = [];
 
-            // Differenzwerte für das Diagramm berechnen
             for (let i = 1; i < history.length; i++) {
                 labels.push(history[i].date);
                 dataValues.push((history[i].meter - history[i-1].meter).toFixed(2));
@@ -239,7 +237,6 @@
 
             if (gasChart) gasChart.destroy();
             
-            // Falls Chart.js noch nicht geladen ist (Offline-Problem), fangen wir den Fehler ab
             try {
                 gasChart = new Chart(ctx, {
                     type: 'bar',
@@ -276,6 +273,13 @@
         window.onload = () => {
             document.getElementById('price').value = localStorage.getItem('gas_price') || "";
             renderAll();
+            
+            // Service Worker Registrierung für Offline-Modus
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js').then(() => {
+                    console.log("Service Worker registriert");
+                });
+            }
         };
     </script>
 </body>
