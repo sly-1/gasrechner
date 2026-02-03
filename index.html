@@ -46,7 +46,7 @@
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
         
-        input, textarea {
+        input {
             width: 100%;
             padding: 12px;
             border: 1px solid #D1D1D6;
@@ -77,7 +77,7 @@
         button:active { opacity: 0.8; }
 
         .btn-secondary { background: #E5E5EA; color: var(--ios-blue); }
-        .btn-danger { background: transparent; color: var(--ios-red); font-size: 14px; margin-top: 10px; }
+        .btn-danger { background: transparent; color: var(--ios-red); font-size: 14px; margin-top: 10px; border: none; cursor: pointer; }
 
         .chart-container { height: 220px; width: 100%; margin-top: 10px; }
 
@@ -88,7 +88,7 @@
         .diff-val { color: var(--ios-blue); font-weight: 600; font-size: 13px; }
         .diff-cost { font-size: 11px; color: var(--ios-text-secondary); display: block; }
 
-        details summary { font-size: 13px; color: var(--ios-blue); cursor: pointer; margin-bottom: 5px; }
+        details summary { font-size: 13px; color: var(--ios-blue); cursor: pointer; margin-bottom: 5px; outline: none; }
     </style>
 </head>
 <body>
@@ -151,7 +151,7 @@
         </table>
     </div>
 
-    <div class="card">
+    <div class="card" style="text-align: center;">
         <h3>Datensicherung</h3>
         <button class="btn-secondary" onclick="exportBackup()">Backup kopieren</button>
         <button class="btn-secondary" onclick="importBackup()">Backup einspielen</button>
@@ -162,71 +162,120 @@
         let history = JSON.parse(localStorage.getItem('gas_history')) || [];
         let gasChart = null;
 
+        // Berechnung der Werte in Echtzeit
         function calculate() {
             const price = parseFloat(document.getElementById('price').value) || 0;
             const meter = parseFloat(document.getElementById('meter').value) || 0;
             const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
             const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
+            
             const kwh = meter * brennwert * zzahl;
             const cost = kwh * price;
+
             document.getElementById('output').innerText = cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
             document.getElementById('kwhOutput').innerText = Math.round(kwh).toLocaleString('de-DE') + " kWh";
+            
             return { cost, meter, kwh, price, brennwert, zzahl };
         }
 
+        // Speichern eines neuen Eintrags
         function saveData() {
             const data = calculate();
-            if (data.meter <= 0) return alert("Bitte Zählerstand eingeben.");
+            if (data.meter <= 0) return alert("Bitte gültigen Zählerstand eingeben.");
+
             history.push({
                 date: new Date().toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'}),
                 meter: data.meter,
                 cost: data.cost
             });
+
+            // Sortieren nach Zählerstand
             history.sort((a, b) => a.meter - b.meter);
+            
             localStorage.setItem('gas_history', JSON.stringify(history));
             localStorage.setItem('gas_price', data.price);
+            
             document.getElementById('meter').value = "";
             renderAll();
+            alert("Erfolgreich gespeichert!");
         }
 
+        // Alles aktualisieren (Tabelle und Diagramm)
         function renderAll() {
             const body = document.getElementById('historyBody');
             body.innerHTML = '';
+            
             for (let i = history.length - 1; i >= 0; i--) {
                 const current = history[i];
                 const previous = history[i - 1];
-                let diffM3 = "-", diffEur = "";
+                
+                let diffM3 = "-";
+                let diffEur = "";
+
                 if (previous) {
-                    diffM3 = `+${(current.meter - previous.meter).toFixed(2)} m³`;
-                    diffEur = `<span class="diff-cost">Δ ${(current.cost - previous.cost).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</span>`;
+                    const m3 = current.meter - previous.meter;
+                    const eur = current.cost - previous.cost;
+                    diffM3 = `+${m3.toFixed(2)} m³`;
+                    diffEur = `<span class="diff-cost">Δ ${eur.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</span>`;
                 }
-                body.innerHTML += `<tr><td>${current.date}</td><td>${current.meter.toFixed(2)}</td><td><span class="diff-val">${diffM3}</span></td><td>${current.cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}${diffEur}</td></tr>`;
+
+                body.innerHTML += `<tr>
+                    <td>${current.date}</td>
+                    <td>${current.meter.toFixed(2)}</td>
+                    <td><span class="diff-val">${diffM3}</span></td>
+                    <td>${current.cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}${diffEur}</td>
+                </tr>`;
             }
             updateChart();
         }
 
+        // Diagramm zeichnen
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
-            const labels = [], dataValues = [];
+            const labels = [];
+            const dataValues = [];
+
             for (let i = 1; i < history.length; i++) {
                 labels.push(history[i].date);
                 dataValues.push((history[i].meter - history[i-1].meter).toFixed(2));
             }
+
             if (gasChart) gasChart.destroy();
+            
             try {
                 gasChart = new Chart(ctx, {
                     type: 'bar',
-                    data: { labels: labels, datasets: [{ label: 'm³', data: dataValues, backgroundColor: '#007AFF', borderRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Verbrauch m³',
+                            data: dataValues,
+                            backgroundColor: '#007AFF',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#E5E5EA' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
                 });
-            } catch(e) {}
+            } catch(e) { console.log("Chart.js offline oder noch nicht geladen."); }
         }
 
+        // Datensicherung: Export
         function exportBackup() {
             const data = JSON.stringify(history);
-            navigator.clipboard.writeText(data).then(() => alert("Backup-Code in die Zwischenablage kopiert! Speichere diesen Text sicher (z.B. in einer Notiz)."));
+            navigator.clipboard.writeText(data).then(() => {
+                alert("Backup-Code kopiert! Füge ihn in eine Notiz ein, um deine Daten zu sichern.");
+            });
         }
 
+        // Datensicherung: Import
         function importBackup() {
             const code = prompt("Füge hier deinen Backup-Code ein:");
             if (code) {
@@ -236,20 +285,30 @@
                         history = parsed;
                         localStorage.setItem('gas_history', JSON.stringify(history));
                         renderAll();
-                        alert("Backup erfolgreich eingespielt!");
+                        alert("Daten erfolgreich wiederhergestellt!");
                     }
-                } catch(e) { alert("Ungültiger Code!"); }
+                } catch(e) { alert("Fehler: Ungültiger Backup-Code."); }
             }
         }
 
+        // Alles löschen
         function clearHistory() {
-            if(confirm("Verlauf wirklich löschen?")) { history = []; localStorage.removeItem('gas_history'); renderAll(); }
+            if(confirm("Willst du wirklich alle Daten löschen? Dies kann nicht rückgängig gemacht werden.")) {
+                history = [];
+                localStorage.removeItem('gas_history');
+                renderAll();
+            }
         }
 
+        // Initialisierung beim Laden
         window.onload = () => {
             document.getElementById('price').value = localStorage.getItem('gas_price') || "";
             renderAll();
-            if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+            
+            // Service Worker für Offline-Betrieb registrieren
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js');
+            }
         };
     </script>
 </body>
