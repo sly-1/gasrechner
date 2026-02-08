@@ -1,36 +1,25 @@
-# ⛽ GasZähler Pro v8.0.1 – Clean & Focused Edition
+# ⛽ GasZähler Pro v8.2.1 – Intuitive Budget Control
 
-Ein spezialisiertes Dashboard zur Überwachung von Gaskosten, das physikalische Präzision mit einer klaren, ablenkungsfreien Benutzeroberfläche kombiniert.
+Optimiertes Dashboard zur Gasverbrauchs-Überwachung mit intelligenter 4-Stufen-Farbpsychologie.
 
-## 🎨 Design-Philosophie (v8.0.1 Update)
-* **Neutrales Layout:** Eingabebereiche und Tabellen sind in neutralem Grau gehalten, um den Fokus auf die Daten zu lenken.
-* **Funktionale Farben:** Farben werden ausschließlich für Status-Meldungen (Ampel-System) verwendet. 
-* **Verbesserte Sichtbarkeit:** Die Ampel-Karten (Kontostand & Prognose) nutzen verstärkte linke Akzentleisten für sofortige visuelle Rückmeldung.
+## 🚦 Visuelle Logik (v8.2.1)
+Die App unterscheidet klar zwischen dem aktuellen Kontostand und der Zukunftsprognose:
 
-## 🚦 Intelligentes Ampel-System
-Die App nutzt zwei unabhängige Logik-Systeme zur Kostenkontrolle:
+### 1. Prognose-Ampel (Trend zum Jahresende)
+* **Grün (Punktlandung):** Du liegst optimal im Plan (90% - 105% des Budgets). 
+* **Blau (Guthaben):** Du verbrauchst deutlich weniger als geplant (< 90%). Ein Puffer baut sich auf.
+* **Orange (Warnung):** Dein Trend zeigt eine leichte Budgetüberschreitung (105% - 115%).
+* **Rot (Gefahr):** Massive Nachzahlung droht (> 115%).
 
-1.  **Echter Kontostand (Cashflow):**
-    * Vergleicht die Summe deiner bisher gezahlten Abschläge mit den real aufgelaufenen Kosten.
-    * **Grün:** Du hast ein Guthaben.
-    * **Rot:** Du bist im Rückstand (Nachzahlung droht).
+### 2. Echter Kontostand (Cashflow)
+* Zeigt in **Grün/Rot**, ob deine bisher geleisteten Abschlagszahlungen die aktuell verbrauchten kWh decken.
 
-2.  **Jahresprognose (Trend-Analyse):**
-    * Berechnet basierend auf deinem Durchschnittsverbrauch die Kosten bis zum Jahresende.
-    * **Grün (< 95% des Budgets):** Alles im grünen Bereich.
-    * **Orange (95% - 105%):** Punktlandung oder leichte Nachzahlung.
-    * **Rot (> 105%):** Dein aktueller Abschlag ist zu niedrig.
-
-## ⚙️ Kern-Konfiguration
-* **Brennwert & z-Zahl:** Individuell einstellbar nach den Angaben deines Netzbetreibers.
-* **Start-Offset:** Ermöglicht den Einstieg bei laufenden Zählerständen.
-* **Sicherheit:** Optionale PIN-Sperre zum Schutz deiner Finanzdaten (Standard: deaktiviert).
-
-## 🚀 Schnelleinstieg
-1. HTML-Code als `index.html` speichern.
-2. Parameter (Abschlag, Brennwert, etc.) in den Einstellungen hinterlegen.
-3. Ersten Zählerstand speichern.
-4. Regelmäßig (z.B. wöchentlich) ablesen für präzise Prognosen.
+## 🛠 Features & Setup
+* **Präzise Berechnung:** Berücksichtigt Brennwert und Zustandszahl ($kWh = m^3 \times BW \times z$).
+* **Finanz-Tracking:** Hinterlegung von Zahltag, Abschlagshöhe und Grundpreis-Staffelung.
+* **Smart-Badge:** Dynamische Empfehlung zur Anpassung des Abschlags (Senken/Erhöhen).
+* **Sicherheit:** Optionale PIN-Sperre (Feld leer lassen zum Deaktivieren).
+* **Charts:** Visualisierung des m³/Tag Trends über Balkendiagramme.
 
 ---
-*Präzision statt Rätselraten bei der nächsten Abrechnung.*
+*Keine Überraschungen bei der Jahresabrechnung mehr.*
