@@ -1,23 +1,22 @@
-# ⛽ GasZähler Pro v8.3.6 – Safety & Budget Master
+# ⛽ GasZähler Pro v8.3.7 – Predictive Budgeting
 
 Die ultimative PWA zur Gasverbrauchs-Kontrolle. Entwickelt für maximale Präzision, Datensicherheit und finanzielle Planbarkeit.
 
-## 🛡️ NEU: Safety Advisor (v8.3.6)
-* **Sicherer Abschlag:** Die App berechnet basierend auf deinem Realverbrauch einen empfohlenen Monatsabschlag.
-* **10% Puffer:** Automatischer Sicherheitsaufschlag, um kalte Winter oder Preisschwankungen abzufangen.
-* **Clean Design:** Vorschläge werden ohne Cent-Beträge kaufmännisch gerundet für bessere Übersicht.
+## 🆕 Live-Preview Mode (v8.3.7)
+* **What-if-Analysis:** Sobald ein Zählerstand eingegeben wird, berechnet die App sofort die Auswirkungen auf den Kontostand und die Jahresprognose.
+* **Visual Cues:** Vorläufige Werte werden gedimmt (ausgegraut) und mit einem "Vorläufig"-Label markiert, um sie von dauerhaft gespeicherten Daten zu unterscheiden.
 
-## 📊 Features & Analyse
-* **Echtzeit-Kontostand:** Live-Abgleich zwischen geleisteten Abschlägen und tatsächlichen Kosten.
-* **Prognose-Ampel:** Sofortiges visuelles Feedback (Blau, Grün, Orange, Rot), ob dein aktueller Abschlag ausreicht.
-* **Trend-Tracking:** Historische Balkendiagramme und Trend-Pfeile zeigen dir, wie sich dein Sparverhalten entwickelt.
+## 🛡️ Smart Budget Advisor
+* **Sicherer Abschlag:** Berechnet basierend auf deinem Realverbrauch den idealen Monatsbetrag.
+* **10% Safety Buffer:** Inklusive Sicherheitsaufschlag für unvorhergesehene Kälteperioden.
+* **Clean Values:** Automatische kaufmännische Rundung auf volle Euro-Beträge.
 
-## 🔒 Sicherheit & Privatsphäre
+## 📊 Deep Analytics
+* **Echtzeit-Kontostand:** Live-Abgleich zwischen Abschlägen und realen Kosten.
+* **Prognose-Ampel:** Visuelles Feedback (Blau, Grün, Orange, Rot) zur Deckung des aktuellen Abschlags.
+* **Trend-Tracking:** Grafische Darstellung und Trend-Pfeile zur Analyse deines Sparverhaltens.
+
+## 🔒 Security & Privacy
 * **PIN-Lock:** Optionaler Schutz der App beim Start.
-* **Master-Reset:** Integrierter Lösch-Button mit Mülltonnen-Symbol und doppelter Sicherheitsabfrage.
-* **Lokal & Offline:** Alle Daten bleiben im Browser-Speicher. Keine Cloud, kein Tracking. 100% offline-fähig im Heizungskeller.
-
-## 🛠 Installation
-1. `index.html` auf dem Smartphone speichern.
-2. Im Browser öffnen.
-3. Über das Teilen-Menü "Zum Home-Bildschirm hinzufügen" wählen.
+* **Master-Reset:** Sicherer Löschvorgang mit Mülltonnen-Icon und doppelter Bestätigung.
+* **100% Offline:** Alle Daten verbleiben lokal im Browser-Speicher. Keine Cloud, kein Tracking.
