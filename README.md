@@ -1,15 +1,23 @@
-# ⛽ GasZähler Pro v8.3.5 – Budget Advisor Edition
+# ⛽ GasZähler Pro v8.3.6 – Safety & Budget Master
 
-## 💡 Smart Budgeting (Neu!)
-Die App berechnet nun basierend auf deiner Verbrauchs-Prognose den **idealen Abschlag**. 
-* Sieht dein Trend eine Nachzahlung voraus? Die App nennt dir den Euro-Betrag, den du monatlich zahlen müsstest, um glatt auf Null rauszukommen.
-* Bist du sparsamer als gedacht? Die App zeigt dir, wie weit du deinen Abschlag senken könntest.
+Die ultimative PWA zur Gasverbrauchs-Kontrolle. Entwickelt für maximale Präzision, Datensicherheit und finanzielle Planbarkeit.
 
-## 📊 Deep Analytics
-* **Ist-Stand:** Direkter Vergleich zwischen geleisteten Zahlungen und Echtzeit-Kosten.
-* **Trend-Pfeile:** Sofortige visuelle Rückmeldung, ob das aktuelle Ablese-Intervall besser oder schlechter als dein Durchschnitt ist.
-* **Prognose-Ampel:** 4-Farben-Status (Blau, Grün, Orange, Rot).
+## 🛡️ NEU: Safety Advisor (v8.3.6)
+* **Sicherer Abschlag:** Die App berechnet basierend auf deinem Realverbrauch einen empfohlenen Monatsabschlag.
+* **10% Puffer:** Automatischer Sicherheitsaufschlag, um kalte Winter oder Preisschwankungen abzufangen.
+* **Clean Design:** Vorschläge werden ohne Cent-Beträge kaufmännisch gerundet für bessere Übersicht.
 
-## 🔒 Security & Offline
-* **PIN-Schutz:** Optionaler Schutz deiner privaten Verbrauchsdaten.
-* **100% Keller-Ready:** Alle Icons sind direkt eingebettet. Funktioniert komplett ohne Internet.
+## 📊 Features & Analyse
+* **Echtzeit-Kontostand:** Live-Abgleich zwischen geleisteten Abschlägen und tatsächlichen Kosten.
+* **Prognose-Ampel:** Sofortiges visuelles Feedback (Blau, Grün, Orange, Rot), ob dein aktueller Abschlag ausreicht.
+* **Trend-Tracking:** Historische Balkendiagramme und Trend-Pfeile zeigen dir, wie sich dein Sparverhalten entwickelt.
+
+## 🔒 Sicherheit & Privatsphäre
+* **PIN-Lock:** Optionaler Schutz der App beim Start.
+* **Master-Reset:** Integrierter Lösch-Button mit Mülltonnen-Symbol und doppelter Sicherheitsabfrage.
+* **Lokal & Offline:** Alle Daten bleiben im Browser-Speicher. Keine Cloud, kein Tracking. 100% offline-fähig im Heizungskeller.
+
+## 🛠 Installation
+1. `index.html` auf dem Smartphone speichern.
+2. Im Browser öffnen.
+3. Über das Teilen-Menü "Zum Home-Bildschirm hinzufügen" wählen.
