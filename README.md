@@ -1,53 +1,43 @@
-# ⛽ GasZähler Pro – Final Version
+# ⛽ GasZähler Pro – Secure Edition (v6.0)
 
-Ein hochpräziser Gasverbrauchs-Tracker für den Browser, optimiert als Progressive Web App (PWA). Diese App wurde speziell für Tarife mit **Bestabrechnung** (Staffelpreise) und präziser Kostenkontrolle entwickelt.
+Ein hochpräziser Gasverbrauchs-Tracker für den Browser, optimiert als Progressive Web App (PWA). Diese App wurde speziell für Tarife mit **Bestabrechnung** (Staffelpreise) und privatem Datenschutz entwickelt.
 
 ## 📊 Aktuelle Tarif-Konfiguration
 Die App ist auf deine spezifischen Vertragsdaten vorkonfiguriert:
 
 * **Brennwert:** 11,500
 * **Z-Zahl:** 0,9500
-* **Start-Offset:** 1,000 m³ (Kostenberechnung beginnt erst ab diesem Zählerstand)
+* **Start-Offset:** 1,000 m³ (Berechnung beginnt erst ab diesem Stand)
 * **Stufe 1 (bis 6.000 kWh/Jahr):** 12,80 ct/kWh | Grundpreis: 5,36 €/Monat
 * **Stufe 2 (ab 6.001 kWh/Jahr):** 11,79 ct/kWh | Grundpreis: 10,41 €/Monat
 
 ## ✨ Kernfunktionen
-* **Dynamische Bestabrechnung:** Automatische Auswahl der günstigsten Preisstaffel basierend auf dem (hochgerechneten) Jahresverbrauch.
-* **Prognose-Modul:** Berechnet die voraussichtlichen Jahreskosten basierend auf deinem aktuellen täglichen Durchschnittsverbrauch.
-* **Tagesgenaue Grundgebühr:** Die Fixkosten werden exakt auf die Tage zwischen den Ablesungen verteilt.
-* **Datensicherung:** Integrierte Export- und Importfunktion via Backup-Code.
+* **🔐 Passwortschutz:** Schütze deine Daten vor neugierigen Blicken. Aktivierung über die Einstellungen.
+* **📈 Dynamische Bestabrechnung:** Automatische Preisstaffel-Wahl basierend auf der Jahresprognose.
+* **🔮 Prognose-Modul:** Hochrechnung der Jahreskosten basierend auf dem täglichen Durchschnitt.
+* **📅 Tagesgenaue Fixkosten:** Grundgebühren werden exakt auf die Tage zwischen den Ablesungen verteilt.
+* **💾 Datensicherung:** Vollständiger Export/Import der Historie via Backup-Code.
 
-## 🛠 Bedienungsanleitung
-1.  **Referenzpunkt setzen:** Speichere als ersten Eintrag den Zählerstand **1,000 m³** mit dem Datum deiner Übernahme/Vertragsbeginn.
-2.  **Regelmäßige Ablesung:** Trage neue Stände ein, um den Trend und die Prognose zu verfeinern.
-3.  **Installation:** Wähle im Browser deines Smartphones **"Zum Home-Bildschirm hinzufügen"**, um die App wie eine native Anwendung zu nutzen.
+## 🛠 Bedienungshilfe
+1. **Referenz:** Speichere als ersten Eintrag den Stand **1,000 m³** mit deinem Übernahmedatum.
+2. **Sicherheit:** Klicke auf "Tarif, Startwert & Sicherheit", um ein Passwort zu vergeben.
+3. **PWA:** Wähle im Browser **"Zum Home-Bildschirm hinzufügen"**, um die App nativ zu nutzen.
 
 ---
 
 ## 📝 Changelog
 
-### v5.0 (Aktuelle Version)
-* **Feature:** Vollständige Backup-Suite (Export/Import via Zwischenablage) wiederhergestellt.
+### v6.0 (Security Update)
+* **Feature:** Optionaler Passwortschutz (lokal verschlüsselt) hinzugefügt.
+* **Feature:** Automatisches Ausblenden der Daten bei aktivem Schutz ("Lock Screen").
+
+### v5.0
+* **Feature:** Vollständige Backup-Suite (Export/Import) wiederhergestellt.
 * **Update:** Standard-Brennwert auf 11,500 angepasst.
-* **Fix:** Fehlerkorrektur in der Prognose-Logik (Start-Offset-Abzug).
-* **Persistence:** Brennwert-Einstellungen werden nun dauerhaft lokal gespeichert.
+* **Fix:** Korrektur der Prognose-Logik inkl. Start-Offset-Abzug.
 
-### v4.0
-* **Feature:** Implementierung des Start-Offsets (Zählerstand bei Übernahme).
-* **Feature:** Hinterlegung der individuellen Tarif-Staffeln (12,80ct / 11,79ct).
-
-### v3.0
-* **Feature:** Einführung der linearen Jahresprognose (Extrapolation auf 365 Tage).
-* **Feature:** Grafische Darstellung des Verbrauchs-Trends (m³/Tag) via Chart.js.
-* **UI:** Optimierung des Designs für iOS-Look & Feel.
-
-### v2.0
-* **Feature:** Unterstützung für Staffel-Tarife und Bestabrechnung.
-* **Feature:** Einführung der anteiligen Grundpreis-Berechnung pro Tag.
-
-### v1.0
-* **Basis:** Grundlegende Zählerstand-Erfassung und Umrechnung von m³ in kWh.
-* **Storage:** Implementierung des LocalStorage zur dauerhaften Speicherung der Historie.
+### v1.0 - v4.0
+* Grundfunktionen, Staffel-Tarife, Chart-Integration und Start-Offset (1 m³).
 
 ---
-*Entwickelt als maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
+*Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
