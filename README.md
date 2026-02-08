@@ -1,47 +1,24 @@
-# ⛽ GasZähler Pro v7.9.6 – Smart Budget & Analytics
+# ⛽ GasZähler Pro v7.9.7 – Precision Update
 
-Die ultimative Progressive Web App (PWA) zur präzisen Überwachung deines Gasverbrauchs. Optimiert für iOS und Android, bietet sie tiefere Einblicke als jeder Standard-Zähler.
+Das präziseste Tool zur Gaskosten-Kontrolle. Jetzt mit dynamischen Netz-Parametern.
 
-## 🚀 Kernfunktionen (v7.9.6)
+## 📐 Mathematische Genauigkeit
+Die App nutzt die offizielle Formel zur Umrechnung von Kubikmetern in Kilowattstunden:
+$$kWh = m^3 \times \text{Brennwert} \times \text{z-Zahl}$$
 
-### 🚦 Intelligente 3-Stufen-Prognose
-Schluss mit nervösen Schwankungen. Die Jahresprognose nutzt ein **5% Toleranz-System**:
-* **🟢 Grün (Sicher):** Prognose liegt unter 95 % des Jahresbudgets.
-* **🟠 Orange (Punktlandung):** Du liegst zwischen 95 % und 105 %. Alles im Plan, aber kein Puffer.
-* **🔴 Rot (Nachzahlung):** Prognose über 105 %. Zeit, den Abschlag anzupassen.
+* **Brennwert:** Die im Gas enthaltene Energie (z.B. 11.25).
+* **z-Zahl (Zustandszahl):** Korrekturfaktor für Temperatur und Druck (z.B. 0.952).
+*Beide Werte findest du auf deiner letzten Gasrechnung.*
 
-### 💰 Real-Cashflow & Kontostand
-Berechnet deinen Kontostand basierend auf **echten Zahltagen**. Gib einfach das Datum deines ersten Abschlags ein (z.B. 28.02.), und die App berechnet exakt, wie viel Geld du zum aktuellen Zeitpunkt bereits an den Versorger überwiesen hast vs. die real entstandenen Kosten.
+## 🚀 Neu in v7.9.7
+* **Variable Faktoren:** Brennwert und z-Zahl sind jetzt direkt in den Einstellungen editierbar und werden im `localStorage` gespeichert.
+* **kWh-Anzeige:** In der Info-Zeile des Kontostands werden nun auch die verbrauchten Kilowattstunden angezeigt.
+* **UI-Feinschliff:** Optimierte Eingabefelder für mobile Nutzung.
 
-### 🔔 Visuelles Feedback (Neu)
-* **Save-Toast:** Eine dezente Bestätigung ("✅ Ablesung gespeichert") erscheint nach jedem Speichervorgang.
-* **Smart-Badge:** Ein dynamisches Schild empfiehlt dir basierend auf der Prognose den idealen monatlichen Abschlag.
-
-### 📊 Analyse & Datensicherheit
-* **Trend-Chart:** Visualisiert den täglichen Durchschnittsverbrauch zwischen den Ablesungen.
-* **Backup & Import:** Deine Daten gehören dir. Exportiere den gesamten Verlauf per Klick in die Zwischenablage.
-* **Offset-Support:** Nutze einen Start-Zählerstand, falls du mitten im Jahr beginnst.
+## 🚦 Budget-Ampel (5% Toleranz)
+* **🟢 < 95%:** Alles bestens.
+* **🟠 95%-105%:** Punktlandung.
+* **🔴 > 105%:** Nachzahlung droht.
 
 ---
-
-## 🛠 Installation (PWA)
-1. Seite im mobilen Browser öffnen.
-2. **iOS:** "Teilen" -> "Zum Home-Bildschirm".
-3. **Android:** "Drei Punkte" -> "App installieren".
-
-## 📝 Technisches Setup
-Die App basiert auf einem Single-File-Ansatz (HTML5/CSS3/JS). 
-* **Daten:** Lokal im Browser gespeichert (`localStorage`).
-* **Berechnung:** Thermische Leistung ($kWh = m^3 \times 11.5 \times 0.95$).
-* **Preise:** Dynamische Staffelung über `myTiers` konfigurierbar.
-
----
-
-## 📜 Changelog
-* **v7.9.6:** Einführung des Save-Confirmation-Toasts und UI-Stabilisierung.
-* **v7.9.4:** Wiederherstellung der Backup- und Löschfunktionen.
-* **v7.9.2:** Implementierung der 5% Toleranz-Logik für die Jahresprognose.
-* **v7.9.0:** Umstellung auf diskrete monatliche Zahltage (Cashflow-Update).
-
----
-*Präzise Kontrolle. Keine Überraschungen bei der Jahresabrechnung.*
+*Präzision statt Schätzung.*
