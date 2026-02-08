@@ -1,28 +1,17 @@
-# ⛽ GasZähler Pro v7.9.9 – Das All-In-One Dashboard
+# ⛽ GasZähler Pro v8.0.0 – Dashboard Fix & Stability
 
-Die ultimative Lösung zur Überwachung und Prognose deiner Gaskosten. Diese App vereint präzise physikalische Berechnungen mit modernem Finanz-Tracking und optionalem Datenschutz.
+Präzises Tracking deines Gasverbrauchs mit optimierter Farblogik und vollem Funktionsumfang.
 
-## 🌟 Hauptfunktionen
+## 🚦 Smart Indicators (Ampel-System)
+* **Echter Kontostand:** Zeigt sofort (Grün/Rot), ob deine bisher gezahlten Abschläge die realen Kosten decken. 
+* **Jahresprognose:** Nutzt ein 5%-Toleranzfenster (Grün/Orange/Rot), um Schwankungen im Trend abzufangen.
+* **Abschlags-Badge:** Empfiehlt proaktiv eine Anpassung deines monatlichen Betrags.
 
-### 1. Präzision durch Parameter
-* **Netz-Faktoren:** Gib Brennwert und Zustandszahl (z-Zahl) direkt ein, um m³ exakt in kWh umzurechnen ($kWh = m^3 \times BW \times z$).
-* **Staffeltarife:** Automatische Berücksichtigung von Grundpreis und Arbeitspreis basierend auf deinem Verbrauch.
-
-### 2. Finanzen & Prognose
-* **Real-Cashflow:** Berechnet dein aktuelles Guthaben/Defizit basierend auf echten monatlichen Zahltagen (vordefiniertes Startdatum).
-* **3-Stufen-Ampel:** Nutzt eine **5% Toleranz-Logik**, um die Jahresprognose stabil zu bewerten (Grün/Orange/Rot).
-* **Smart-Badge:** Gibt eine dynamische Empfehlung für deinen monatlichen Abschlag aus.
-
-### 3. Sicherheit & Komfort
-* **Optionale PIN-Sperre:** Schütze deine Daten mit einer PIN oder lass das Feld leer, um die Sperre komplett zu deaktivieren.
-* **Visuelles Feedback:** Ein "Save-Toast" bestätigt jede erfolgreiche Speicherung.
-* **Daten-Hoheit:** Integrierte Export- und Import-Funktionen für Backups in die Zwischenablage.
-* **Trends:** Balkendiagramm des täglichen Durchschnittsverbrauchs.
-
-## 🛠 Installation
-1. Den HTML-Code in eine Datei namens `index.html` speichern.
-2. Auf dem Smartphone öffnen.
-3. Über die Browser-Funktion "Zum Home-Bildschirm hinzufügen" als PWA installieren.
+## ⚙️ Technische Features
+* **Formel:** $kWh = m^3 \times \text{Brennwert} \times \text{z-Zahl}$.
+* **Privatsphäre:** Optionale PIN-Sperre (Feld leer lassen = deaktiviert).
+* **Daten:** Lokale Speicherung (`localStorage`), kein Cloud-Zwang.
+* **Backup:** Export und Import über Text-Code möglich.
 
 ---
-*Keine Überraschungen mehr bei der Jahresabrechnung.*
+*Vollständig. Präzise. Sicher.*
