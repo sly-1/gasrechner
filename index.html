@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro - Prognose</title>
+    <title>GasZähler Pro - Custom</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; }
@@ -12,14 +12,10 @@
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        
         .result-container { text-align: center; padding: 10px 0; }
         .result-price { font-size: 34px; font-weight: 800; color: var(--ios-blue); display: block; }
-        
-        /* Prognose Style */
         .prediction-card { border-left: 5px solid var(--ios-green); }
         .prediction-value { font-size: 24px; font-weight: 700; color: var(--ios-green); }
-        
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
@@ -43,10 +39,14 @@
         </div>
         
         <details>
-            <summary>Tarif-Staffeln & Faktoren</summary>
+            <summary>Tarif-Konfiguration & Startwert</summary>
             <div class="input-group">
-                <label>Staffeln (Limit kWh : Cent : Grundpreis €/Monat)</label>
-                <textarea id="tiersConfig" rows="3" oninput="renderAll()"></textarea>
+                <label>Staffeln (Limit kWh : Cent : Grundpreis €)</label>
+                <textarea id="tiersConfig" rows="2" oninput="renderAll()"></textarea>
+            </div>
+            <div class="input-group">
+                <label>Zählerstand bei Übernahme (m³)</label>
+                <input type="number" id="startOffset" step="0.001" value="1.000" oninput="renderAll()">
             </div>
             <div style="display: flex; gap: 10px;">
                 <div style="flex:1"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" value="11.250" oninput="renderAll()"></div>
@@ -59,22 +59,22 @@
         <div class="result-container">
             <span style="font-size: 14px; color: var(--ios-text-secondary);">Kosten bisher (kumuliert)</span>
             <span class="result-price" id="output">0,00 €</span>
-            <div id="breakdown" style="font-size: 12px; color: var(--ios-text-secondary);">Gas: 0€ | Fix: 0€</div>
+            <div id="breakdown" style="font-size: 12px; color: var(--ios-text-secondary);">Lade Daten...</div>
         </div>
     </div>
 
     <div class="card prediction-card" id="predictionArea" style="display:none;">
         <div class="result-container">
-            <span style="font-size: 14px; color: var(--ios-text-secondary);">Hochgerechnete Jahreskosten</span>
+            <span style="font-size: 14px; color: var(--ios-text-secondary);">Jahresprognose (inkl. Fixkosten)</span>
             <span class="prediction-value" id="yearPrice">0,00 €</span>
-            <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);">Basierend auf Ø 0,00 m³/Tag</div>
+            <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);">Berechnung läuft...</div>
         </div>
     </div>
 
     <button onclick="saveData()">Ablesung speichern</button>
 
     <div class="card">
-        <h3>Verbrauchstrend (m³/Tag)</h3>
+        <h3>Trend (m³/Tag)</h3>
         <div class="chart-container" style="height: 180px;"><canvas id="gasChart"></canvas></div>
     </div>
 
@@ -84,9 +84,9 @@
             <thead>
                 <tr>
                     <th>Datum</th>
-                    <th>m³</th>
-                    <th>Δ Tag</th>
-                    <th>Gesamt</th>
+                    <th>Stand</th>
+                    <th>Verbrauch</th>
+                    <th>Kosten</th>
                     <th></th>
                 </tr>
             </thead>
@@ -95,12 +95,13 @@
     </div>
 
     <script>
-        const defaultTiers = "4000:14.50:8.50\n99999:12.20:12.00";
-        let history = JSON.parse(localStorage.getItem('gas_history_v3')) || [];
+        // Deine Tarife als Standard
+        const myTiers = "6000:12.80:5.36\n99999:11.79:10.41";
+        let history = JSON.parse(localStorage.getItem('gas_history_v4')) || [];
         let gasChart = null;
 
         document.getElementById('readingDate').valueAsDate = new Date();
-        document.getElementById('tiersConfig').value = localStorage.getItem('gas_tiers') || defaultTiers;
+        document.getElementById('tiersConfig').value = localStorage.getItem('gas_tiers') || myTiers;
 
         function getTier(kwh) {
             const lines = document.getElementById('tiersConfig').value.split('\n');
@@ -114,38 +115,38 @@
         function calculateCost(meter, date) {
             if (history.length === 0) return null;
             const first = history[0];
-            const diffM3 = meter - first.meter;
+            const startOffset = parseFloat(document.getElementById('startOffset').value) || 0;
+            
+            // Berechnung nur über den Differenzverbrauch seit Start (Offset berücksichtigt)
+            const diffM3 = meter - first.meter; 
             const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
             const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
             const kwh = diffM3 * brennwert * zzahl;
+            
             const tier = getTier(kwh);
             const gasCost = kwh * tier.price;
             const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
             const baseCost = (tier.base * 12 / 365) * days;
+            
             return { total: gasCost + baseCost, gas: gasCost, base: baseCost, kwh, tier, days, m3Day: diffM3 / days };
         }
 
         function renderAll() {
-            const currentMeter = parseFloat(document.getElementById('meter').value) || (history.length > 0 ? history[history.length-1].meter : 0);
+            const currentMeter = parseFloat(document.getElementById('meter').value) || (history.length > 0 ? history[history.length-1].meter : 1);
             const currentDate = document.getElementById('readingDate').value;
             const res = calculateCost(currentMeter, currentDate);
 
             if (res) {
                 document.getElementById('output').innerText = res.total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                document.getElementById('breakdown').innerText = `Gas: ${res.gas.toFixed(2)}€ | Fix: ${res.base.toFixed(2)}€ (${Math.round(res.days)} Tage)`;
+                document.getElementById('breakdown').innerText = `Gas: ${res.gas.toFixed(2)}€ | Grundgebühr: ${res.base.toFixed(2)}€ (${Math.round(res.days)} Tage)`;
 
-                // Prognose Logik
                 if (history.length >= 2 || (history.length === 1 && document.getElementById('meter').value)) {
                     document.getElementById('predictionArea').style.display = "block";
-                    const estYearM3 = res.m3Day * 365;
-                    const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
-                    const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
-                    const estYearKwh = estYearM3 * brennwert * zzahl;
+                    const estYearKwh = (res.m3Day * 365) * (parseFloat(document.getElementById('brennwert').value) || 11.25) * (parseFloat(document.getElementById('zzahl').value) || 0.95);
                     const yearTier = getTier(estYearKwh);
                     const yearTotal = (estYearKwh * yearTier.price) + (yearTier.base * 12);
-                    
                     document.getElementById('yearPrice').innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    document.getElementById('yearInfo').innerText = `Prognose: Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estYearKwh).toLocaleString()} kWh/Jahr)`;
+                    document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estYearKwh).toLocaleString()} kWh/Jahr)`;
                 }
             }
 
@@ -155,7 +156,6 @@
                 const h = history[i];
                 const hRes = calculateCost(h.meter, h.date);
                 if(!hRes) continue;
-                
                 const prev = history[i-1];
                 let diffText = "-";
                 if(prev) {
@@ -163,10 +163,9 @@
                     const dTage = (new Date(h.date) - new Date(prev.date)) / 86400000;
                     diffText = `<span style="color:var(--ios-blue);font-weight:600">+${dM3.toFixed(1)}</span><br><small>${(dM3/dTage).toFixed(2)}/Tag</small>`;
                 }
-
                 body.innerHTML += `<tr>
                     <td>${new Date(h.date).toLocaleDateString('de-DE')}</td>
-                    <td>${h.meter.toFixed(1)}</td>
+                    <td>${h.meter.toFixed(2)}</td>
                     <td>${diffText}</td>
                     <td>${hRes.total.toLocaleString('de-DE', {style:'currency', currency:'EUR'})}<br><span class="badge">${(hRes.tier.price*100).toFixed(1)}ct</span></td>
                     <td style="color:var(--ios-red); cursor:pointer" onclick="deleteEntry(${h.id})">×</td>
@@ -178,16 +177,16 @@
         function saveData() {
             const meter = parseFloat(document.getElementById('meter').value);
             const date = document.getElementById('readingDate').value;
-            if (isNaN(meter) || !date) return alert("Daten unvollständig");
+            if (isNaN(meter) || !date) return alert("Eingabe prüfen");
             history.push({ date, meter, id: Date.now() });
             history.sort((a, b) => new Date(a.date) - new Date(b.date));
-            localStorage.setItem('gas_history_v3', JSON.stringify(history));
+            localStorage.setItem('gas_history_v4', JSON.stringify(history));
             localStorage.setItem('gas_tiers', document.getElementById('tiersConfig').value);
             document.getElementById('meter').value = "";
             renderAll();
         }
 
-        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v3', JSON.stringify(history)); renderAll(); } }
+        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v4', JSON.stringify(history)); renderAll(); } }
 
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
@@ -198,7 +197,7 @@
                 data.push(tage > 0 ? ((history[i].meter - history[i-1].meter) / tage).toFixed(2) : 0);
             }
             if (gasChart) gasChart.destroy();
-            gasChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: '#007AFF', borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            gasChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: '#007AFF', borderRadius: 4 }] }, options: { plugins: { legend: { display: false } } } });
         }
 
         window.onload = renderAll;
