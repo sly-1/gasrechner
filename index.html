@@ -3,92 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GasZähler">
-
+    <title>GasZähler Pro - Prognose</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        :root {
-            --ios-blue: #007AFF;
-            --ios-red: #FF3B30;
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-text-secondary: #8E8E93;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--ios-bg);
-            margin: 0;
-            padding: 20px;
-            color: #000;
-            line-height: 1.4;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        h1 { font-size: 26px; text-align: center; margin-bottom: 20px; font-weight: 700; }
-        h3 { margin-top: 0; font-size: 17px; color: #000; font-weight: 600; }
-
-        .card {
-            background: var(--ios-card);
-            padding: 18px;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            margin-bottom: 15px;
-        }
-
+        :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; }
         .input-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
         
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #D1D1D6;
-            border-radius: 10px;
-            box-sizing: border-box;
-            font-size: 17px;
-            background: #FFF;
-            outline: none;
-        }
-
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 34px; font-weight: 800; color: var(--ios-blue); display: block; letter-spacing: -0.5px; }
-        .result-kwh { font-size: 16px; color: var(--ios-text-secondary); font-weight: 500; }
-
-        button {
-            width: 100%;
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        button:active { opacity: 0.8; }
-
-        .btn-secondary { background: #E5E5EA; color: var(--ios-blue); margin-bottom: 8px; }
-        .btn-danger { background: transparent; color: var(--ios-red); font-size: 14px; margin-top: 10px; border: none; cursor: pointer; width: 100%; }
-
-        .chart-container { height: 220px; width: 100%; margin-top: 10px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; text-transform: uppercase; }
-        td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; vertical-align: top; }
-
-        .diff-val { color: var(--ios-blue); font-weight: 600; font-size: 13px; }
-        .diff-sub { font-size: 10px; color: var(--ios-text-secondary); display: block; font-weight: normal; }
+        .result-price { font-size: 34px; font-weight: 800; color: var(--ios-blue); display: block; }
         
-        .delete-btn { color: var(--ios-red); font-weight: bold; cursor: pointer; padding: 5px; font-size: 18px; }
-
-        details summary { font-size: 13px; color: var(--ios-blue); cursor: pointer; margin-bottom: 5px; outline: none; }
+        /* Prognose Style */
+        .prediction-card { border-left: 5px solid var(--ios-green); }
+        .prediction-value { font-size: 24px; font-weight: 700; color: var(--ios-green); }
+        
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
+        td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
+        .badge { background: #E5E5EA; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        details summary { font-size: 13px; color: var(--ios-blue); cursor: pointer; padding: 5px 0; }
     </style>
 </head>
 <body>
@@ -102,32 +39,35 @@
         </div>
         <div class="input-group">
             <label>Zählerstand (m³)</label>
-            <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="calculate()">
-        </div>
-        <div class="input-group">
-            <label>Preis pro kWh (€)</label>
-            <input type="number" id="price" step="0.0001" placeholder="z.B. 0.1250" oninput="renderAll()">
+            <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="renderAll()">
         </div>
         
         <details>
-            <summary>Erweiterte Faktoren (Z-Zahl/Brennwert)</summary>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <div class="input-group" style="flex:1">
-                    <label>Brennwert</label>
-                    <input type="number" id="brennwert" step="0.001" value="11.250" oninput="renderAll()">
-                </div>
-                <div class="input-group" style="flex:1">
-                    <label>Z-Zahl</label>
-                    <input type="number" id="zzahl" step="0.0001" value="0.9500" oninput="renderAll()">
-                </div>
+            <summary>Tarif-Staffeln & Faktoren</summary>
+            <div class="input-group">
+                <label>Staffeln (Limit kWh : Cent : Grundpreis €/Monat)</label>
+                <textarea id="tiersConfig" rows="3" oninput="renderAll()"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex:1"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" value="11.250" oninput="renderAll()"></div>
+                <div style="flex:1"><label>Z-Zahl</label><input type="number" id="zzahl" step="0.0001" value="0.9500" oninput="renderAll()"></div>
             </div>
         </details>
     </div>
 
     <div class="card">
         <div class="result-container">
+            <span style="font-size: 14px; color: var(--ios-text-secondary);">Kosten bisher (kumuliert)</span>
             <span class="result-price" id="output">0,00 €</span>
-            <span class="result-kwh" id="kwhOutput">0 kWh</span>
+            <div id="breakdown" style="font-size: 12px; color: var(--ios-text-secondary);">Gas: 0€ | Fix: 0€</div>
+        </div>
+    </div>
+
+    <div class="card prediction-card" id="predictionArea" style="display:none;">
+        <div class="result-container">
+            <span style="font-size: 14px; color: var(--ios-text-secondary);">Hochgerechnete Jahreskosten</span>
+            <span class="prediction-value" id="yearPrice">0,00 €</span>
+            <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);">Basierend auf Ø 0,00 m³/Tag</div>
         </div>
     </div>
 
@@ -135,9 +75,7 @@
 
     <div class="card">
         <h3>Verbrauchstrend (m³/Tag)</h3>
-        <div class="chart-container">
-            <canvas id="gasChart"></canvas>
-        </div>
+        <div class="chart-container" style="height: 180px;"><canvas id="gasChart"></canvas></div>
     </div>
 
     <div class="card">
@@ -146,9 +84,9 @@
             <thead>
                 <tr>
                     <th>Datum</th>
-                    <th>Stand</th>
-                    <th>Verbrauch</th>
-                    <th>Kosten</th>
+                    <th>m³</th>
+                    <th>Δ Tag</th>
+                    <th>Gesamt</th>
                     <th></th>
                 </tr>
             </thead>
@@ -156,173 +94,114 @@
         </table>
     </div>
 
-    <div class="card" style="text-align: center;">
-        <h3>Datensicherung</h3>
-        <button class="btn-secondary" onclick="exportBackup()">Backup kopieren</button>
-        <button class="btn-secondary" onclick="importBackup()">Backup einspielen</button>
-        <button class="btn-danger" onclick="clearHistory()">Alle Daten löschen</button>
-    </div>
-
     <script>
-        let history = JSON.parse(localStorage.getItem('gas_history')) || [];
+        const defaultTiers = "4000:14.50:8.50\n99999:12.20:12.00";
+        let history = JSON.parse(localStorage.getItem('gas_history_v3')) || [];
         let gasChart = null;
 
         document.getElementById('readingDate').valueAsDate = new Date();
+        document.getElementById('tiersConfig').value = localStorage.getItem('gas_tiers') || defaultTiers;
 
-        function calculate() {
-            const meter = parseFloat(document.getElementById('meter').value) || 0;
-            const price = parseFloat(document.getElementById('price').value) || 0;
+        function getTier(kwh) {
+            const lines = document.getElementById('tiersConfig').value.split('\n');
+            for (let line of lines) {
+                const parts = line.split(':').map(Number);
+                if (parts.length === 3 && kwh <= parts[0]) return { price: parts[1]/100, base: parts[2] };
+            }
+            return { price: 0, base: 0 };
+        }
+
+        function calculateCost(meter, date) {
+            if (history.length === 0) return null;
+            const first = history[0];
+            const diffM3 = meter - first.meter;
             const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
             const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
-            
-            const kwh = meter * brennwert * zzahl;
-            const cost = kwh * price;
-
-            document.getElementById('output').innerText = cost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-            document.getElementById('kwhOutput').innerText = Math.round(kwh).toLocaleString('de-DE') + " kWh";
-            
-            return { meter, price, brennwert, zzahl };
-        }
-
-        function saveData() {
-            const meter = parseFloat(document.getElementById('meter').value);
-            const dateVal = document.getElementById('readingDate').value;
-
-            if (!meter || !dateVal) return alert("Bitte Stand und Datum prüfen.");
-
-            history.push({
-                date: dateVal,
-                meter: meter,
-                id: Date.now() // Eindeutige ID zum Löschen
-            });
-
-            history.sort((a, b) => new Date(a.date) - new Date(b.date));
-            saveToLocal();
-            
-            document.getElementById('meter').value = "";
-            renderAll();
-        }
-
-        function deleteEntry(id) {
-            if(confirm("Diesen Eintrag wirklich löschen?")) {
-                history = history.filter(entry => entry.id !== id);
-                saveToLocal();
-                renderAll();
-            }
-        }
-
-        function saveToLocal() {
-            localStorage.setItem('gas_history', JSON.stringify(history));
-            localStorage.setItem('gas_price', document.getElementById('price').value);
-            localStorage.setItem('gas_brennwert', document.getElementById('brennwert').value);
-            localStorage.setItem('gas_zzahl', document.getElementById('zzahl').value);
+            const kwh = diffM3 * brennwert * zzahl;
+            const tier = getTier(kwh);
+            const gasCost = kwh * tier.price;
+            const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
+            const baseCost = (tier.base * 12 / 365) * days;
+            return { total: gasCost + baseCost, gas: gasCost, base: baseCost, kwh, tier, days, m3Day: diffM3 / days };
         }
 
         function renderAll() {
-            calculate();
+            const currentMeter = parseFloat(document.getElementById('meter').value) || (history.length > 0 ? history[history.length-1].meter : 0);
+            const currentDate = document.getElementById('readingDate').value;
+            const res = calculateCost(currentMeter, currentDate);
+
+            if (res) {
+                document.getElementById('output').innerText = res.total.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                document.getElementById('breakdown').innerText = `Gas: ${res.gas.toFixed(2)}€ | Fix: ${res.base.toFixed(2)}€ (${Math.round(res.days)} Tage)`;
+
+                // Prognose Logik
+                if (history.length >= 2 || (history.length === 1 && document.getElementById('meter').value)) {
+                    document.getElementById('predictionArea').style.display = "block";
+                    const estYearM3 = res.m3Day * 365;
+                    const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
+                    const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
+                    const estYearKwh = estYearM3 * brennwert * zzahl;
+                    const yearTier = getTier(estYearKwh);
+                    const yearTotal = (estYearKwh * yearTier.price) + (yearTier.base * 12);
+                    
+                    document.getElementById('yearPrice').innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    document.getElementById('yearInfo').innerText = `Prognose: Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estYearKwh).toLocaleString()} kWh/Jahr)`;
+                }
+            }
+
             const body = document.getElementById('historyBody');
             body.innerHTML = '';
-            
-            const price = parseFloat(document.getElementById('price').value) || 0;
-            const brennwert = parseFloat(document.getElementById('brennwert').value) || 11.25;
-            const zzahl = parseFloat(document.getElementById('zzahl').value) || 0.95;
-
             for (let i = history.length - 1; i >= 0; i--) {
-                const current = history[i];
-                const previous = history[i - 1];
+                const h = history[i];
+                const hRes = calculateCost(h.meter, h.date);
+                if(!hRes) continue;
                 
-                const currentKwh = current.meter * brennwert * zzahl;
-                const currentCost = currentKwh * price;
-
-                let diffHtml = "-";
-                if (previous) {
-                    const m3 = current.meter - previous.meter;
-                    const tage = (new Date(current.date) - new Date(previous.date)) / (1000 * 60 * 60 * 24);
-                    const proTag = tage > 0 ? (m3 / tage).toFixed(2) : 0;
-                    diffHtml = `<span class="diff-val">+${m3.toFixed(2)} m³</span>
-                                <span class="diff-sub">${proTag} m³/Tag</span>`;
+                const prev = history[i-1];
+                let diffText = "-";
+                if(prev) {
+                    const dM3 = h.meter - prev.meter;
+                    const dTage = (new Date(h.date) - new Date(prev.date)) / 86400000;
+                    diffText = `<span style="color:var(--ios-blue);font-weight:600">+${dM3.toFixed(1)}</span><br><small>${(dM3/dTage).toFixed(2)}/Tag</small>`;
                 }
 
                 body.innerHTML += `<tr>
-                    <td>${new Date(current.date).toLocaleDateString('de-DE')}</td>
-                    <td>${current.meter.toFixed(2)}</td>
-                    <td>${diffHtml}</td>
-                    <td>${currentCost.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'})}</td>
-                    <td><span class="delete-btn" onclick="deleteEntry(${current.id})">×</span></td>
+                    <td>${new Date(h.date).toLocaleDateString('de-DE')}</td>
+                    <td>${h.meter.toFixed(1)}</td>
+                    <td>${diffText}</td>
+                    <td>${hRes.total.toLocaleString('de-DE', {style:'currency', currency:'EUR'})}<br><span class="badge">${(hRes.tier.price*100).toFixed(1)}ct</span></td>
+                    <td style="color:var(--ios-red); cursor:pointer" onclick="deleteEntry(${h.id})">×</td>
                 </tr>`;
             }
             updateChart();
         }
 
+        function saveData() {
+            const meter = parseFloat(document.getElementById('meter').value);
+            const date = document.getElementById('readingDate').value;
+            if (isNaN(meter) || !date) return alert("Daten unvollständig");
+            history.push({ date, meter, id: Date.now() });
+            history.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem('gas_history_v3', JSON.stringify(history));
+            localStorage.setItem('gas_tiers', document.getElementById('tiersConfig').value);
+            document.getElementById('meter').value = "";
+            renderAll();
+        }
+
+        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v3', JSON.stringify(history)); renderAll(); } }
+
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
-            const labels = [];
-            const dataValues = [];
-
+            const labels = [], data = [];
             for (let i = 1; i < history.length; i++) {
-                const tage = (new Date(history[i].date) - new Date(history[i-1].date)) / (1000 * 60 * 60 * 24);
-                const m3 = history[i].meter - history[i-1].meter;
-                const proTag = tage > 0 ? (m3 / tage).toFixed(2) : 0;
-
+                const tage = (new Date(history[i].date) - new Date(history[i-1].date)) / 86400000;
                 labels.push(new Date(history[i].date).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'}));
-                dataValues.push(proTag);
+                data.push(tage > 0 ? ((history[i].meter - history[i-1].meter) / tage).toFixed(2) : 0);
             }
-
             if (gasChart) gasChart.destroy();
-            gasChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'm³ pro Tag',
-                        data: dataValues,
-                        backgroundColor: '#007AFF',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#E5E5EA' } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
+            gasChart = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: '#007AFF', borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         }
 
-        function exportBackup() {
-            const data = JSON.stringify(history);
-            navigator.clipboard.writeText(data).then(() => alert("Backup kopiert!"));
-        }
-
-        function importBackup() {
-            const code = prompt("Backup-Code einfügen:");
-            if (code) {
-                try {
-                    const parsed = JSON.parse(code);
-                    history = parsed.map(e => ({...e, id: e.id || Date.now() + Math.random()}));
-                    saveToLocal();
-                    renderAll();
-                } catch(e) { alert("Fehler beim Import."); }
-            }
-        }
-
-        function clearHistory() {
-            if(confirm("Wirklich alles löschen?")) {
-                history = [];
-                localStorage.removeItem('gas_history');
-                renderAll();
-            }
-        }
-
-        window.onload = () => {
-            document.getElementById('price').value = localStorage.getItem('gas_price') || "";
-            document.getElementById('brennwert').value = localStorage.getItem('gas_brennwert') || "11.250";
-            document.getElementById('zzahl').value = localStorage.getItem('gas_zzahl') || "0.9500";
-            renderAll();
-        };
+        window.onload = renderAll;
     </script>
 </body>
 </html>
