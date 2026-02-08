@@ -1,39 +1,34 @@
-# ⛽ GasZähler Pro v7.4 – Smart Finance & UX Edition
+# ⛽ GasZähler Pro v7.5 – Final Physics & Finance Edition
 
-Die ultimative Progressive Web App (PWA) zur präzisen Kontrolle deines Gasverbrauchs. Optimiert für Tarife mit Bestabrechnung, intelligente Finanz-Vorschau und privatem Datenschutz.
+Die ultimative Progressive Web App (PWA) zur präzisen Gaskosten-Kontrolle. Optimiert für Tarife mit Bestabrechnung und individuelle Zähler-Offsets.
 
-## 💰 Smart Finance Features
-* **Zwei-Wege-Ampel:** Erkennt nicht nur drohende Nachzahlungen (Orange), sondern warnt auch vor deutlich zu hohen Abschlägen (Blau), um zinslose Darlehen an den Anbieter zu vermeiden.
-* **Intelligente Empfehlung:** Berechnet den idealen monatlichen Abschlag basierend auf deiner aktuellen Jahresprognose inkl. 10 % Sicherheitspuffer.
-* **Echtzeit-Guthaben:** Sofortiger Abgleich deiner gezahlten Abschläge gegen die real angefallenen Kosten.
+## ⚙️ Kern-Features (v7.5)
+* **Zähler-Offset:** Manuelle Eingabe des Start-Zählerstands (z.B. 1.000 m³), damit die Kostenrechnung ab dem korrekten Übernahmewert startet.
+* **Smart Finance:** Erkennt Unter- und Überzahlungen beim monatlichen Abschlag und gibt proaktive Empfehlungen.
+* **Echtzeit-Analyse:** Guthaben-Ampel, Jahresprognose und Verbrauchstrend in einem Dashboard.
 
-## ✨ UX & Komfort
-* **Vorschau-Modus:** Neue Eingaben werden als "VORSCHAU" markiert und Ergebnisse gedimmt dargestellt, solange sie nicht gespeichert sind.
-* **Toast-System:** Dezente, automatische Rückmeldungen beim Speichern, Kopieren oder Importieren von Daten.
-* **Historie:** Vollständige Kostenspalte pro Eintrag in der Historientabelle.
+## 🛠 Konfiguration
+* **Physik:** Brennwert 11,500 | Z-Zahl 0,9500 (beides im Interface anpassbar).
+* **Tarif:** Dynamische Bestabrechnung zwischen zwei Preisstaffeln (12,80 ct / 11,79 ct).
+* **UX:** iOS-Style Toasts für lautloses Feedback und klarer Vorschau-Modus für neue Eingaben.
 
-## 📊 Konfiguration (Pre-configured)
-* **Physik:** Brennwert 11,500 | Z-Zahl 0,9500.
-* **Tarif:** Automatische Bestabrechnung (12,80 ct / 11,79 ct pro kWh).
-* **Start:** Berechnung basiert auf einem Referenz-Startwert von 1,000 m³.
-
-## 🔐 Sicherheit & PWA
-* **Passwortschutz:** Optionaler Lock-Screen direkt im Browser.
-* **Offline-Ready:** Als App auf dem Homescreen installierbar (PWA) mit eigenem Icon.
+## 🔐 Datenschutz & Sicherheit
+* **Passwortschutz:** Optionaler Lock-Screen zur Sicherung deiner Daten vor neugierigen Blicken.
+* **PWA:** Einfache Installation als App auf dem Homescreen via "Zum Home-Bildschirm hinzufügen".
 
 ---
 
 ## 📝 Changelog
 
+### v7.5 (Physics & Offset)
+* **Wiederhergestellt:** Eingabefeld für Start-Zählerstand (Offset) in den Einstellungen.
+* **Update:** Kostenberechnung nutzt nun den dynamischen Offset-Wert.
+
 ### v7.4 (Smart Finance)
-* **Fix:** Abschlags-Empfehlung erkennt nun auch Überzahlungen (Zwei-Wege-Prüfung).
-* **UI:** Status-Badge für zu hohe Abschläge integriert.
+* **Neu:** Zwei-Wege-Ampel für Abschläge (Warnung bei Nachzahlung / Info bei Überzahlung).
 
 ### v7.3 (UX Update)
-* **Neu:** Toast-Benachrichtigungen & Vorschau-Modus für ungespeicherte Daten.
-
-### v1.0 - v7.1
-* Einführung Finanz-Modul, Passwortschutz, Bestabrechnung und Backup-Suite.
+* **Neu:** Toast-Benachrichtigungen & Vorschau-Modus.
 
 ---
 *Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
