@@ -1,34 +1,33 @@
-# ⛽ GasZähler Pro v7.5 – Final Physics & Finance Edition
+# ⛽ GasZähler Pro v7.7 – Full Predictive Insight
 
-Die ultimative Progressive Web App (PWA) zur präzisen Gaskosten-Kontrolle. Optimiert für Tarife mit Bestabrechnung und individuelle Zähler-Offsets.
+Die ultimative Progressive Web App (PWA) zur präzisen Gaskosten-Kontrolle. Jetzt mit durchgängig dynamischem Feedback für Kontostand und Jahresprognose.
 
-## ⚙️ Kern-Features (v7.5)
-* **Zähler-Offset:** Manuelle Eingabe des Start-Zählerstands (z.B. 1.000 m³), damit die Kostenrechnung ab dem korrekten Übernahmewert startet.
-* **Smart Finance:** Erkennt Unter- und Überzahlungen beim monatlichen Abschlag und gibt proaktive Empfehlungen.
-* **Echtzeit-Analyse:** Guthaben-Ampel, Jahresprognose und Verbrauchstrend in einem Dashboard.
+## 📈 Intelligente Hochrechnung (v7.7)
+* **Budget-Check:** Die Hochrechnungs-Karte gleicht die prognostizierten Jahreskosten automatisch mit deinem aktuellen Jahresbudget (12 x Abschlag) ab.
+    * **Grün:** Deine Abschläge decken die erwarteten Kosten.
+    * **Rot:** Die Prognose übersteigt dein Budget (Handlungsbedarf).
+* **Dynamische Visualisierung:** Sowohl die Finanz-Karte als auch die Prognose-Karte nutzen das intuitive Farbsystem für sofortige Klarheit.
 
-## 🛠 Konfiguration
-* **Physik:** Brennwert 11,500 | Z-Zahl 0,9500 (beides im Interface anpassbar).
-* **Tarif:** Dynamische Bestabrechnung zwischen zwei Preisstaffeln (12,80 ct / 11,79 ct).
-* **UX:** iOS-Style Toasts für lautloses Feedback und klarer Vorschau-Modus für neue Eingaben.
+## ⚙️ Kern-Features
+* **Zähler-Offset:** Berücksichtigung deines individuellen Start-Zählerstands.
+* **Smart Finance:** Zwei-Wege-Ampel für proaktive Abschlags-Empfehlungen.
+* **UX:** iOS-Style Toasts und Echtzeit-Vorschau während der Eingabe.
 
-## 🔐 Datenschutz & Sicherheit
-* **Passwortschutz:** Optionaler Lock-Screen zur Sicherung deiner Daten vor neugierigen Blicken.
-* **PWA:** Einfache Installation als App auf dem Homescreen via "Zum Home-Bildschirm hinzufügen".
+## 🔐 Datenschutz & Technik
+* **Passwortschutz:** Lokal verschlüsselter Lock-Screen.
+* **PWA:** Installierbar als native Web-App mit eigenem Icon.
+* **Physik:** Anpassbarer Brennwert und Z-Zahl für thermische Abrechnung.
 
 ---
 
 ## 📝 Changelog
 
-### v7.5 (Physics & Offset)
-* **Wiederhergestellt:** Eingabefeld für Start-Zählerstand (Offset) in den Einstellungen.
-* **Update:** Kostenberechnung nutzt nun den dynamischen Offset-Wert.
+### v7.7 (Predictive Logic)
+* **Neu:** Hochrechnungs-Karte ist nun dynamisch (Grün/Rot) basierend auf dem Jahresbudget.
+* **UI:** Vereinheitlichung der Dashboard-Visualisierung.
 
-### v7.4 (Smart Finance)
-* **Neu:** Zwei-Wege-Ampel für Abschläge (Warnung bei Nachzahlung / Info bei Überzahlung).
-
-### v7.3 (UX Update)
-* **Neu:** Toast-Benachrichtigungen & Vorschau-Modus.
+### v7.6 (Dynamic Colors)
+* **Neu:** Kontostand-Karte nutzt dynamische Farben (Grün/Rot).
 
 ---
 *Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
