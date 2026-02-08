@@ -1,24 +1,28 @@
-# ⛽ GasZähler Pro v7.9.7 – Precision Update
+# ⛽ GasZähler Pro v7.9.9 – Das All-In-One Dashboard
 
-Das präziseste Tool zur Gaskosten-Kontrolle. Jetzt mit dynamischen Netz-Parametern.
+Die ultimative Lösung zur Überwachung und Prognose deiner Gaskosten. Diese App vereint präzise physikalische Berechnungen mit modernem Finanz-Tracking und optionalem Datenschutz.
 
-## 📐 Mathematische Genauigkeit
-Die App nutzt die offizielle Formel zur Umrechnung von Kubikmetern in Kilowattstunden:
-$$kWh = m^3 \times \text{Brennwert} \times \text{z-Zahl}$$
+## 🌟 Hauptfunktionen
 
-* **Brennwert:** Die im Gas enthaltene Energie (z.B. 11.25).
-* **z-Zahl (Zustandszahl):** Korrekturfaktor für Temperatur und Druck (z.B. 0.952).
-*Beide Werte findest du auf deiner letzten Gasrechnung.*
+### 1. Präzision durch Parameter
+* **Netz-Faktoren:** Gib Brennwert und Zustandszahl (z-Zahl) direkt ein, um m³ exakt in kWh umzurechnen ($kWh = m^3 \times BW \times z$).
+* **Staffeltarife:** Automatische Berücksichtigung von Grundpreis und Arbeitspreis basierend auf deinem Verbrauch.
 
-## 🚀 Neu in v7.9.7
-* **Variable Faktoren:** Brennwert und z-Zahl sind jetzt direkt in den Einstellungen editierbar und werden im `localStorage` gespeichert.
-* **kWh-Anzeige:** In der Info-Zeile des Kontostands werden nun auch die verbrauchten Kilowattstunden angezeigt.
-* **UI-Feinschliff:** Optimierte Eingabefelder für mobile Nutzung.
+### 2. Finanzen & Prognose
+* **Real-Cashflow:** Berechnet dein aktuelles Guthaben/Defizit basierend auf echten monatlichen Zahltagen (vordefiniertes Startdatum).
+* **3-Stufen-Ampel:** Nutzt eine **5% Toleranz-Logik**, um die Jahresprognose stabil zu bewerten (Grün/Orange/Rot).
+* **Smart-Badge:** Gibt eine dynamische Empfehlung für deinen monatlichen Abschlag aus.
 
-## 🚦 Budget-Ampel (5% Toleranz)
-* **🟢 < 95%:** Alles bestens.
-* **🟠 95%-105%:** Punktlandung.
-* **🔴 > 105%:** Nachzahlung droht.
+### 3. Sicherheit & Komfort
+* **Optionale PIN-Sperre:** Schütze deine Daten mit einer PIN oder lass das Feld leer, um die Sperre komplett zu deaktivieren.
+* **Visuelles Feedback:** Ein "Save-Toast" bestätigt jede erfolgreiche Speicherung.
+* **Daten-Hoheit:** Integrierte Export- und Import-Funktionen für Backups in die Zwischenablage.
+* **Trends:** Balkendiagramm des täglichen Durchschnittsverbrauchs.
+
+## 🛠 Installation
+1. Den HTML-Code in eine Datei namens `index.html` speichern.
+2. Auf dem Smartphone öffnen.
+3. Über die Browser-Funktion "Zum Home-Bildschirm hinzufügen" als PWA installieren.
 
 ---
-*Präzision statt Schätzung.*
+*Keine Überraschungen mehr bei der Jahresabrechnung.*
