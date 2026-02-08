@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v7.9.6</title>
+    <title>GasZähler Pro v7.9.7</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,34 +12,32 @@
         .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: all 0.4s ease; }
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
-        input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; background: #FFF; }
         
         .result-container { text-align: center; padding: 10px 0; }
         .result-price { font-size: 32px; font-weight: 800; display: block; }
         
-        /* Das Status-Schild (Abschlag) */
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; border: 1px solid transparent; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
         .status-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
         .status-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
 
-        /* NEU: Speicher-Bestätigung (Toast) */
         #saveToast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
             background: #323232; color: white; padding: 12px 24px; border-radius: 25px;
             font-size: 14px; font-weight: 600; z-index: 9999; transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
 
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .btn-secondary { background: var(--ios-gray); color: var(--ios-blue); padding: 12px; font-size: 14px; }
-        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; padding: 5px; }
+        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
         .cost-col { font-weight: 700; color: var(--ios-blue); text-align: right; }
+        summary { cursor: pointer; color: var(--ios-blue); font-weight: 600; font-size: 14px; outline: none; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -47,19 +45,23 @@
     <div id="saveToast">✅ Ablesung gespeichert</div>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v7.9.6</h1>
+        <h1>⛽ GasZähler Pro v7.9.7</h1>
 
         <div class="card">
             <div class="input-group">
-                <label>Zählerstand (m³)</label>
+                <label>Aktueller Zählerstand (m³)</label>
                 <div style="display: flex; gap: 8px;">
                     <input type="date" id="readingDate">
                     <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="renderAll()">
                 </div>
             </div>
             <details>
-                <summary style="cursor:pointer; color:var(--ios-blue); font-size:14px;">⚙️ Einstellungen</summary>
+                <summary>⚙️ Parameter & Abrechnung</summary>
                 <div style="margin-top:15px; border-top: 1px solid #eee; padding-top: 10px;">
+                    <div style="display: flex; gap: 8px;">
+                        <div class="input-group" style="flex:1;"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" oninput="renderAll()"></div>
+                        <div class="input-group" style="flex:1;"><label>z-Zahl</label><input type="number" id="zZahl" step="0.0001" oninput="renderAll()"></div>
+                    </div>
                     <div class="input-group"><label>1. Abschlag am</label><input type="date" id="firstPaymentDate" oninput="renderAll()"></div>
                     <div class="input-group"><label>Abschläge pro Jahr</label><input type="number" id="paymentCount" oninput="renderAll()"></div>
                     <div class="input-group"><label>Monatlicher Betrag (€)</label><input type="number" id="monthlyPayment" step="0.01" oninput="renderAll()"></div>
@@ -70,7 +72,7 @@
 
         <div class="card" id="financeArea" style="display:none;">
             <div class="result-container">
-                <label>Aktueller Kontostand</label>
+                <label>Echter Kontostand (Cashflow)</label>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
                 <div id="balanceInfo" style="font-size: 12px; margin-top: 4px; color: var(--ios-text-secondary);"></div>
                 <div id="abschlagBadge" class="status-badge"></div>
@@ -85,11 +87,11 @@
             </div>
         </div>
 
-        <button onclick="saveData()">Ablesung speichern</button>
+        <button onclick="saveData()">Speichern</button>
 
         <div class="card">
-            <label>Verbrauchstrend (m³/Tag)</label>
-            <div style="height: 150px; margin-bottom: 15px;"><canvas id="gasChart"></canvas></div>
+            <label>Trend (m³/Tag)</label>
+            <div style="height: 140px; margin-bottom: 10px;"><canvas id="gasChart"></canvas></div>
             <table>
                 <thead><tr><th>Datum</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
                 <tbody id="historyBody"></tbody>
@@ -98,10 +100,10 @@
 
         <div class="card" style="text-align: center; border-left: none;">
             <div style="display: flex; gap: 8px;">
-                <button class="btn-secondary" onclick="exportBackup()">Backup Export</button>
+                <button class="btn-secondary" onclick="exportBackup()">Export</button>
                 <button class="btn-secondary" onclick="importBackup()">Import</button>
             </div>
-            <button class="btn-danger-text" style="margin-top: 10px;" onclick="clearHistory()">⚠️ Alle Daten löschen</button>
+            <button class="btn-danger-text" style="margin-top: 12px;" onclick="clearHistory()">⚠️ Alle Daten löschen</button>
         </div>
     </div>
 
@@ -110,11 +112,14 @@
         let history = JSON.parse(localStorage.getItem('gas_history_v7')) || [];
         let gasChart = null;
 
+        // Init & Defaults
         document.getElementById('readingDate').valueAsDate = new Date();
+        document.getElementById('brennwert').value = localStorage.getItem('gas_brennwert') || 11.250;
+        document.getElementById('zZahl').value = localStorage.getItem('gas_zzahl') || 0.9520;
         document.getElementById('firstPaymentDate').value = localStorage.getItem('gas_first_pay') || "2026-02-28";
         document.getElementById('paymentCount').value = localStorage.getItem('gas_pay_count') || 11;
         document.getElementById('monthlyPayment').value = localStorage.getItem('gas_monthly') || 100.00;
-        document.getElementById('startOffset').value = localStorage.getItem('gas_offset') || 1.000;
+        document.getElementById('startOffset').value = localStorage.getItem('gas_offset') || 0.000;
 
         function getTier(kwh) {
             const lines = myTiers.split('\n');
@@ -142,13 +147,18 @@
             if (history.length === 0) return null;
             const first = history[0];
             const offset = parseFloat(document.getElementById('startOffset').value) || 0;
-            const kwh = Math.max(0, (meter - offset) * 11.5 * 0.95);
+            const bw = parseFloat(document.getElementById('brennwert').value);
+            const zz = parseFloat(document.getElementById('zZahl').value);
+            
+            const kwh = Math.max(0, (meter - offset) * bw * zz);
             const tier = getTier(kwh);
             const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
-            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: (meter - first.meter) / days };
+            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: (meter - first.meter) / days, kwh: kwh };
         }
 
         function renderAll() {
+            localStorage.setItem('gas_brennwert', document.getElementById('brennwert').value);
+            localStorage.setItem('gas_zzahl', document.getElementById('zZahl').value);
             localStorage.setItem('gas_first_pay', document.getElementById('firstPaymentDate').value);
             localStorage.setItem('gas_pay_count', document.getElementById('paymentCount').value);
             localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
@@ -169,9 +179,9 @@
                     document.getElementById('balanceOutput').innerText = balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
                     document.getElementById('balanceOutput').style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                     document.getElementById('financeArea').style.borderLeftColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                    document.getElementById('balanceInfo').innerText = `${paid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
+                    document.getElementById('balanceInfo').innerText = `${paid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten (${res.kwh.toFixed(0)} kWh)`;
 
-                    const estKwhYear = (res.m3Day * 365) * 11.5 * 0.95;
+                    const estKwhYear = (res.m3Day * 365) * parseFloat(document.getElementById('brennwert').value) * parseFloat(document.getElementById('zZahl').value);
                     const tier = getTier(estKwhYear);
                     const yearTotal = (estKwhYear * tier.price) + (tier.base * 12);
                     const budget = parseFloat(document.getElementById('monthlyPayment').value) * parseInt(document.getElementById('paymentCount').value);
@@ -185,7 +195,6 @@
                     else { yearOut.style.color = "var(--ios-red)"; pCard.style.borderLeftColor = "var(--ios-red)"; }
                     document.getElementById('yearInfo').innerText = `Budget: ${budget.toFixed(0)}€ | Ø ${res.m3Day.toFixed(2)} m³/Tag`;
 
-                    // Smart Badge Abschlag
                     const badge = document.getElementById('abschlagBadge');
                     const ideal = (yearTotal * 1.05) / parseInt(document.getElementById('paymentCount').value);
                     const current = parseFloat(document.getElementById('monthlyPayment').value);
@@ -219,11 +228,11 @@
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
             document.getElementById('meter').value = "";
             renderAll();
-            showToast(); // Feedback Badge aufrufen
+            showToast();
         }
 
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Backup kopiert!")); }
+        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert!")); }
         function importBackup() { const c = prompt("Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
 
