@@ -1,19 +1,21 @@
-# ⛽ GasZähler Pro v8.3.1 – Offline First Edition
+# ⛽ GasZähler Pro v8.3.3 – The Complete Dashboard
 
-Die ultimative PWA zur Gasverbrauchs-Kontrolle. Diese Version ist speziell für den **100% Offline-Betrieb** optimiert.
+Diese Version vereint maximale Datentiefe mit höchster Sicherheit und Offline-Komfort.
 
-## 📡 Echte Offline-Fähigkeit
-Im Gegensatz zu früheren Versionen lädt die v8.3.1 **keine externen Icon-Bibliotheken** mehr nach. Alle Symbole sind als skalierbare Vektorgrafiken (SVG) direkt in den Code eingebettet. Das bedeutet:
-* Funktioniert im tiefsten Keller ohne Internet.
-* Sofortige Ladezeiten.
-* Keine Abhängigkeit von externen Servern (CDNs).
+## 🚦 Smart-Badge System (Neu in v8.3.3)
+Die App analysiert jetzt wieder aktiv deine Finanzen und gibt konkrete Handlungsanweisungen:
+* **Kontostand-Badge:** Zeigt sofort, ob du beim Versorger im Plus bist oder Rücklagen bilden musst.
+* **Prognose-Badge:** Berechnet, ob dein monatlicher Abschlag erhöht, gesenkt oder beibehalten werden sollte (basierend auf dem 365-Tage-Trend).
 
-## 🚦 Features & Ampel-Logik
-* **Finanz-Check:** Vergleich von geleisteten Abschlägen mit realen Kosten (Grün/Rot).
-* **Prognose-Ampel:** 4-Farben-Logik für dein Jahresende (Blau: Guthaben, Grün: Plan, Orange/Rot: Warnung).
-* **Trend-Tabelle:** Automatische Berechnung von $m^3/Tag$ und visuelle Einordnung deines Verbrauchs per Trend-Pfeilen.
+## 📊 Detaillierte Historie
+* **m³ Differenz:** Zeigt den exakten Mehrverbrauch seit der letzten Messung.
+* **Tages-Durchschnitt:** Berechnet $m^3/Tag$ für jedes Zeitintervall.
+* **Visueller Trend:** Pfeile (↘︎, →, ↗︎) vergleichen das Intervall mit deinem Jahresmittel.
 
-## 🛠 Setup
-1. Code in `index.html` speichern.
-2. Im Browser öffnen.
-3. Über "Zum Home-Bildschirm hinzufügen" als App installieren.
+## 🔒 Sicherheit & Offline
+* **PIN-Schutz:** Optionaler Sperrbildschirm für deine privaten Daten.
+* **100% Offline:** Alle Icons sind als Inline-SVG eingebettet. Funktioniert ohne Internetzugriff.
+
+## 🚀 Setup
+1. `index.html` erstellen, Code einfügen, speichern.
+2. Im Browser öffnen und als PWA ("Zum Home-Bildschirm") installieren.
