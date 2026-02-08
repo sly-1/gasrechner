@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.3</title>
+    <title>GasZähler Pro v8.3.4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; --ios-neutral: #D1D1D6; }
@@ -19,7 +19,6 @@
         .result-price { font-size: 32px; font-weight: 800; display: block; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; border: 1px solid transparent; }
         
-        /* Badge Farben */
         .badge-good { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
         .badge-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
         .badge-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
@@ -51,7 +50,7 @@
     <div id="mainContent">
         <h1 style="display:flex; align-items:center; gap:10px;">
             <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.3
+            GasZähler Pro v8.3.4
         </h1>
         
         <div class="card">
@@ -78,7 +77,7 @@
             <div class="result-container">
                 <label>Kontostand (Ist)</label>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
-                <div id="balanceBadge" class="status-badge">Warte auf Daten...</div>
+                <div id="balanceBadge" class="status-badge">...</div>
             </div>
         </div>
         <div class="card" id="predictionArea">
@@ -86,7 +85,7 @@
                 <label>Jahres-Prognose</label>
                 <span class="result-price" id="yearPrice">0,00 €</span>
                 <div id="yearInfo" style="font-size:12px; color:var(--ios-text-secondary);"></div>
-                <div id="predictionBadge" class="status-badge">Berechne Trend...</div>
+                <div id="predictionBadge" class="status-badge">...</div>
             </div>
         </div>
 
@@ -100,7 +99,13 @@
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
+        
         <div style="display: flex; gap: 8px;"><button class="btn-secondary" onclick="exportBackup()" style="flex:1;">Export</button><button class="btn-secondary" onclick="importBackup()" style="flex:1;">Import</button></div>
+        
+        <button class="btn-danger-text" style="width:100%; margin-top:20px;" onclick="clearHistory()">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            Alle Daten unwiderruflich löschen
+        </button>
     </div>
 
     <script>
@@ -156,26 +161,21 @@
                 const totalKwh = (curMeter - off) * bw * zz, totalDays = Math.max(1, (new Date(curDate) - new Date(history[0].date)) / 86400000);
                 const globalAvg = (curMeter - history[0].meter) / totalDays;
                 
-                // Finanz-Logik (Badge 1)
                 const tier = getTier(totalKwh), currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
                 const firstPay = new Date(document.getElementById('firstPaymentDate').value), monthly = parseFloat(document.getElementById('monthlyPayment').value)||0;
                 let count = 0; let checkDate = new Date(firstPay);
                 while(checkDate <= new Date(curDate) && count < (parseInt(document.getElementById('paymentCount').value)||12)) { count++; checkDate.setMonth(checkDate.getMonth()+1); }
                 
                 const balance = (count * monthly) - currentCost;
-                const bOut = document.getElementById('balanceOutput');
-                bOut.innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-                bOut.style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                document.getElementById('financeArea').style.borderColor = bOut.style.color;
-
+                document.getElementById('balanceOutput').innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+                document.getElementById('balanceOutput').style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                document.getElementById('financeArea').style.borderColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                 const bBadge = document.getElementById('balanceBadge');
                 bBadge.innerText = balance >= 0 ? "✅ Aktuell im Plus" : "⚠️ Rücklage bilden!";
                 bBadge.className = "status-badge " + (balance >= 0 ? "badge-good" : "badge-danger");
 
-                // Prognose-Logik (Badge 2)
                 const yearKwh = (globalAvg * 365) * bw * zz, yearTotal = (yearKwh * getTier(yearKwh).price) + (getTier(yearKwh).base * 12);
                 const budget = monthly * (parseInt(document.getElementById('paymentCount').value)||12), ratio = yearTotal / budget;
-                
                 let pColor = "var(--ios-green)", pClass = "badge-good", pText = "Abschlag perfekt";
                 if (ratio < 0.90) { pColor = "var(--ios-blue)"; pClass = "badge-info"; pText = "Abschlag senken möglich"; }
                 else if (ratio > 1.15) { pColor = "var(--ios-red)"; pClass = "badge-danger"; pText = "Abschlag dringend erhöhen!"; }
@@ -185,14 +185,10 @@
                 document.getElementById('yearPrice').style.color = pColor;
                 document.getElementById('predictionArea').style.borderColor = pColor;
                 document.getElementById('yearInfo').innerText = `Ø ${globalAvg.toFixed(2)} m³/Tag | Budget: ${budget.toFixed(0)}€`;
-                
                 const pBadge = document.getElementById('predictionBadge');
-                pBadge.innerText = pText;
-                pBadge.className = "status-badge " + pClass;
+                pBadge.innerText = pText; pBadge.className = "status-badge " + pClass;
 
-                // Historie rendern
-                const body = document.getElementById('historyBody');
-                body.innerHTML = '';
+                const body = document.getElementById('historyBody'); body.innerHTML = '';
                 for (let i = history.length - 1; i >= 0; i--) {
                     const h = history[i], prev = history[i-1];
                     let trendIcon = '→', tColor = "var(--ios-green)";
@@ -228,6 +224,16 @@
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Exportiert!")); }
         function importBackup() { const c = prompt("Backup-Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         
+        function clearHistory() {
+            if (confirm("Möchtest du wirklich ALLE Daten löschen?")) {
+                if (confirm("Bist du GANZ sicher? Diese Aktion kann nicht rückgängig gemacht werden!")) {
+                    history = [];
+                    localStorage.setItem('gas_history_v7', JSON.stringify(history));
+                    location.reload();
+                }
+            }
+        }
+
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
             const l = [], d = [];
