@@ -3,151 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.2.1</title>
-    
+    <title>GasZähler Pro v8.3.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; --ios-neutral: #D1D1D6; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
-        
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-input { font-size: 24px; padding: 15px; width: 150px; text-align: center; border-radius: 12px; border: 1px solid var(--ios-neutral); margin-bottom: 20px; letter-spacing: 5px; }
-        
         .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 6px solid var(--ios-neutral); transition: border-color 0.3s ease; }
-        
         .input-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
-        input { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
-        
+        label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        input { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; margin-bottom: 5px; }
         .result-container { text-align: center; padding: 10px 0; }
         .result-price { font-size: 32px; font-weight: 800; display: block; }
-        
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; border: 1px solid transparent; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
         .status-info { background: #E5F1FF; color: var(--ios-blue); border-color: var(--ios-blue); }
-        .status-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
-
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; }
+        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 16px; border: none; cursor: pointer; padding: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--ios-gray); text-align: left; }
+        td { padding: 10px 2px; border-bottom: 1px solid #F2F2F7; font-size: 13px; }
+        .m3-val { color: var(--ios-text-secondary); font-size: 11px; display: block; }
+        .icon-svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
-
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; }
-        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
-        summary { cursor: pointer; color: var(--ios-blue); font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
-
-    <div id="lockScreen">
-        <h2 style="margin-bottom:10px;">🔐 Gesperrt</h2>
-        <input type="password" id="pinEntry" class="pin-input" inputmode="numeric" placeholder="••••">
-        <button onclick="checkPin()" style="width: 150px;">Öffnen</button>
-    </div>
-
-    <div id="saveToast">✅ Ablesung gespeichert</div>
-
+    <div id="saveToast">✅ Gespeichert</div>
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v8.2.1</h1>
-
+        <h1 style="display:flex; align-items:center; gap:10px;">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
+            GasZähler Pro v8.3.1
+        </h1>
+        
         <div class="card">
-            <div class="input-group">
-                <label>Zählerstand (m³)</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="date" id="readingDate">
-                    <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="renderAll()">
-                </div>
+            <label>Neue Ablesung</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="date" id="readingDate" style="flex:1;">
+                <input type="number" id="meter" step="0.001" placeholder="m³ Stand" style="flex:1;" oninput="renderAll()">
             </div>
-            <details>
-                <summary>⚙️ Einstellungen</summary>
-                <div style="margin-top:15px; border-top: 1px solid #eee; padding-top: 10px;">
-                    <div class="input-group"><label>PIN (leer = aus)</label><input type="password" id="appPin" placeholder="PIN setzen" oninput="savePin()"></div>
-                    <div style="display: flex; gap: 8px;">
-                        <div class="input-group" style="flex:1;"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" oninput="renderAll()"></div>
-                        <div class="input-group" style="flex:1;"><label>z-Zahl</label><input type="number" id="zZahl" step="0.0001" oninput="renderAll()"></div>
-                    </div>
-                    <div class="input-group"><label>1. Abschlag am</label><input type="date" id="firstPaymentDate" oninput="renderAll()"></div>
-                    <div class="input-group"><label>Abschläge / Jahr</label><input type="number" id="paymentCount" oninput="renderAll()"></div>
-                    <div class="input-group"><label>Monats-Betrag (€)</label><input type="number" id="monthlyPayment" step="0.01" oninput="renderAll()"></div>
-                    <div class="input-group"><label>Start-Offset (m³)</label><input type="number" id="startOffset" step="0.001" oninput="renderAll()"></div>
+            <details><summary style="color:var(--ios-blue); font-size:12px; cursor:pointer; margin-top:5px;">Konfiguration</summary>
+                <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+                    <label>Brennwert / z-Zahl</label>
+                    <div style="display:flex; gap:5px;"><input type="number" id="brennwert" step="0.001" oninput="renderAll()"><input type="number" id="zZahl" step="0.0001" oninput="renderAll()"></div>
+                    <label>1. Abschlag / Anzahl</label>
+                    <div style="display:flex; gap:5px;"><input type="date" id="firstPaymentDate" oninput="renderAll()"><input type="number" id="paymentCount" oninput="renderAll()"></div>
+                    <label>Monatsbetrag (€) / Start-Offset (m³)</label>
+                    <div style="display:flex; gap:5px;"><input type="number" id="monthlyPayment" step="0.01" oninput="renderAll()"><input type="number" id="startOffset" step="0.001" oninput="renderAll()"></div>
                 </div>
             </details>
         </div>
 
         <div class="card" id="financeArea">
             <div class="result-container">
-                <label>Echter Kontostand (Cashflow)</label>
+                <label>Kontostand (Ist)</label>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
-                <div id="balanceInfo" style="font-size: 12px; margin-top: 4px; color: var(--ios-text-secondary);"></div>
                 <div id="abschlagBadge" class="status-badge"></div>
             </div>
         </div>
-
         <div class="card" id="predictionArea">
             <div class="result-container">
-                <label>Prognose Jahresende</label>
+                <label>Prognose (Trend)</label>
                 <span class="result-price" id="yearPrice">0,00 €</span>
-                <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);"></div>
+                <div id="yearInfo" style="font-size:12px; color:var(--ios-text-secondary);"></div>
             </div>
         </div>
 
-        <button onclick="saveData()">Speichern</button>
+        <button onclick="saveData()">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Speichern
+        </button>
 
         <div class="card">
-            <label>Verbrauchstrend (m³/Tag)</label>
-            <div style="height: 140px; margin-bottom: 10px;"><canvas id="gasChart"></canvas></div>
+            <label>Historie & Differenz</label>
+            <div style="height: 120px;"><canvas id="gasChart"></canvas></div>
             <table>
-                <thead><tr><th>Datum</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
+                <thead><tr><th>Datum</th><th>Trend</th><th>Zählerstand</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
-
-        <div class="card" style="text-align: center; border-left: none;">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-secondary" onclick="exportBackup()">Export</button>
-                <button class="btn-secondary" onclick="importBackup()">Import</button>
-            </div>
-            <button class="btn-danger-text" style="margin-top: 12px;" onclick="clearHistory()">⚠️ Alle Daten löschen</button>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-secondary" onclick="exportBackup()" style="flex:1;">Export</button>
+            <button class="btn-secondary" onclick="importBackup()" style="flex:1;">Import</button>
         </div>
     </div>
 
     <script>
-        const myTiers = "6000:12.80:5.36\n99999:11.79:10.41";
         let history = JSON.parse(localStorage.getItem('gas_history_v7')) || [];
         let gasChart = null;
-
-        function initAuth() {
-            const storedPin = localStorage.getItem('gas_app_pin');
-            if (storedPin && storedPin.trim() !== "") {
-                document.getElementById('lockScreen').style.display = "flex";
-                document.getElementById('mainContent').style.display = "none";
-            } else {
-                document.getElementById('lockScreen').style.display = "none";
-                document.getElementById('mainContent').style.display = "block";
-                renderAll();
-            }
-        }
-
-        function checkPin() {
-            if (document.getElementById('pinEntry').value === localStorage.getItem('gas_app_pin')) {
-                document.getElementById('lockScreen').style.display = "none";
-                document.getElementById('mainContent').style.display = "block";
-                renderAll();
-            } else { alert("PIN falsch!"); document.getElementById('pinEntry').value = ""; }
-        }
-
-        function savePin() { localStorage.setItem('gas_app_pin', document.getElementById('appPin').value); }
+        const myTiers = "6000:12.80:5.36\n99999:11.79:10.41";
 
         document.getElementById('readingDate').valueAsDate = new Date();
-        document.getElementById('appPin').value = localStorage.getItem('gas_app_pin') || "";
-        document.getElementById('brennwert').value = localStorage.getItem('gas_brennwert') || 11.250;
-        document.getElementById('zZahl').value = localStorage.getItem('gas_zzahl') || 0.9520;
-        document.getElementById('firstPaymentDate').value = localStorage.getItem('gas_first_pay') || "2026-02-28";
-        document.getElementById('paymentCount').value = localStorage.getItem('gas_pay_count') || 11;
-        document.getElementById('monthlyPayment').value = localStorage.getItem('gas_monthly') || 100.00;
-        document.getElementById('startOffset').value = localStorage.getItem('gas_offset') || 0.000;
+        ['brennwert', 'zZahl', 'firstPaymentDate', 'paymentCount', 'monthlyPayment', 'startOffset'].forEach(id => {
+            document.getElementById(id).value = localStorage.getItem('gas_' + id) || (id==='brennwert'?'11.25':id==='zZahl'?'0.952':id==='paymentCount'?'11':'');
+        });
 
         function getTier(kwh) {
             const lines = myTiers.split('\n');
@@ -157,100 +107,80 @@
             }
         }
 
-        function calculatePaid(targetDate) {
-            const firstPay = new Date(document.getElementById('firstPaymentDate').value);
-            const monthly = parseFloat(document.getElementById('monthlyPayment').value);
-            const maxPays = parseInt(document.getElementById('paymentCount').value);
-            if (isNaN(firstPay.getTime())) return 0;
-            let count = 0; let checkDate = new Date(firstPay);
-            const limitDate = new Date(targetDate);
-            for (let i = 0; i < maxPays; i++) {
-                if (checkDate <= limitDate) { count++; checkDate.setMonth(checkDate.getMonth() + 1); } else break;
-            }
-            return count * monthly;
-        }
-
-        function calculateCost(meter, date) {
-            if (history.length === 0) return null;
-            const bw = parseFloat(document.getElementById('brennwert').value);
-            const zz = parseFloat(document.getElementById('zZahl').value);
-            const offset = parseFloat(document.getElementById('startOffset').value) || 0;
-            const kwh = Math.max(0, (meter - offset) * bw * zz);
-            const tier = getTier(kwh);
-            const days = Math.max(1, (new Date(date) - new Date(history[0].date)) / 86400000);
-            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: (meter - history[0].meter) / days, kwh: kwh };
-        }
-
         function renderAll() {
-            localStorage.setItem('gas_brennwert', document.getElementById('brennwert').value);
-            localStorage.setItem('gas_zzahl', document.getElementById('zZahl').value);
-            localStorage.setItem('gas_first_pay', document.getElementById('firstPaymentDate').value);
-            localStorage.setItem('gas_pay_count', document.getElementById('paymentCount').value);
-            localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
-            localStorage.setItem('gas_offset', document.getElementById('startOffset').value);
+            const ids = ['brennwert', 'zZahl', 'firstPaymentDate', 'paymentCount', 'monthlyPayment', 'startOffset'];
+            ids.forEach(id => localStorage.setItem('gas_' + id, document.getElementById(id).value));
 
-            const inputMeter = document.getElementById('meter').value;
-            const curMeter = inputMeter !== "" ? parseFloat(inputMeter) : (history.length > 0 ? history[history.length-1].meter : null);
+            const curMeterInput = document.getElementById('meter').value;
+            const curMeter = curMeterInput !== "" ? parseFloat(curMeterInput) : (history.length > 0 ? history[history.length-1].meter : null);
             const curDate = document.getElementById('readingDate').value;
 
-            if (curMeter !== null) {
-                const res = calculateCost(curMeter, curDate);
-                if (res) {
-                    const paid = calculatePaid(curDate);
-                    const balance = paid - res.total;
-                    const bOut = document.getElementById('balanceOutput');
-                    const fCard = document.getElementById('financeArea');
-                    
-                    bOut.innerText = balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    const bColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                    bOut.style.color = bColor;
-                    fCard.style.borderColor = bColor;
-                    document.getElementById('balanceInfo').innerText = `${paid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
+            let globalAvg = 0;
+            if (curMeter && history.length > 0) {
+                const bw = parseFloat(document.getElementById('brennwert').value) || 1;
+                const zz = parseFloat(document.getElementById('zZahl').value) || 1;
+                const offset = parseFloat(document.getElementById('startOffset').value) || 0;
+                const totalKwh = (curMeter - offset) * bw * zz;
+                const totalDays = Math.max(1, (new Date(curDate) - new Date(history[0].date)) / 86400000);
+                globalAvg = (curMeter - history[0].meter) / totalDays;
+                
+                const tier = getTier(totalKwh);
+                const currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
 
-                    const estKwhYear = (res.m3Day * 365) * parseFloat(document.getElementById('brennwert').value) * parseFloat(document.getElementById('zZahl').value);
-                    const tier = getTier(estKwhYear);
-                    const yearTotal = (estKwhYear * tier.price) + (tier.base * 12);
-                    const budget = parseFloat(document.getElementById('monthlyPayment').value) * parseInt(document.getElementById('paymentCount').value);
-                    const ratio = yearTotal / budget;
-
-                    const yOut = document.getElementById('yearPrice');
-                    const pCard = document.getElementById('predictionArea');
-                    yOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    
-                    let pColor;
-                    if (ratio < 0.90) { pColor = "var(--ios-blue)"; }      // Blau = Guthaben
-                    else if (ratio <= 1.05) { pColor = "var(--ios-green)"; } // Grün = Punktlandung
-                    else if (ratio <= 1.15) { pColor = "var(--ios-orange)"; } // Orange = Knapp
-                    else { pColor = "var(--ios-red)"; }                     // Rot = Teuer
-                    
-                    yOut.style.color = pColor;
-                    pCard.style.borderColor = pColor;
-                    document.getElementById('yearInfo').innerText = `Budget: ${budget.toFixed(0)}€ | Ø ${res.m3Day.toFixed(2)} m³/Tag`;
-
-                    const badge = document.getElementById('abschlagBadge');
-                    const ideal = (yearTotal * 1.05) / parseInt(document.getElementById('paymentCount').value);
-                    const current = parseFloat(document.getElementById('monthlyPayment').value);
-                    
-                    if (current < ideal * 0.95) {
-                        badge.innerText = `⚠️ Empfehlung: ${Math.ceil(ideal)} €`; 
-                        badge.className = "status-badge status-danger";
-                    } else if (current > ideal * 1.15) {
-                        badge.innerText = `💰 Abschlag senken möglich`;
-                        badge.className = "status-badge status-info";
-                    } else { 
-                        badge.innerText = `✅ Abschlag ist optimal`; 
-                        badge.className = "status-badge status-good"; 
-                    }
+                const firstPay = new Date(document.getElementById('firstPaymentDate').value);
+                const monthly = parseFloat(document.getElementById('monthlyPayment').value) || 0;
+                let count = 0; let checkDate = new Date(firstPay);
+                while(checkDate <= new Date(curDate) && count < (parseInt(document.getElementById('paymentCount').value)||12)) {
+                    count++; checkDate.setMonth(checkDate.getMonth()+1);
                 }
+                const balance = (count * monthly) - currentCost;
+                const bOut = document.getElementById('balanceOutput');
+                bOut.innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+                bOut.style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                document.getElementById('financeArea').style.borderColor = bOut.style.color;
+
+                const yearKwh = (globalAvg * 365) * bw * zz;
+                const yearTotal = (yearKwh * getTier(yearKwh).price) + (getTier(yearKwh).base * 12);
+                const budget = monthly * (parseInt(document.getElementById('paymentCount').value)||12);
+                const ratio = yearTotal / budget;
+                let pColor = ratio < 0.90 ? "var(--ios-blue)" : (ratio <= 1.05 ? "var(--ios-green)" : (ratio <= 1.15 ? "var(--ios-orange)" : "var(--ios-red)"));
+                
+                const yOut = document.getElementById('yearPrice');
+                yOut.innerText = yearTotal.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+                yOut.style.color = pColor;
+                document.getElementById('predictionArea').style.borderColor = pColor;
+                document.getElementById('yearInfo').innerText = `Ø ${globalAvg.toFixed(2)} m³/Tag | Budget: ${budget.toFixed(0)}€`;
             }
 
             const body = document.getElementById('historyBody');
             body.innerHTML = '';
             for (let i = history.length - 1; i >= 0; i--) {
-                const h = history[i]; const r = calculateCost(h.meter, h.date);
-                body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td>${h.meter.toFixed(2)}</td><td style="text-align:right; font-weight:700;">${r ? r.total.toFixed(2)+'€' : '-'}</td><td style="text-align:right"><button class="btn-danger-text" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
+                const h = history[i]; const prev = history[i-1];
+                let trendIcon = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>'; 
+                let tColor = "var(--ios-green)";
+                
+                if (prev) {
+                    const days = (new Date(h.date) - new Date(prev.date)) / 86400000;
+                    const m3Day = (h.meter - prev.meter) / days;
+                    if (m3Day < globalAvg * 0.9) { 
+                        trendIcon = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25"/></svg>'; 
+                        tColor = "var(--ios-blue)"; 
+                    } else if (m3Day > globalAvg * 1.1) { 
+                        trendIcon = '<svg class="icon-svg" viewBox="0 0 24 24"><path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>'; 
+                        tColor = "var(--ios-red)"; 
+                    }
+                }
+                const diffText = prev ? `+${(h.meter - prev.meter).toFixed(2)} m³ (${((h.meter-prev.meter)/((new Date(h.date)-new Date(prev.date))/86400000)).toFixed(2)}/T)` : "-";
+                body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td style="color:${tColor}">${trendIcon}</td><td>${h.meter.toFixed(2)}<span class="m3-val">${diffText}</span></td><td style="text-align:right; font-weight:700;">${calculateCostForEntry(h.meter, h.date, history[0])?.total.toFixed(2)}€</td><td style="text-align:right;"><button class="btn-danger-text" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
             }
             updateChart();
+        }
+
+        function calculateCostForEntry(m, d, base) {
+            if(!base) return null;
+            const bw = parseFloat(document.getElementById('brennwert').value)||1, zz = parseFloat(document.getElementById('zZahl').value)||1, off = parseFloat(document.getElementById('startOffset').value)||0;
+            const kwh = Math.max(0, (m - off) * bw * zz), tier = getTier(kwh), days = Math.max(1, (new Date(d)-new Date(base.date))/86400000);
+            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days) };
         }
 
         function saveData() {
@@ -259,17 +189,13 @@
             history.push({ date: d, meter: m, id: Date.now() });
             history.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
-            document.getElementById('meter').value = "";
-            renderAll();
-            document.getElementById('saveToast').classList.add('show');
-            setTimeout(() => document.getElementById('saveToast').classList.remove('show'), 2000);
+            document.getElementById('meter').value = ""; renderAll();
+            document.getElementById('saveToast').classList.add('show'); setTimeout(() => document.getElementById('saveToast').classList.remove('show'), 2000);
         }
-
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert!")); }
-        function importBackup() { const c = prompt("Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-
+        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Exportiert!")); }
+        function importBackup() { const c = prompt("Backup-Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
             const l = [], d = [];
@@ -281,7 +207,7 @@
             if (gasChart) gasChart.destroy();
             gasChart = new Chart(ctx, { type: 'bar', data: { labels: l, datasets: [{ data: d, backgroundColor: '#007AFF', borderRadius: 5 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
         }
-        initAuth();
+        renderAll();
     </script>
 </body>
 </html>
