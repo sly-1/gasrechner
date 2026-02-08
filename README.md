@@ -1,33 +1,34 @@
-# ⛽ GasZähler Pro v7.7 – Full Predictive Insight
+# ⛽ GasZähler Pro v7.8 – Financial Efficiency Edition
 
-Die ultimative Progressive Web App (PWA) zur präzisen Gaskosten-Kontrolle. Jetzt mit durchgängig dynamischem Feedback für Kontostand und Jahresprognose.
+Die ultimative Progressive Web App (PWA) zur präzisen Gaskosten-Kontrolle. v7.8 führt ein intelligentes Drei-Farben-Warnsystem für maximale finanzielle Effizienz ein.
 
-## 📈 Intelligente Hochrechnung (v7.7)
-* **Budget-Check:** Die Hochrechnungs-Karte gleicht die prognostizierten Jahreskosten automatisch mit deinem aktuellen Jahresbudget (12 x Abschlag) ab.
-    * **Grün:** Deine Abschläge decken die erwarteten Kosten.
-    * **Rot:** Die Prognose übersteigt dein Budget (Handlungsbedarf).
-* **Dynamische Visualisierung:** Sowohl die Finanz-Karte als auch die Prognose-Karte nutzen das intuitive Farbsystem für sofortige Klarheit.
+## 🌈 Drei-Farben-Logik (Dashboard)
+Sowohl der Kontostand als auch die Jahresprognose nutzen nun ein erweitertes Farbsystem:
+* **🔴 Rot (Nachzahlung):** Deine Zahlungen decken den Verbrauch nicht. Handlungsbedarf!
+* **🟢 Grün (Optimal):** Dein Abschlag ist ideal gewählt. Du hast ein gesundes Guthaben ohne Verschwendung.
+* **🔵 Blau (Überzahlung):** Du zahlst massiv mehr als nötig (>30% über Bedarf). Zeit, den Abschlag zu senken und dein Geld selbst zu behalten.
 
-## ⚙️ Kern-Features
-* **Zähler-Offset:** Berücksichtigung deines individuellen Start-Zählerstands.
-* **Smart Finance:** Zwei-Wege-Ampel für proaktive Abschlags-Empfehlungen.
-* **UX:** iOS-Style Toasts und Echtzeit-Vorschau während der Eingabe.
+## ⚙️ Features
+* **Predictive Analysis:** Hochrechnung der Jahreskosten basierend auf dem aktuellen Tagesschnitt.
+* **Zähler-Offset:** Berücksichtigung deines individuellen Start-Werts (z.B. 1.000 m³).
+* **Smart Finance:** Zwei-Wege-Ampel für Abschlags-Empfehlungen inklusive Sicherheitspuffer.
+* **UX & Sicherheit:** iOS-Style Toasts, Echtzeit-Vorschau und optionaler Passwortschutz.
 
-## 🔐 Datenschutz & Technik
-* **Passwortschutz:** Lokal verschlüsselter Lock-Screen.
-* **PWA:** Installierbar als native Web-App mit eigenem Icon.
-* **Physik:** Anpassbarer Brennwert und Z-Zahl für thermische Abrechnung.
+## 🛠 Technik
+* **Abrechnung:** Integrierte Bestabrechnung zwischen zwei Preisstaffeln.
+* **PWA:** Als eigenständige App auf Smartphones installierbar.
+* **Data:** Alles bleibt lokal in deinem Browser (localStorage).
 
 ---
 
 ## 📝 Changelog
 
-### v7.7 (Predictive Logic)
-* **Neu:** Hochrechnungs-Karte ist nun dynamisch (Grün/Rot) basierend auf dem Jahresbudget.
-* **UI:** Vereinheitlichung der Dashboard-Visualisierung.
+### v7.8 (Financial Efficiency)
+* **Neu:** Drei-Stufen-Farbsystem (Rot/Grün/Blau) für Kontostand und Hochrechnung.
+* **Logic:** Differenzierung zwischen sicherem Guthaben und ineffizienter Überzahlung.
 
-### v7.6 (Dynamic Colors)
-* **Neu:** Kontostand-Karte nutzt dynamische Farben (Grün/Rot).
+### v7.7 (Predictive Logic)
+* **Neu:** Hochrechnungs-Karte dynamisch verknüpft mit Jahresbudget.
 
 ---
 *Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
