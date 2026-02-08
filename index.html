@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v7.7</title>
+    <title>GasZähler Pro v7.8</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -15,16 +15,16 @@
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
         #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid transparent; transition: border-color 0.3s; }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: border-color 0.4s ease; }
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 32px; font-weight: 800; display: block; transition: opacity 0.3s; }
+        .result-price { font-size: 32px; font-weight: 800; display: block; transition: color 0.4s, opacity 0.3s; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border: 1px solid var(--ios-green); }
         .status-warn { background: #FFF4E5; color: var(--ios-orange); border: 1px solid var(--ios-orange); }
-        .status-info { background: var(--ios-gray); color: var(--ios-blue); border: 1px solid #D1D1D6; }
+        .status-info { background: #E5F1FF; color: var(--ios-blue); border: 1px solid var(--ios-blue); }
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: background 0.2s; }
         .btn-secondary { background: var(--ios-gray); color: var(--ios-blue); }
         .btn-danger { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
@@ -44,7 +44,7 @@
     </div>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v7.7</h1>
+        <h1>⛽ GasZähler Pro v7.8</h1>
 
         <div class="card">
             <div class="input-group">
@@ -193,48 +193,55 @@
                     document.getElementById('predictionArea').style.display = "block";
                     document.getElementById('financeArea').style.display = "block";
                     
-                    // --- HOCHRECHNUNG ---
                     const estKwhYear = (res.m3Day * 365) * (parseFloat(document.getElementById('brennwert').value) || 11.5) * 0.95;
                     const pT = getTier(estKwhYear);
                     const yearTotal = (estKwhYear * pT.price) + (pT.base * 12);
                     const annualBudget = parseFloat(monthlyInput.value) * 12;
-                    
-                    yearOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    const current = parseFloat(monthlyInput.value);
+                    const idealMonth = (yearTotal * 1.1) / 12;
+
+                    // --- HOCHRECHNUNG FARB-LOGIK (v7.8) ---
                     const predCard = document.getElementById('predictionArea');
+                    yearOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
                     
-                    if (yearTotal <= annualBudget) {
-                        yearOut.style.color = "var(--ios-green)";
-                        predCard.style.borderLeftColor = "var(--ios-green)";
-                    } else {
+                    if (yearTotal > annualBudget) {
                         yearOut.style.color = "var(--ios-red)";
                         predCard.style.borderLeftColor = "var(--ios-red)";
+                    } else if (current > idealMonth * 1.3) {
+                        yearOut.style.color = "var(--ios-blue)";
+                        predCard.style.borderLeftColor = "var(--ios-blue)";
+                    } else {
+                        yearOut.style.color = "var(--ios-green)";
+                        predCard.style.borderLeftColor = "var(--ios-green)";
                     }
                     document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estKwhYear)} kWh/J)`;
 
-                    // --- KONTOSTAND ---
-                    const totalPaid = (parseFloat(monthlyInput.value) / 30.42) * res.days;
+                    // --- KONTOSTAND FARB-LOGIK (v7.8) ---
+                    const totalPaid = (current / 30.42) * res.days;
                     const balance = totalPaid - res.total;
                     const finCard = document.getElementById('financeArea');
                     
                     balOut.innerText = (balance >= 0 ? "+" : "") + balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    if (balance >= 0) {
-                        balOut.style.color = "var(--ios-green)";
-                        finCard.style.borderLeftColor = "var(--ios-green)";
-                    } else {
+                    
+                    if (balance < 0) {
                         balOut.style.color = "var(--ios-red)";
                         finCard.style.borderLeftColor = "var(--ios-red)";
+                    } else if (current > idealMonth * 1.3) {
+                        balOut.style.color = "var(--ios-blue)";
+                        finCard.style.borderLeftColor = "var(--ios-blue)";
+                    } else {
+                        balOut.style.color = "var(--ios-green)";
+                        finCard.style.borderLeftColor = "var(--ios-green)";
                     }
                     document.getElementById('balanceInfo').innerText = `Gezahlt: ${totalPaid.toFixed(2)}€ | Kosten: ${res.total.toFixed(2)}€`;
 
                     // --- ABSCHLAG-EMPFEHLUNG ---
-                    const ideal = (yearTotal * 1.1) / 12;
-                    const current = parseFloat(monthlyInput.value);
                     const empfEl = document.getElementById('abschiagEmpfehlung');
-                    if (current < ideal * 0.95) {
-                        empfEl.innerText = `⚠️ Erhöhen auf ca. ${Math.ceil(ideal)} €`;
+                    if (current < idealMonth * 0.95) {
+                        empfEl.innerText = `⚠️ Erhöhen auf ca. ${Math.ceil(idealMonth)} €`;
                         empfEl.className = "status-badge status-warn";
-                    } else if (current > ideal * 1.3) {
-                        empfEl.innerText = `ℹ️ Zu hoch! Ideal: ${Math.ceil(ideal)} €`;
+                    } else if (current > idealMonth * 1.3) {
+                        empfEl.innerText = `ℹ️ Zu hoch! Ideal: ${Math.ceil(idealMonth)} €`;
                         empfEl.className = "status-badge status-info";
                     } else {
                         empfEl.innerText = `✅ Abschlag ist optimal`;
