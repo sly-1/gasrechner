@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v7.9</title>
+    <title>GasZähler Pro v7.9.2</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -14,16 +14,15 @@
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: border-color 0.4s; }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: all 0.4s ease; }
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 32px; font-weight: 800; display: block; }
+        .result-price { font-size: 32px; font-weight: 800; display: block; transition: color 0.4s; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border: 1px solid var(--ios-green); }
         .status-warn { background: #FFF4E5; color: var(--ios-orange); border: 1px solid var(--ios-orange); }
-        .status-info { background: #E5F1FF; color: var(--ios-blue); border: 1px solid var(--ios-blue); }
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .btn-secondary { background: var(--ios-gray); color: var(--ios-blue); }
         .btn-danger { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
@@ -31,12 +30,13 @@
         th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
         .cost-col { font-weight: 700; color: var(--ios-blue); text-align: right; }
+        summary { cursor: pointer; color: var(--ios-blue); font-weight: 600; font-size: 14px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v7.9</h1>
+        <h1>⛽ GasZähler Pro v7.9.2</h1>
 
         <div class="card">
             <div class="input-group">
@@ -97,7 +97,7 @@
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
-
+        
         <div class="card" style="text-align: center;">
             <button class="btn-secondary" onclick="exportBackup()">Backup kopieren</button>
             <button class="btn-secondary" style="margin-top:8px" onclick="importBackup()">Backup einspielen</button>
@@ -110,7 +110,6 @@
         let history = JSON.parse(localStorage.getItem('gas_history_v7')) || [];
         let gasChart = null;
 
-        // Init Form
         document.getElementById('readingDate').valueAsDate = new Date();
         document.getElementById('firstPaymentDate').value = localStorage.getItem('gas_first_pay') || "2026-02-28";
         document.getElementById('paymentCount').value = localStorage.getItem('gas_pay_count') || 11;
@@ -130,16 +129,11 @@
             const monthly = parseFloat(document.getElementById('monthlyPayment').value);
             const maxPays = parseInt(document.getElementById('paymentCount').value);
             if (isNaN(firstPay.getTime())) return 0;
-            
             let count = 0;
             let checkDate = new Date(firstPay);
             const limitDate = new Date(targetDate);
-
             for (let i = 0; i < maxPays; i++) {
-                if (checkDate <= limitDate) {
-                    count++;
-                    checkDate.setMonth(checkDate.getMonth() + 1);
-                } else { break; }
+                if (checkDate <= limitDate) { count++; checkDate.setMonth(checkDate.getMonth() + 1); } else { break; }
             }
             return count * monthly;
         }
@@ -161,8 +155,7 @@
             localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
             localStorage.setItem('gas_offset', document.getElementById('startOffset').value);
 
-            const isPreview = document.getElementById('meter').value !== "";
-            const curMeter = isPreview ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
+            const curMeter = document.getElementById('meter').value !== "" ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
             const curDate = document.getElementById('readingDate').value;
 
             if (curMeter !== null) {
@@ -171,25 +164,41 @@
                     document.getElementById('predictionArea').style.display = "block";
                     document.getElementById('financeArea').style.display = "block";
 
-                    const totalPaid = calculatePaid(curDate);
-                    const balance = totalPaid - res.total;
+                    // 1. KONTOSTAND (CASHFLOW)
+                    const totalPaidNow = calculatePaid(curDate);
+                    const balance = totalPaidNow - res.total;
                     const balOut = document.getElementById('balanceOutput');
                     const finCard = document.getElementById('financeArea');
-                    
                     balOut.innerText = balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
                     balOut.style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                     finCard.style.borderLeftColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                    
-                    document.getElementById('balanceInfo').innerText = `${totalPaid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
+                    document.getElementById('balanceInfo').innerText = `${totalPaidNow.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
 
+                    // 2. PROGNOSE (SMART TOLERANCE v7.9.2)
                     const estKwhYear = (res.m3Day * 365) * 11.5 * 0.95;
                     const pT = getTier(estKwhYear);
                     const yearTotal = (estKwhYear * pT.price) + (pT.base * 12);
+                    const plannedBudget = parseFloat(document.getElementById('monthlyPayment').value) * parseInt(document.getElementById('paymentCount').value);
+                    const usageRatio = yearTotal / plannedBudget;
+                    
                     const yearOut = document.getElementById('yearPrice');
+                    const predCard = document.getElementById('predictionArea');
                     yearOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estKwhYear)} kWh/J)`;
+                    
+                    if (usageRatio < 0.95) {
+                        yearOut.style.color = "var(--ios-green)";
+                        predCard.style.borderLeftColor = "var(--ios-green)";
+                    } else if (usageRatio <= 1.05) {
+                        yearOut.style.color = "var(--ios-orange)";
+                        predCard.style.borderLeftColor = "var(--ios-orange)";
+                    } else {
+                        yearOut.style.color = "var(--ios-red)";
+                        predCard.style.borderLeftColor = "var(--ios-red)";
+                    }
+                    document.getElementById('yearInfo').innerText = `Geplantes Budget: ${plannedBudget.toFixed(0)}€ | Ø ${res.m3Day.toFixed(2)} m³/Tag`;
 
-                    const ideal = (yearTotal * 1.1) / 12;
+                    // 3. EMPFEHLUNG
+                    const ideal = (yearTotal * 1.1) / parseInt(document.getElementById('paymentCount').value);
                     const current = parseFloat(document.getElementById('monthlyPayment').value);
                     const empfEl = document.getElementById('abschiagEmpfehlung');
                     if (current < ideal * 0.95) {
@@ -207,13 +216,7 @@
             for (let i = history.length - 1; i >= 0; i--) {
                 const h = history[i];
                 const hRes = calculateCost(h.meter, h.date);
-                body.innerHTML += `<tr>
-                    <td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'})}</td>
-                    <td>${h.meter.toFixed(2)}</td>
-                    <td style="color:var(--ios-blue)">${history[i-1] ? '+'+(h.meter-history[i-1].meter).toFixed(2) : '-'}</td>
-                    <td class="cost-col">${hRes ? hRes.total.toLocaleString('de-DE', {style:'currency', currency:'EUR'}) : '-'}</td>
-                    <td><button class="btn-danger" onclick="deleteEntry(${h.id})">×</button></td>
-                </tr>`;
+                body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'})}</td><td>${h.meter.toFixed(2)}</td><td style="color:var(--ios-blue)">${history[i-1] ? '+'+(h.meter-history[i-1].meter).toFixed(2) : '-'}</td><td class="cost-col">${hRes ? hRes.total.toLocaleString('de-DE', {style:'currency', currency:'EUR'}) : '-'}</td><td><button class="btn-danger" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
             }
             updateChart();
         }
@@ -227,11 +230,10 @@
             document.getElementById('meter').value = "";
             renderAll();
         }
-
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert")); }
-        function importBackup() { const c = prompt("Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function importBackup() { const c = prompt("Backup-Code einfügen:"); if(c) { try { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } catch(e) { alert("Ungültiger Code!"); } } }
+        function clearHistory() { if(confirm("Alle Daten unwiderruflich löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
 
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
