@@ -1,25 +1,19 @@
-# ⛽ GasZähler Pro v8.2.1 – Intuitive Budget Control
+# ⛽ GasZähler Pro v8.3.1 – Offline First Edition
 
-Optimiertes Dashboard zur Gasverbrauchs-Überwachung mit intelligenter 4-Stufen-Farbpsychologie.
+Die ultimative PWA zur Gasverbrauchs-Kontrolle. Diese Version ist speziell für den **100% Offline-Betrieb** optimiert.
 
-## 🚦 Visuelle Logik (v8.2.1)
-Die App unterscheidet klar zwischen dem aktuellen Kontostand und der Zukunftsprognose:
+## 📡 Echte Offline-Fähigkeit
+Im Gegensatz zu früheren Versionen lädt die v8.3.1 **keine externen Icon-Bibliotheken** mehr nach. Alle Symbole sind als skalierbare Vektorgrafiken (SVG) direkt in den Code eingebettet. Das bedeutet:
+* Funktioniert im tiefsten Keller ohne Internet.
+* Sofortige Ladezeiten.
+* Keine Abhängigkeit von externen Servern (CDNs).
 
-### 1. Prognose-Ampel (Trend zum Jahresende)
-* **Grün (Punktlandung):** Du liegst optimal im Plan (90% - 105% des Budgets). 
-* **Blau (Guthaben):** Du verbrauchst deutlich weniger als geplant (< 90%). Ein Puffer baut sich auf.
-* **Orange (Warnung):** Dein Trend zeigt eine leichte Budgetüberschreitung (105% - 115%).
-* **Rot (Gefahr):** Massive Nachzahlung droht (> 115%).
+## 🚦 Features & Ampel-Logik
+* **Finanz-Check:** Vergleich von geleisteten Abschlägen mit realen Kosten (Grün/Rot).
+* **Prognose-Ampel:** 4-Farben-Logik für dein Jahresende (Blau: Guthaben, Grün: Plan, Orange/Rot: Warnung).
+* **Trend-Tabelle:** Automatische Berechnung von $m^3/Tag$ und visuelle Einordnung deines Verbrauchs per Trend-Pfeilen.
 
-### 2. Echter Kontostand (Cashflow)
-* Zeigt in **Grün/Rot**, ob deine bisher geleisteten Abschlagszahlungen die aktuell verbrauchten kWh decken.
-
-## 🛠 Features & Setup
-* **Präzise Berechnung:** Berücksichtigt Brennwert und Zustandszahl ($kWh = m^3 \times BW \times z$).
-* **Finanz-Tracking:** Hinterlegung von Zahltag, Abschlagshöhe und Grundpreis-Staffelung.
-* **Smart-Badge:** Dynamische Empfehlung zur Anpassung des Abschlags (Senken/Erhöhen).
-* **Sicherheit:** Optionale PIN-Sperre (Feld leer lassen zum Deaktivieren).
-* **Charts:** Visualisierung des m³/Tag Trends über Balkendiagramme.
-
----
-*Keine Überraschungen bei der Jahresabrechnung mehr.*
+## 🛠 Setup
+1. Code in `index.html` speichern.
+2. Im Browser öffnen.
+3. Über "Zum Home-Bildschirm hinzufügen" als App installieren.
