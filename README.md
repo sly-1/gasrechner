@@ -1,21 +1,21 @@
-# ⛽ GasZähler Pro v8.3.3 – The Complete Dashboard
+# ⛽ GasZähler Pro v8.3.4 – Final Feature Pack
 
-Diese Version vereint maximale Datentiefe mit höchster Sicherheit und Offline-Komfort.
+Die ultimative PWA zur Gasverbrauchs-Kontrolle: Sicher, Offline-fähig und intelligent.
 
-## 🚦 Smart-Badge System (Neu in v8.3.3)
-Die App analysiert jetzt wieder aktiv deine Finanzen und gibt konkrete Handlungsanweisungen:
-* **Kontostand-Badge:** Zeigt sofort, ob du beim Versorger im Plus bist oder Rücklagen bilden musst.
-* **Prognose-Badge:** Berechnet, ob dein monatlicher Abschlag erhöht, gesenkt oder beibehalten werden sollte (basierend auf dem 365-Tage-Trend).
+## 🔴 Neu in v8.3.4: Master-Reset
+* **Sicherer Löschvorgang:** Ein neuer Button am Ende der App ermöglicht das komplette Zurücksetzen aller Daten.
+* **Doppelte Bestätigung:** Um Datenverlust zu vermeiden, muss das Löschen zwei Mal explizit bestätigt werden.
 
-## 📊 Detaillierte Historie
-* **m³ Differenz:** Zeigt den exakten Mehrverbrauch seit der letzten Messung.
-* **Tages-Durchschnitt:** Berechnet $m^3/Tag$ für jedes Zeitintervall.
-* **Visueller Trend:** Pfeile (↘︎, →, ↗︎) vergleichen das Intervall mit deinem Jahresmittel.
+## 🚦 Smart-Badge System
+* **Live-Analyse:** Die App bewertet deinen Kontostand und deine Jahresprognose in Echtzeit.
+* **Handlungsempfehlungen:** Klare Texte sagen dir, ob dein Abschlag angepasst werden sollte.
 
-## 🔒 Sicherheit & Offline
-* **PIN-Schutz:** Optionaler Sperrbildschirm für deine privaten Daten.
-* **100% Offline:** Alle Icons sind als Inline-SVG eingebettet. Funktioniert ohne Internetzugriff.
+## 🔒 Sicherheit & Komfort
+* **PIN-Sperre:** Schütze deine Finanzdaten vor Zugriffen Dritter.
+* **Inline-SVGs:** Alle Icons sind im Code eingebettet – 100% Offline-Funktionalität garantiert.
+* **iOS-Design:** Optimiert für das "Add to Home Screen" Erlebnis.
 
-## 🚀 Setup
-1. `index.html` erstellen, Code einfügen, speichern.
-2. Im Browser öffnen und als PWA ("Zum Home-Bildschirm") installieren.
+## 🛠 Setup
+1. `index.html` lokal speichern.
+2. In den mobilen Browser laden.
+3. Über das Teilen-Menü "Zum Home-Bildschirm hinzufügen".
