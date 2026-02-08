@@ -1,26 +1,29 @@
-# ⛽ GasZähler Pro v7.9 – Real Cashflow Edition
+# ⛽ GasZähler Pro v7.9.2 – Smart Tolerance Edition
 
-Maximale Präzision in der Kostenkontrolle durch Berücksichtigung echter Zahlungsströme.
+Die intelligente PWA zur Überwachung deiner Gaskosten mit Fokus auf Cashflow und ruhige Vorhersagen.
 
-## 📅 Zahlungsplan-Logik (v7.9)
-Die App rechnet nicht mehr mit fiktiven Tagesraten, sondern mit realen Zahltagen:
-* **Zahltag-Check:** Du definierst das Datum des ersten Abschlags (z.B. 28.02.2026).
-* **Cashflow-Analyse:** Der Kontostand bleibt negativ, bis ein Zahltag erreicht wird. Erst dann springt das Guthaben nach oben.
-* **Abschlags-Limit:** Unterstützung für Tarife mit weniger als 12 Abschlägen pro Jahr (z.B. 11 Zahlungen).
+## 🚦 Drei-Stufen-Ampel (Neu in v7.9.2)
+Die Jahresprognose nutzt jetzt ein Toleranz-System, um tägliche Schwankungen abzufangen:
+* **🟢 Grün (Sicher):** Prognose liegt unter 95% deines Budgets.
+* **🟠 Orange (Warnung):** Prognose liegt zwischen 95% und 105%. Es wird eine Punktlandung.
+* **🔴 Rot (Nachzahlung):** Prognose liegt über 105% des geplanten Budgets.
 
-## ⚙️ Kern-Funktionen
-* **Präziser Kontostand:** Abgleich zwischen tatsächlich geleisteten Zahlungen und verbrauchtem Gas.
-* **Jahresprognose:** Hochrechnung basierend auf dem aktuellen Tagesschnitt inklusive Grundpreis-Staffelung.
-* **Zähler-Offset:** Unterstützung für beliebige Start-Zählerstände.
+## 📅 Cashflow & Zahlungsplan
+* **Präzise Buchhaltung:** Der Kontostand basiert auf diskreten Zahltagen (z.B. jeweils zum 28. eines Monats).
+* **Flexibilität:** Unterstützung für Tarife mit weniger als 12 Abschlägen pro Jahr.
+* **Transparenz:** Sofortige Sichtbarkeit von Kosten vs. geleisteten Zahlungen.
 
 ---
 
 ## 📝 Changelog
 
+### v7.9.2 (Smart Tolerance)
+* **Neu:** Orangefarbener Warnzustand für die Jahresprognose (±5% Bereich).
+* **Logic:** Prognose-Vergleich erfolgt nun gegen das gesamte Jahresbudget (Abschläge × Anzahl).
+* **UI:** Info-Text zeigt das geplante Jahres-Budget zur besseren Einordnung an.
+
 ### v7.9 (Real Cashflow)
-* **Neu:** Implementierung eines Zahlungsplans (Startdatum & Anzahl Abschläge).
-* **Fix:** Kontostand-Berechnung von linearer Tagesrate auf diskrete Zahltage umgestellt.
-* **UI:** Neuer Bereich "Zahlungsplan" in den Einstellungen.
+* **Neu:** Umstellung der Kontostand-Berechnung auf reale Zahltage.
 
 ---
-*Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
+*Maßgeschneidert für präzise Kostenkontrolle ohne Panik-Meldungen.*
