@@ -1,54 +1,43 @@
-# ⛽ GasZähler Pro – Finance & Security Edition (v7.1)
+# ⛽ GasZähler Pro v7.3 – Finance & UX Edition
 
-Die ultimative Progressive Web App (PWA) zur präzisen Kontrolle deines Gasverbrauchs und deiner Finanzen. Optimiert für Tarife mit Bestabrechnung und privatem Datenschutz.
+Die ultimative Progressive Web App (PWA) zur präzisen Kontrolle deines Gasverbrauchs. Optimiert für Tarife mit Bestabrechnung, Finanz-Vorschau und privatem Datenschutz.
 
-## 💰 Finanz-Features
-* **Abschlags-Monitor:** Echtzeit-Abgleich zwischen gezahlten Abschlägen und tatsächlichen Kosten.
-* **Guthaben-Ampel:** Sofortige visuelle Rückmeldung (Grün = Guthaben / Rot = Nachzahlung).
-* **Intelligente Empfehlung:** Berechnet den idealen monatlichen Abschlag basierend auf deiner Prognose inkl. 10 % Sicherheitspuffer.
+## 💰 Finanz- & UX-Features (Neu in v7.3)
+* **Guthaben-Ampel:** Echtzeit-Abgleich zwischen gezahlten Abschlägen und tatsächlichen Kosten (Grün = Guthaben / Rot = Nachzahlung).
+* **Intelligente Empfehlung:** Berechnet den idealen monatlichen Abschlag inkl. 10 % Sicherheitspuffer.
+* **Vorschau-Modus:** Neue Eingaben werden als "VORSCHAU" markiert, um sie klar von gespeicherten Daten zu trennen.
+* **iOS-Toast-System:** Dezente Bestätigungen beim Speichern oder Kopieren von Backups ohne störende Popups.
 
 ## 📊 Konfiguration (Pre-configured)
-Die App nutzt deine spezifischen Vertragsdaten für maximale Genauigkeit:
-* **Brennwert:** 11,500 | **Z-Zahl:** 0,9500
-* **Staffel 1 (bis 6.000 kWh):** 12,80 ct/kWh | Grundpreis: 5,36 €/Monat
-* **Staffel 2 (ab 6.001 kWh):** 11,79 ct/kWh | Grundpreis: 10,41 €/Monat
-* **Start-Offset:** Berechnung beginnt ab 1,000 m³ (Referenzwert).
+* **Physik:** Brennwert 11,500 | Z-Zahl 0,9500.
+* **Tarif:** Automatische Bestabrechnung (12,80 ct / 11,79 ct pro kWh).
+* **Start:** Berechnung basiert auf einem Referenz-Startwert von 1,000 m³.
 
 ## ✨ Kernfunktionen
-* **🔐 Datenschutz:** Optionaler Passwortschutz direkt im Browser (lokale Verschlüsselung).
+* **🔐 Datenschutz:** Optionaler Passwortschutz direkt im Browser.
 * **📈 Trend-Analyse:** Grafische Darstellung des täglichen Verbrauchs (m³/Tag).
-* **💾 Backup-System:** Volle Datensicherung über Export/Import von Text-Codes.
-* **📱 PWA-Ready:** Optimiert für die Nutzung als App auf dem Homescreen.
-
-## 📲 Installation & Nutzung
-1. **GitHub Pages:** Aktiviere Pages in den Repository-Einstellungen, um die App über eine URL aufzurufen.
-2. **Zum Homescreen:** Öffne die URL am Smartphone und wähle "Zum Home-Bildschirm hinzufügen". Dank der `icon.png` erscheint die App mit eigenem Symbol.
-3. **Erster Schritt:** Speichere deinen Basis-Zählerstand (1,000 m³) mit dem entsprechenden Datum ab.
+* **💾 Backup-System:** Datensicherung via Text-Code (Export/Import).
+* **📱 PWA-Ready:** Mit eigenem Icon (`icon.png`) als App auf dem Homescreen installierbar.
 
 ---
 
-## 📝 Vollständiger Changelog
+## 📝 Changelog
 
-### v7.1 (Final Finance)
-* **Feature:** Finanz-Check Modul mit Guthaben-Anzeige integriert.
-* **Feature:** Automatisierte Abschlags-Empfehlung (Ampel-System).
-* **UI:** Kosten-Historie in der Tabelle pro Eintrag ergänzt.
-* **Fix:** PWA-Icon Support und Mobile-Meta-Tags finalisiert.
+### v7.3 (Final UX)
+* **Neu:** Toast-Benachrichtigungen für besseren Workflow hinzugefügt.
+* **Neu:** Visueller Vorschau-Modus für ungespeicherte Eingaben.
+* **UI:** Kosten-Spalte in der Historie fest integriert.
 
-### v6.0 (Security Update)
-* **Feature:** Optionaler Passwortschutz (lokal verschlüsselt).
-* **Update:** Anpassung des Standard-Brennwertes auf 11,500.
+### v7.1 (Finance Update)
+* **Neu:** Finanz-Check Modul & Abschlags-Empfehlung integriert.
+* **Storage:** Migration auf das stabile `v7` Speicher-Schema.
 
-### v5.0 (Backup & Physics)
-* **Feature:** Vollständige Backup-Suite (Export/Import via Code) wiederhergestellt.
-* **Update:** Integration der Z-Zahl (0,9500) in die thermische Abrechnung.
+### v6.0 (Security & Fixes)
+* **Neu:** Passwortschutz-Layer hinzugefügt.
+* **Fix:** PWA-Icon Support und Meta-Tags für Vollbildmodus korrigiert.
 
-### v1.0 - v4.0 (Core Engine)
-* **Core:** Dynamische Bestabrechnung (automatische Preisstaffel-Wahl).
-* **Core:** Start-Offset Logik (1,000 m³) für Übernahmewerte.
-* **UI:** Chart.js Integration für Verbrauchs-Trends.
-* **PWA:** Grundgerüst für die Nutzung als Web-App.
+### v1.0 - v5.0
+* Grundgerüst mit Chart.js, Bestabrechnung und Backup-Suite.
 
 ---
 *Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
-
