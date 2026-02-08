@@ -1,43 +1,39 @@
-# ⛽ GasZähler Pro v7.3 – Finance & UX Edition
+# ⛽ GasZähler Pro v7.4 – Smart Finance & UX Edition
 
-Die ultimative Progressive Web App (PWA) zur präzisen Kontrolle deines Gasverbrauchs. Optimiert für Tarife mit Bestabrechnung, Finanz-Vorschau und privatem Datenschutz.
+Die ultimative Progressive Web App (PWA) zur präzisen Kontrolle deines Gasverbrauchs. Optimiert für Tarife mit Bestabrechnung, intelligente Finanz-Vorschau und privatem Datenschutz.
 
-## 💰 Finanz- & UX-Features (Neu in v7.3)
-* **Guthaben-Ampel:** Echtzeit-Abgleich zwischen gezahlten Abschlägen und tatsächlichen Kosten (Grün = Guthaben / Rot = Nachzahlung).
-* **Intelligente Empfehlung:** Berechnet den idealen monatlichen Abschlag inkl. 10 % Sicherheitspuffer.
-* **Vorschau-Modus:** Neue Eingaben werden als "VORSCHAU" markiert, um sie klar von gespeicherten Daten zu trennen.
-* **iOS-Toast-System:** Dezente Bestätigungen beim Speichern oder Kopieren von Backups ohne störende Popups.
+## 💰 Smart Finance Features
+* **Zwei-Wege-Ampel:** Erkennt nicht nur drohende Nachzahlungen (Orange), sondern warnt auch vor deutlich zu hohen Abschlägen (Blau), um zinslose Darlehen an den Anbieter zu vermeiden.
+* **Intelligente Empfehlung:** Berechnet den idealen monatlichen Abschlag basierend auf deiner aktuellen Jahresprognose inkl. 10 % Sicherheitspuffer.
+* **Echtzeit-Guthaben:** Sofortiger Abgleich deiner gezahlten Abschläge gegen die real angefallenen Kosten.
+
+## ✨ UX & Komfort
+* **Vorschau-Modus:** Neue Eingaben werden als "VORSCHAU" markiert und Ergebnisse gedimmt dargestellt, solange sie nicht gespeichert sind.
+* **Toast-System:** Dezente, automatische Rückmeldungen beim Speichern, Kopieren oder Importieren von Daten.
+* **Historie:** Vollständige Kostenspalte pro Eintrag in der Historientabelle.
 
 ## 📊 Konfiguration (Pre-configured)
 * **Physik:** Brennwert 11,500 | Z-Zahl 0,9500.
 * **Tarif:** Automatische Bestabrechnung (12,80 ct / 11,79 ct pro kWh).
 * **Start:** Berechnung basiert auf einem Referenz-Startwert von 1,000 m³.
 
-## ✨ Kernfunktionen
-* **🔐 Datenschutz:** Optionaler Passwortschutz direkt im Browser.
-* **📈 Trend-Analyse:** Grafische Darstellung des täglichen Verbrauchs (m³/Tag).
-* **💾 Backup-System:** Datensicherung via Text-Code (Export/Import).
-* **📱 PWA-Ready:** Mit eigenem Icon (`icon.png`) als App auf dem Homescreen installierbar.
+## 🔐 Sicherheit & PWA
+* **Passwortschutz:** Optionaler Lock-Screen direkt im Browser.
+* **Offline-Ready:** Als App auf dem Homescreen installierbar (PWA) mit eigenem Icon.
 
 ---
 
 ## 📝 Changelog
 
-### v7.3 (Final UX)
-* **Neu:** Toast-Benachrichtigungen für besseren Workflow hinzugefügt.
-* **Neu:** Visueller Vorschau-Modus für ungespeicherte Eingaben.
-* **UI:** Kosten-Spalte in der Historie fest integriert.
+### v7.4 (Smart Finance)
+* **Fix:** Abschlags-Empfehlung erkennt nun auch Überzahlungen (Zwei-Wege-Prüfung).
+* **UI:** Status-Badge für zu hohe Abschläge integriert.
 
-### v7.1 (Finance Update)
-* **Neu:** Finanz-Check Modul & Abschlags-Empfehlung integriert.
-* **Storage:** Migration auf das stabile `v7` Speicher-Schema.
+### v7.3 (UX Update)
+* **Neu:** Toast-Benachrichtigungen & Vorschau-Modus für ungespeicherte Daten.
 
-### v6.0 (Security & Fixes)
-* **Neu:** Passwortschutz-Layer hinzugefügt.
-* **Fix:** PWA-Icon Support und Meta-Tags für Vollbildmodus korrigiert.
-
-### v1.0 - v5.0
-* Grundgerüst mit Chart.js, Bestabrechnung und Backup-Suite.
+### v1.0 - v7.1
+* Einführung Finanz-Modul, Passwortschutz, Bestabrechnung und Backup-Suite.
 
 ---
 *Maßgeschneiderte Lösung zur präzisen Gaskosten-Kontrolle.*
