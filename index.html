@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro - Final Finance</title>
+    <title>GasZähler Pro v7.3</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -13,24 +13,25 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; }
-        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
+        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; }
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 32px; font-weight: 800; display: block; }
+        .result-price { font-size: 32px; font-weight: 800; display: block; transition: opacity 0.3s; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border: 1px solid var(--ios-green); }
         .status-warn { background: #FFF4E5; color: var(--ios-orange); border: 1px solid var(--ios-orange); }
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: background 0.2s; }
         .btn-secondary { background: #E5E5EA; color: var(--ios-blue); }
-        .btn-danger { background: transparent; color: var(--ios-red); font-size: 13px; border: none; width: 100%; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .btn-danger { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
         .cost-col { font-weight: 700; color: var(--ios-blue); text-align: right; }
+        .preview-label { font-size: 10px; font-weight: 800; color: var(--ios-orange); letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -42,7 +43,7 @@
     </div>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Finance</h1>
+        <h1>⛽ GasZähler Pro</h1>
 
         <div class="card">
             <div class="input-group">
@@ -54,14 +55,14 @@
             </div>
             
             <details>
-                <summary>⚙️ Finanzen, Tarif & Sicherheit</summary>
+                <summary>⚙️ Finanzen & Sicherheit</summary>
                 <div class="input-group" style="margin-top:15px;">
                     <label>Monatlicher Abschlag (€)</label>
                     <input type="number" id="monthlyPayment" step="0.01" value="100.00" oninput="renderAll()">
                 </div>
                 <div class="input-group">
                     <label>Passwortschutz</label>
-                    <input type="password" id="pwConfig" placeholder="Passwort setzen/ändern" onchange="savePW()">
+                    <input type="password" id="pwConfig" placeholder="Passwort setzen" onchange="savePW()">
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <div style="flex:1"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" value="11.500" oninput="renderAll()"></div>
@@ -72,7 +73,8 @@
 
         <div class="card" id="financeArea" style="display:none; border-left: 5px solid var(--ios-orange);">
             <div class="result-container">
-                <span style="font-size: 13px; color: var(--ios-text-secondary);">Aktueller Kontostand (Gezahlt vs. Verbrauch)</span>
+                <div id="previewBadgeFinance"></div>
+                <span style="font-size: 13px; color: var(--ios-text-secondary);">Aktueller Kontostand</span>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
                 <div id="balanceInfo" style="font-size: 12px; margin-top: 5px; color: var(--ios-text-secondary);"></div>
                 <div id="abschiagEmpfehlung" class="status-badge"></div>
@@ -81,13 +83,14 @@
 
         <div class="card" id="predictionArea" style="display:none; border-left: 5px solid var(--ios-green);">
             <div class="result-container">
+                <div id="previewBadgePredict"></div>
                 <span style="font-size: 13px; color: var(--ios-text-secondary);">Hochrechnung Jahresende</span>
                 <span class="result-price" style="color: var(--ios-green);" id="yearPrice">0,00 €</span>
                 <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);">...</div>
             </div>
         </div>
 
-        <button onclick="saveData()">Ablesung speichern</button>
+        <button id="saveBtn" onclick="saveData()">Ablesung speichern</button>
 
         <div class="card">
             <h3>Historie & Trend</h3>
@@ -99,9 +102,9 @@
         </div>
 
         <div class="card" style="text-align: center;">
-            <button class="btn-secondary" onclick="exportBackup()">Backup Code kopieren</button>
+            <button class="btn-secondary" onclick="exportBackup()">Backup kopieren</button>
             <button class="btn-secondary" style="margin-top:8px" onclick="importBackup()">Backup einspielen</button>
-            <button class="btn-danger" onclick="clearHistory()">Alle Daten löschen</button>
+            <button class="btn-danger" onclick="clearHistory()">Daten löschen</button>
         </div>
     </div>
 
@@ -109,6 +112,14 @@
         const myTiers = "6000:12.80:5.36\n99999:11.79:10.41";
         let history = JSON.parse(localStorage.getItem('gas_history_v7')) || [];
         let gasChart = null;
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.innerText = msg;
+            t.style = "position:fixed; bottom:50px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:12px 24px; border-radius:25px; z-index:10001; font-size:14px; pointer-events:none; transition:opacity 0.5s;";
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2000);
+        }
 
         function checkLock() {
             if (localStorage.getItem('gas_app_pw')) {
@@ -122,13 +133,13 @@
                 document.getElementById('lockScreen').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 renderAll();
-            } else { alert("Passwort falsch!"); }
+            } else { showToast("❌ Passwort falsch"); }
         }
 
         function savePW() {
             const val = document.getElementById('pwConfig').value;
             val ? localStorage.setItem('gas_app_pw', val) : localStorage.removeItem('gas_app_pw');
-            alert("Sicherheitseinstellungen aktualisiert.");
+            showToast("🔐 Sicherheit aktualisiert");
         }
 
         document.getElementById('readingDate').valueAsDate = new Date();
@@ -149,14 +160,18 @@
             const kwh = diffM3 * (parseFloat(document.getElementById('brennwert').value) || 11.5) * (parseFloat(document.getElementById('zzahl').value) || 0.95);
             const tier = getTier(kwh);
             const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
-            const total = (kwh * tier.price) + ((tier.base * 12 / 365) * days);
-            return { total, m3Day: diffM3 / days, days, kwh };
+            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: diffM3 / days, days };
         }
 
         function renderAll() {
             localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
-            const curMeter = document.getElementById('meter').value !== "" ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
+            const isPreview = document.getElementById('meter').value !== "";
+            const curMeter = isPreview ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
             
+            document.getElementById('previewBadgeFinance').innerHTML = isPreview ? '<span class="preview-label">VORSCHAU</span>' : '';
+            document.getElementById('previewBadgePredict').innerHTML = isPreview ? '<span class="preview-label">VORSCHAU</span>' : '';
+            document.getElementById('balanceOutput').style.opacity = isPreview ? "0.5" : "1";
+
             if (curMeter !== null) {
                 const res = calculateCost(curMeter, document.getElementById('readingDate').value);
                 if (res) {
@@ -166,7 +181,6 @@
                     const estKwhYear = (res.m3Day * 365) * (parseFloat(document.getElementById('brennwert').value) || 11.5) * 0.95;
                     const pT = getTier(estKwhYear);
                     const yearTotal = (estKwhYear * pT.price) + (pT.base * 12);
-                    
                     document.getElementById('yearPrice').innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
                     document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estKwhYear)} kWh/J)`;
 
@@ -180,7 +194,7 @@
                     const ideal = (yearTotal * 1.1) / 12;
                     const empfEl = document.getElementById('abschiagEmpfehlung');
                     if (parseFloat(document.getElementById('monthlyPayment').value) < ideal * 0.95) {
-                        empfEl.innerText = `⚠️ Empfehlung: Erhöhe auf ${Math.ceil(ideal)} €`;
+                        empfEl.innerText = `⚠️ Empfehlung: ${Math.ceil(ideal)} €`;
                         empfEl.className = "status-badge status-warn";
                     } else {
                         empfEl.innerText = `✅ Abschlag ist optimal`;
@@ -194,13 +208,12 @@
             for (let i = history.length - 1; i >= 0; i--) {
                 const h = history[i];
                 const hRes = calculateCost(h.meter, h.date);
-                const diff = i > 0 ? (h.meter - history[i-1].meter).toFixed(2) : "-";
                 body.innerHTML += `<tr>
                     <td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'})}</td>
                     <td>${h.meter.toFixed(2)}</td>
-                    <td style="color:var(--ios-blue)">${i > 0 ? '+'+diff : '-'}</td>
+                    <td style="color:var(--ios-blue)">${history[i-1] ? '+'+(h.meter-history[i-1].meter).toFixed(2) : '-'}</td>
                     <td class="cost-col">${hRes ? hRes.total.toLocaleString('de-DE', {style:'currency', currency:'EUR'}) : '-'}</td>
-                    <td style="color:var(--ios-red); padding-left:10px; cursor:pointer" onclick="deleteEntry(${h.id})">×</td>
+                    <td><button class="btn-danger" onclick="deleteEntry(${h.id})">×</button></td>
                 </tr>`;
             }
             updateChart();
@@ -208,18 +221,19 @@
 
         function saveData() {
             const m = parseFloat(document.getElementById('meter').value), d = document.getElementById('readingDate').value;
-            if (isNaN(m) || !d) return;
+            if (isNaN(m) || !d) { showToast("⚠️ Bitte Stand eingeben"); return; }
             history.push({ date: d, meter: m, id: Date.now() });
             history.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
             document.getElementById('meter').value = "";
+            showToast("✅ Gespeichert");
             renderAll();
         }
 
-        function deleteEntry(id) { if(confirm("Eintrag löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Backup-Code in Zwischenablage kopiert!")); }
-        function importBackup() { const c = prompt("Backup-Code hier einfügen:"); if(c) { try { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } catch(e) { alert("Ungültiger Code!"); } } }
-        function clearHistory() { if(confirm("Wirklich ALLE Daten löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => showToast("📋 Code kopiert")); }
+        function importBackup() { const c = prompt("Code einfügen:"); if(c) { try { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); showToast("📥 Import fertig"); } catch(e) { showToast("❌ Fehler"); } } }
+        function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
 
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
@@ -230,7 +244,7 @@
                 d.push(days > 0 ? ((history[i].meter - history[i-1].meter) / days).toFixed(2) : 0);
             }
             if (gasChart) gasChart.destroy();
-            gasChart = new Chart(ctx, { type: 'bar', data: { labels: l, datasets: [{ data: d, backgroundColor: '#007AFF', borderRadius: 5 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+            gasChart = new Chart(ctx, { type: 'bar', data: { labels: l, datasets: [{ data: d, backgroundColor: '#007AFF', borderRadius: 5 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         }
         window.onload = () => { checkLock(); renderAll(); };
     </script>
