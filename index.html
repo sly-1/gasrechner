@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v7.8</title>
+    <title>GasZähler Pro v7.9</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -14,72 +14,65 @@
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
-        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: border-color 0.4s ease; }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: border-color 0.4s; }
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 32px; font-weight: 800; display: block; transition: color 0.4s, opacity 0.3s; }
+        .result-price { font-size: 32px; font-weight: 800; display: block; }
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border: 1px solid var(--ios-green); }
         .status-warn { background: #FFF4E5; color: var(--ios-orange); border: 1px solid var(--ios-orange); }
         .status-info { background: #E5F1FF; color: var(--ios-blue); border: 1px solid var(--ios-blue); }
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: background 0.2s; }
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
         .btn-secondary { background: var(--ios-gray); color: var(--ios-blue); }
         .btn-danger { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 10px; color: var(--ios-text-secondary); border-bottom: 1px solid #E5E5EA; padding-bottom: 8px; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
         .cost-col { font-weight: 700; color: var(--ios-blue); text-align: right; }
-        .preview-label { font-size: 10px; font-weight: 800; color: var(--ios-orange); letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
 
-    <div id="lockScreen" style="display: none;">
-        <h2>🔐 Gesperrt</h2>
-        <input type="password" id="pwEntry" placeholder="Passwort" style="text-align: center; margin-bottom: 20px;">
-        <button onclick="unlockApp()">Entsperren</button>
-    </div>
-
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v7.8</h1>
+        <h1>⛽ GasZähler Pro v7.9</h1>
 
         <div class="card">
             <div class="input-group">
                 <label>Datum & Zählerstand (m³)</label>
                 <div style="display: flex; gap: 8px;">
-                    <input type="date" id="readingDate" style="flex: 1.5;">
-                    <input type="number" id="meter" step="0.001" placeholder="0,000" style="flex: 1;" oninput="renderAll()">
+                    <input type="date" id="readingDate">
+                    <input type="number" id="meter" step="0.001" placeholder="0,000" oninput="renderAll()">
                 </div>
             </div>
             
             <details>
-                <summary>⚙️ Finanzen & Sicherheit</summary>
-                <div class="input-group" style="margin-top:15px;">
-                    <label>Start-Zählerstand (Offset m³)</label>
-                    <input type="number" id="startOffset" step="0.001" value="1.000" oninput="renderAll()">
-                </div>
-                <div class="input-group">
-                    <label>Monatlicher Abschlag (€)</label>
-                    <input type="number" id="monthlyPayment" step="0.01" value="100.00" oninput="renderAll()">
-                </div>
-                <div class="input-group">
-                    <label>Passwortschutz</label>
-                    <input type="password" id="pwConfig" placeholder="Passwort setzen" onchange="savePW()">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex:1"><label>Brennwert</label><input type="number" id="brennwert" step="0.001" value="11.500" oninput="renderAll()"></div>
-                    <div style="flex:1"><label>Z-Zahl</label><input type="number" id="zzahl" step="0.0001" value="0.9500" oninput="renderAll()"></div>
+                <summary>⚙️ Zahlungsplan & Faktoren</summary>
+                <div style="margin-top:15px; border-top: 1px solid #eee; padding-top: 10px;">
+                    <div class="input-group">
+                        <label>Datum des 1. Abschlags</label>
+                        <input type="date" id="firstPaymentDate" oninput="renderAll()">
+                    </div>
+                    <div class="input-group">
+                        <label>Anzahl Abschläge p.a.</label>
+                        <input type="number" id="paymentCount" oninput="renderAll()">
+                    </div>
+                    <div class="input-group">
+                        <label>Monatlicher Abschlag (€)</label>
+                        <input type="number" id="monthlyPayment" step="0.01" oninput="renderAll()">
+                    </div>
+                    <div class="input-group">
+                        <label>Start-Zählerstand (Offset)</label>
+                        <input type="number" id="startOffset" step="0.001" oninput="renderAll()">
+                    </div>
                 </div>
             </details>
         </div>
 
         <div class="card" id="financeArea" style="display:none;">
             <div class="result-container">
-                <div id="previewBadgeFinance"></div>
-                <span style="font-size: 13px; color: var(--ios-text-secondary);">Aktueller Kontostand</span>
+                <span style="font-size: 13px; color: var(--ios-text-secondary);">Echter Kontostand</span>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
                 <div id="balanceInfo" style="font-size: 12px; margin-top: 5px; color: var(--ios-text-secondary);"></div>
                 <div id="abschiagEmpfehlung" class="status-badge"></div>
@@ -88,14 +81,13 @@
 
         <div class="card" id="predictionArea" style="display:none;">
             <div class="result-container">
-                <div id="previewBadgePredict"></div>
-                <span style="font-size: 13px; color: var(--ios-text-secondary);">Hochrechnung Jahresende</span>
+                <span style="font-size: 13px; color: var(--ios-text-secondary);">Prognose Jahresende</span>
                 <span class="result-price" id="yearPrice">0,00 €</span>
                 <div id="yearInfo" style="font-size: 12px; color: var(--ios-text-secondary);">...</div>
             </div>
         </div>
 
-        <button id="saveBtn" onclick="saveData()">Ablesung speichern</button>
+        <button onclick="saveData()">Ablesung speichern</button>
 
         <div class="card">
             <h3>Historie & Trend</h3>
@@ -118,40 +110,12 @@
         let history = JSON.parse(localStorage.getItem('gas_history_v7')) || [];
         let gasChart = null;
 
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.innerText = msg;
-            t.style = "position:fixed; bottom:50px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:white; padding:12px 24px; border-radius:25px; z-index:10001; font-size:14px; pointer-events:none; transition:opacity 0.5s;";
-            document.body.appendChild(t);
-            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2000);
-        }
-
-        function checkLock() {
-            if (localStorage.getItem('gas_app_pw')) {
-                document.getElementById('mainContent').style.display = 'none';
-                document.getElementById('lockScreen').style.display = 'flex';
-            }
-        }
-
-        function unlockApp() {
-            if (document.getElementById('pwEntry').value === localStorage.getItem('gas_app_pw')) {
-                document.getElementById('lockScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                renderAll();
-            } else { showToast("❌ Passwort falsch"); }
-        }
-
-        function savePW() {
-            const val = document.getElementById('pwConfig').value;
-            val ? localStorage.setItem('gas_app_pw', val) : localStorage.removeItem('gas_app_pw');
-            showToast("🔐 Sicherheit aktualisiert");
-        }
-
+        // Init Form
         document.getElementById('readingDate').valueAsDate = new Date();
-        const monthlyInput = document.getElementById('monthlyPayment');
-        monthlyInput.value = localStorage.getItem('gas_monthly') || 100.00;
-        const offsetInput = document.getElementById('startOffset');
-        offsetInput.value = localStorage.getItem('gas_offset') || 1.000;
+        document.getElementById('firstPaymentDate').value = localStorage.getItem('gas_first_pay') || "2026-02-28";
+        document.getElementById('paymentCount').value = localStorage.getItem('gas_pay_count') || 11;
+        document.getElementById('monthlyPayment').value = localStorage.getItem('gas_monthly') || 100.00;
+        document.getElementById('startOffset').value = localStorage.getItem('gas_offset') || 1.000;
 
         function getTier(kwh) {
             const lines = myTiers.split('\n');
@@ -161,88 +125,76 @@
             }
         }
 
+        function calculatePaid(targetDate) {
+            const firstPay = new Date(document.getElementById('firstPaymentDate').value);
+            const monthly = parseFloat(document.getElementById('monthlyPayment').value);
+            const maxPays = parseInt(document.getElementById('paymentCount').value);
+            if (isNaN(firstPay.getTime())) return 0;
+            
+            let count = 0;
+            let checkDate = new Date(firstPay);
+            const limitDate = new Date(targetDate);
+
+            for (let i = 0; i < maxPays; i++) {
+                if (checkDate <= limitDate) {
+                    count++;
+                    checkDate.setMonth(checkDate.getMonth() + 1);
+                } else { break; }
+            }
+            return count * monthly;
+        }
+
         function calculateCost(meter, date) {
             if (history.length === 0) return null;
             const first = history[0];
-            const offset = parseFloat(offsetInput.value) || 0;
+            const offset = parseFloat(document.getElementById('startOffset').value) || 0;
             const diffM3 = Math.max(0, meter - offset); 
-            const kwh = diffM3 * (parseFloat(document.getElementById('brennwert').value) || 11.5) * (parseFloat(document.getElementById('zzahl').value) || 0.95);
+            const kwh = diffM3 * 11.5 * 0.95;
             const tier = getTier(kwh);
             const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
             return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: (meter - first.meter) / days, days };
         }
 
         function renderAll() {
-            localStorage.setItem('gas_monthly', monthlyInput.value);
-            localStorage.setItem('gas_offset', offsetInput.value);
-            
+            localStorage.setItem('gas_first_pay', document.getElementById('firstPaymentDate').value);
+            localStorage.setItem('gas_pay_count', document.getElementById('paymentCount').value);
+            localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
+            localStorage.setItem('gas_offset', document.getElementById('startOffset').value);
+
             const isPreview = document.getElementById('meter').value !== "";
             const curMeter = isPreview ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
-            
-            document.getElementById('previewBadgeFinance').innerHTML = isPreview ? '<span class="preview-label">VORSCHAU</span>' : '';
-            document.getElementById('previewBadgePredict').innerHTML = isPreview ? '<span class="preview-label">VORSCHAU</span>' : '';
-            
-            const balOut = document.getElementById('balanceOutput');
-            const yearOut = document.getElementById('yearPrice');
-            balOut.style.opacity = isPreview ? "0.5" : "1";
-            yearOut.style.opacity = isPreview ? "0.5" : "1";
+            const curDate = document.getElementById('readingDate').value;
 
             if (curMeter !== null) {
-                const res = calculateCost(curMeter, document.getElementById('readingDate').value);
+                const res = calculateCost(curMeter, curDate);
                 if (res) {
                     document.getElementById('predictionArea').style.display = "block";
                     document.getElementById('financeArea').style.display = "block";
-                    
-                    const estKwhYear = (res.m3Day * 365) * (parseFloat(document.getElementById('brennwert').value) || 11.5) * 0.95;
-                    const pT = getTier(estKwhYear);
-                    const yearTotal = (estKwhYear * pT.price) + (pT.base * 12);
-                    const annualBudget = parseFloat(monthlyInput.value) * 12;
-                    const current = parseFloat(monthlyInput.value);
-                    const idealMonth = (yearTotal * 1.1) / 12;
 
-                    // --- HOCHRECHNUNG FARB-LOGIK (v7.8) ---
-                    const predCard = document.getElementById('predictionArea');
-                    yearOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    
-                    if (yearTotal > annualBudget) {
-                        yearOut.style.color = "var(--ios-red)";
-                        predCard.style.borderLeftColor = "var(--ios-red)";
-                    } else if (current > idealMonth * 1.3) {
-                        yearOut.style.color = "var(--ios-blue)";
-                        predCard.style.borderLeftColor = "var(--ios-blue)";
-                    } else {
-                        yearOut.style.color = "var(--ios-green)";
-                        predCard.style.borderLeftColor = "var(--ios-green)";
-                    }
-                    document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estKwhYear)} kWh/J)`;
-
-                    // --- KONTOSTAND FARB-LOGIK (v7.8) ---
-                    const totalPaid = (current / 30.42) * res.days;
+                    const totalPaid = calculatePaid(curDate);
                     const balance = totalPaid - res.total;
+                    const balOut = document.getElementById('balanceOutput');
                     const finCard = document.getElementById('financeArea');
                     
-                    balOut.innerText = (balance >= 0 ? "+" : "") + balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    balOut.innerText = balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    balOut.style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                    finCard.style.borderLeftColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                     
-                    if (balance < 0) {
-                        balOut.style.color = "var(--ios-red)";
-                        finCard.style.borderLeftColor = "var(--ios-red)";
-                    } else if (current > idealMonth * 1.3) {
-                        balOut.style.color = "var(--ios-blue)";
-                        finCard.style.borderLeftColor = "var(--ios-blue)";
-                    } else {
-                        balOut.style.color = "var(--ios-green)";
-                        finCard.style.borderLeftColor = "var(--ios-green)";
-                    }
-                    document.getElementById('balanceInfo').innerText = `Gezahlt: ${totalPaid.toFixed(2)}€ | Kosten: ${res.total.toFixed(2)}€`;
+                    document.getElementById('balanceInfo').innerText = `${totalPaid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
 
-                    // --- ABSCHLAG-EMPFEHLUNG ---
+                    const estKwhYear = (res.m3Day * 365) * 11.5 * 0.95;
+                    const pT = getTier(estKwhYear);
+                    const yearTotal = (estKwhYear * pT.price) + (pT.base * 12);
+                    const yearOut = document.getElementById('yearPrice');
+                    yearOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+                    document.getElementById('yearInfo').innerText = `Ø ${res.m3Day.toFixed(2)} m³/Tag (~${Math.round(estKwhYear)} kWh/J)`;
+
+                    const ideal = (yearTotal * 1.1) / 12;
+                    const current = parseFloat(document.getElementById('monthlyPayment').value);
                     const empfEl = document.getElementById('abschiagEmpfehlung');
-                    if (current < idealMonth * 0.95) {
-                        empfEl.innerText = `⚠️ Erhöhen auf ca. ${Math.ceil(idealMonth)} €`;
+                    if (current < ideal * 0.95) {
+                        empfEl.innerText = `⚠️ Erhöhen auf ca. ${Math.ceil(ideal)} €`;
                         empfEl.className = "status-badge status-warn";
-                    } else if (current > idealMonth * 1.3) {
-                        empfEl.innerText = `ℹ️ Zu hoch! Ideal: ${Math.ceil(idealMonth)} €`;
-                        empfEl.className = "status-badge status-info";
                     } else {
                         empfEl.innerText = `✅ Abschlag ist optimal`;
                         empfEl.className = "status-badge status-good";
@@ -268,18 +220,17 @@
 
         function saveData() {
             const m = parseFloat(document.getElementById('meter').value), d = document.getElementById('readingDate').value;
-            if (isNaN(m) || !d) { showToast("⚠️ Bitte Stand eingeben"); return; }
+            if (isNaN(m) || !d) return;
             history.push({ date: d, meter: m, id: Date.now() });
             history.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
             document.getElementById('meter').value = "";
-            showToast("✅ Gespeichert");
             renderAll();
         }
 
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => showToast("📋 Code kopiert")); }
-        function importBackup() { const c = prompt("Code einfügen:"); if(c) { try { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); showToast("📥 Import fertig"); } catch(e) { showToast("❌ Fehler"); } } }
+        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert")); }
+        function importBackup() { const c = prompt("Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
 
         function updateChart() {
@@ -293,7 +244,7 @@
             if (gasChart) gasChart.destroy();
             gasChart = new Chart(ctx, { type: 'bar', data: { labels: l, datasets: [{ data: d, backgroundColor: '#007AFF', borderRadius: 5 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         }
-        window.onload = () => { checkLock(); renderAll(); };
+        window.onload = renderAll;
     </script>
 </body>
 </html>
