@@ -3,41 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.0.0</title>
+    <title>GasZähler Pro v8.0.1</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; }
+        :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; --ios-neutral: #D1D1D6; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
         
-        /* Sperrbildschirm */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pin-input { font-size: 24px; padding: 15px; width: 150px; text-align: center; border-radius: 12px; border: 1px solid #D1D1D6; margin-bottom: 20px; letter-spacing: 5px; }
+        .pin-input { font-size: 24px; padding: 15px; width: 150px; text-align: center; border-radius: 12px; border: 1px solid var(--ios-neutral); margin-bottom: 20px; letter-spacing: 5px; }
         
-        /* Cards & UI */
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid #D1D1D6; transition: border-color 0.3s ease; }
+        /* Neutrale Cards für Eingabe und Tabelle */
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 5px solid var(--ios-neutral); transition: border-color 0.3s ease; }
+        
+        /* Spezielle ID-Selektoren für die Ampeln (höhere Priorität) */
+        #financeArea, #predictionArea { border-left-width: 6px; }
+
         .input-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
-        input { width: 100%; padding: 12px; border: 1px solid #D1D1D6; border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         
         .result-container { text-align: center; padding: 10px 0; }
-        .result-price { font-size: 32px; font-weight: 800; display: block; transition: color 0.3s ease; }
+        .result-price { font-size: 32px; font-weight: 800; display: block; }
         
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; border: 1px solid transparent; }
         .status-good { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
-        .status-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
         .status-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
+        .status-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
 
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
 
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .btn-secondary { background: var(--ios-gray); color: var(--ios-blue); padding: 12px; font-size: 14px; }
+        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; }
         .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 13px; border: none; cursor: pointer; }
         
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #F2F2F7; font-size: 14px; }
-        .cost-col { font-weight: 700; color: var(--ios-blue); text-align: right; }
+        .cost-col { font-weight: 700; color: #000; text-align: right; }
         summary { cursor: pointer; color: var(--ios-blue); font-weight: 600; font-size: 14px; }
     </style>
 </head>
@@ -52,9 +55,9 @@
     <div id="saveToast">✅ Ablesung gespeichert</div>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v8.0.0</h1>
+        <h1>⛽ GasZähler Pro v8.0.1</h1>
 
-        <div class="card" style="border-left-color: var(--ios-blue);">
+        <div class="card">
             <div class="input-group">
                 <label>Zählerstand (m³)</label>
                 <div style="display: flex; gap: 8px;">
@@ -63,7 +66,7 @@
                 </div>
             </div>
             <details>
-                <summary>⚙️ Einstellungen & Sicherheit</summary>
+                <summary>⚙️ Einstellungen</summary>
                 <div style="margin-top:15px; border-top: 1px solid #eee; padding-top: 10px;">
                     <div class="input-group"><label>PIN (leer = aus)</label><input type="password" id="appPin" placeholder="PIN setzen" oninput="savePin()"></div>
                     <div style="display: flex; gap: 8px;">
@@ -97,7 +100,7 @@
 
         <button onclick="saveData()">Speichern</button>
 
-        <div class="card" style="border-left-color: var(--ios-blue);">
+        <div class="card">
             <label>Verbrauchstrend (m³/Tag)</label>
             <div style="height: 140px; margin-bottom: 10px;"><canvas id="gasChart"></canvas></div>
             <table>
@@ -142,7 +145,6 @@
 
         function savePin() { localStorage.setItem('gas_app_pin', document.getElementById('appPin').value); }
 
-        // Init Werte
         document.getElementById('readingDate').valueAsDate = new Date();
         document.getElementById('appPin').value = localStorage.getItem('gas_app_pin') || "";
         document.getElementById('brennwert').value = localStorage.getItem('gas_brennwert') || 11.250;
@@ -185,7 +187,6 @@
         }
 
         function renderAll() {
-            // Speichern
             localStorage.setItem('gas_brennwert', document.getElementById('brennwert').value);
             localStorage.setItem('gas_zzahl', document.getElementById('zZahl').value);
             localStorage.setItem('gas_first_pay', document.getElementById('firstPaymentDate').value);
@@ -207,12 +208,12 @@
                     const fCard = document.getElementById('financeArea');
                     
                     bOut.innerText = balance.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
-                    const color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                    bOut.style.color = color;
-                    fCard.style.borderLeftColor = color;
+                    const bColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                    bOut.style.color = bColor;
+                    fCard.style.borderColor = bColor;
                     document.getElementById('balanceInfo').innerText = `${paid.toFixed(0)}€ gezahlt vs. ${res.total.toFixed(2)}€ Kosten`;
 
-                    // Ampel 2: Prognose
+                    // Ampel 2: Prognose (Fixierte Logik)
                     const estKwhYear = (res.m3Day * 365) * parseFloat(document.getElementById('brennwert').value) * parseFloat(document.getElementById('zZahl').value);
                     const tier = getTier(estKwhYear);
                     const yearTotal = (estKwhYear * tier.price) + (tier.base * 12);
@@ -223,17 +224,25 @@
                     const pCard = document.getElementById('predictionArea');
                     yOut.innerText = yearTotal.toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
                     
-                    if (ratio < 0.95) { yOut.style.color = "var(--ios-green)"; pCard.style.borderLeftColor = "var(--ios-green)"; }
-                    else if (ratio <= 1.05) { yOut.style.color = "var(--ios-orange)"; pCard.style.borderLeftColor = "var(--ios-orange)"; }
-                    else { yOut.style.color = "var(--ios-red)"; pCard.style.borderLeftColor = "var(--ios-red)"; }
+                    let pColor;
+                    if (ratio < 0.95) { pColor = "var(--ios-green)"; }
+                    else if (ratio <= 1.05) { pColor = "var(--ios-orange)"; }
+                    else { pColor = "var(--ios-red)"; }
+                    
+                    yOut.style.color = pColor;
+                    pCard.style.borderColor = pColor;
                     document.getElementById('yearInfo').innerText = `Budget: ${budget.toFixed(0)}€ | Ø ${res.m3Day.toFixed(2)} m³/Tag`;
 
                     // Badge
                     const badge = document.getElementById('abschlagBadge');
                     const ideal = (yearTotal * 1.05) / parseInt(document.getElementById('paymentCount').value);
                     if (parseFloat(document.getElementById('monthlyPayment').value) < ideal * 0.95) {
-                        badge.innerText = `⚠️ Empfehlung: ${Math.ceil(ideal)} €`; badge.className = "status-badge status-danger";
-                    } else { badge.innerText = `✅ Abschlag ist optimal`; badge.className = "status-badge status-good"; }
+                        badge.innerText = `⚠️ Empfehlung: ${Math.ceil(ideal)} €`; 
+                        badge.className = "status-badge status-danger";
+                    } else { 
+                        badge.innerText = `✅ Abschlag ist optimal`; 
+                        badge.className = "status-badge status-good"; 
+                    }
                 }
             }
 
@@ -259,9 +268,9 @@
         }
 
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Backup kopiert!")); }
-        function importBackup() { const c = prompt("Backup Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function clearHistory() { if(confirm("Wirklich alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert!")); }
+        function importBackup() { const c = prompt("Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function clearHistory() { if(confirm("Alles löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
 
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
