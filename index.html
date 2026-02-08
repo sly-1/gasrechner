@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v7.4</title>
+    <title>GasZähler Pro v7.5</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="icon.png">
@@ -44,7 +44,7 @@
     </div>
 
     <div id="mainContent">
-        <h1>⛽ GasZähler Pro v7.4</h1>
+        <h1>⛽ GasZähler Pro v7.5</h1>
 
         <div class="card">
             <div class="input-group">
@@ -58,6 +58,10 @@
             <details>
                 <summary>⚙️ Finanzen & Sicherheit</summary>
                 <div class="input-group" style="margin-top:15px;">
+                    <label>Start-Zählerstand (Offset m³)</label>
+                    <input type="number" id="startOffset" step="0.001" value="1.000" oninput="renderAll()">
+                </div>
+                <div class="input-group">
                     <label>Monatlicher Abschlag (€)</label>
                     <input type="number" id="monthlyPayment" step="0.01" value="100.00" oninput="renderAll()">
                 </div>
@@ -132,7 +136,7 @@
         function unlockApp() {
             if (document.getElementById('pwEntry').value === localStorage.getItem('gas_app_pw')) {
                 document.getElementById('lockScreen').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('mainContent').style.block;
                 renderAll();
             } else { showToast("❌ Passwort falsch"); }
         }
@@ -145,6 +149,7 @@
 
         document.getElementById('readingDate').valueAsDate = new Date();
         document.getElementById('monthlyPayment').value = localStorage.getItem('gas_monthly') || 100.00;
+        document.getElementById('startOffset').value = localStorage.getItem('gas_offset') || 1.000;
 
         function getTier(kwh) {
             const lines = myTiers.split('\n');
@@ -157,15 +162,18 @@
         function calculateCost(meter, date) {
             if (history.length === 0) return null;
             const first = history[0];
-            const diffM3 = Math.max(0, meter - first.meter); 
+            const offset = parseFloat(document.getElementById('startOffset').value) || 0;
+            const diffM3 = Math.max(0, meter - offset); 
             const kwh = diffM3 * (parseFloat(document.getElementById('brennwert').value) || 11.5) * (parseFloat(document.getElementById('zzahl').value) || 0.95);
             const tier = getTier(kwh);
             const days = Math.max(1, (new Date(date) - new Date(first.date)) / 86400000);
-            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: diffM3 / days, days };
+            return { total: (kwh * tier.price) + ((tier.base * 12 / 365) * days), m3Day: (meter - first.meter) / days, days };
         }
 
         function renderAll() {
             localStorage.setItem('gas_monthly', document.getElementById('monthlyPayment').value);
+            localStorage.setItem('gas_offset', document.getElementById('startOffset').value);
+            
             const isPreview = document.getElementById('meter').value !== "";
             const curMeter = isPreview ? parseFloat(document.getElementById('meter').value) : (history.length > 0 ? history[history.length-1].meter : null);
             
