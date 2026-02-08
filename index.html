@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.4</title>
+    <title>GasZähler Pro v8.3.5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500; --ios-gray: #E5E5EA; --ios-neutral: #D1D1D6; }
@@ -35,6 +35,7 @@
         .icon-svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
+        .ideal-box { margin-top: 10px; padding: 10px; background: #f8f8fa; border-radius: 8px; font-size: 13px; border: 1px dashed var(--ios-neutral); }
     </style>
 </head>
 <body>
@@ -50,7 +51,7 @@
     <div id="mainContent">
         <h1 style="display:flex; align-items:center; gap:10px;">
             <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.4
+            GasZähler Pro v8.3.5
         </h1>
         
         <div class="card">
@@ -61,13 +62,12 @@
             </div>
             <details><summary style="color:var(--ios-blue); font-size:12px; cursor:pointer; margin-top:5px;">⚙️ Einstellungen</summary>
                 <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
-                    <label>App PIN (leer = aus)</label>
-                    <input type="password" id="appPin" placeholder="Sicherheits-PIN" oninput="savePin()">
+                    <label>App PIN</label><input type="password" id="appPin" oninput="savePin()">
                     <label>Brennwert / z-Zahl</label>
                     <div style="display:flex; gap:5px;"><input type="number" id="brennwert" step="0.001" oninput="renderAll()"><input type="number" id="zZahl" step="0.0001" oninput="renderAll()"></div>
-                    <label>Abschläge (Datum / Anzahl)</label>
+                    <label>Abschläge (Start / Anzahl)</label>
                     <div style="display:flex; gap:5px;"><input type="date" id="firstPaymentDate" oninput="renderAll()"><input type="number" id="paymentCount" oninput="renderAll()"></div>
-                    <label>Betrag / Offset</label>
+                    <label>Betrag / Start-m³ Offset</label>
                     <div style="display:flex; gap:5px;"><input type="number" id="monthlyPayment" step="0.01" oninput="renderAll()"><input type="number" id="startOffset" step="0.001" oninput="renderAll()"></div>
                 </div>
             </details>
@@ -75,37 +75,35 @@
 
         <div class="card" id="financeArea">
             <div class="result-container">
-                <label>Kontostand (Ist)</label>
+                <label>Kontostand (Ist-Stand)</label>
                 <span class="result-price" id="balanceOutput">0,00 €</span>
                 <div id="balanceBadge" class="status-badge">...</div>
             </div>
         </div>
+
         <div class="card" id="predictionArea">
             <div class="result-container">
                 <label>Jahres-Prognose</label>
                 <span class="result-price" id="yearPrice">0,00 €</span>
-                <div id="yearInfo" style="font-size:12px; color:var(--ios-text-secondary);"></div>
+                <div id="yearInfo" style="font-size:12px; color:var(--ios-text-secondary); margin-bottom:10px;"></div>
                 <div id="predictionBadge" class="status-badge">...</div>
+                <div id="idealAbschlagBox" class="ideal-box"></div>
             </div>
         </div>
 
         <button onclick="saveData()">💾 Speichern</button>
 
         <div class="card">
-            <label>Historie & Trends</label>
+            <label>Historie</label>
             <div style="height: 120px;"><canvas id="gasChart"></canvas></div>
             <table>
-                <thead><tr><th>Datum</th><th>Trend</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
+                <thead><tr><th>Datum</th><th>Tr.</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
                 <tbody id="historyBody"></tbody>
             </table>
         </div>
         
         <div style="display: flex; gap: 8px;"><button class="btn-secondary" onclick="exportBackup()" style="flex:1;">Export</button><button class="btn-secondary" onclick="importBackup()" style="flex:1;">Import</button></div>
-        
-        <button class="btn-danger-text" style="width:100%; margin-top:20px;" onclick="clearHistory()">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-            Alle Daten unwiderruflich löschen
-        </button>
+        <button class="btn-danger-text" style="width:100%; margin-top:20px;" onclick="clearHistory()">Daten löschen</button>
     </div>
 
     <script>
@@ -161,33 +159,40 @@
                 const totalKwh = (curMeter - off) * bw * zz, totalDays = Math.max(1, (new Date(curDate) - new Date(history[0].date)) / 86400000);
                 const globalAvg = (curMeter - history[0].meter) / totalDays;
                 
+                // Finanzen
                 const tier = getTier(totalKwh), currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
-                const firstPay = new Date(document.getElementById('firstPaymentDate').value), monthly = parseFloat(document.getElementById('monthlyPayment').value)||0;
+                const firstPay = new Date(document.getElementById('firstPaymentDate').value), monthly = parseFloat(document.getElementById('monthlyPayment').value)||0, pCount = parseInt(document.getElementById('paymentCount').value)||12;
                 let count = 0; let checkDate = new Date(firstPay);
-                while(checkDate <= new Date(curDate) && count < (parseInt(document.getElementById('paymentCount').value)||12)) { count++; checkDate.setMonth(checkDate.getMonth()+1); }
+                while(checkDate <= new Date(curDate) && count < pCount) { count++; checkDate.setMonth(checkDate.getMonth()+1); }
                 
                 const balance = (count * monthly) - currentCost;
                 document.getElementById('balanceOutput').innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
                 document.getElementById('balanceOutput').style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                 document.getElementById('financeArea').style.borderColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                 const bBadge = document.getElementById('balanceBadge');
-                bBadge.innerText = balance >= 0 ? "✅ Aktuell im Plus" : "⚠️ Rücklage bilden!";
+                bBadge.innerText = balance >= 0 ? "✅ Im Plus" : "⚠️ Rücklage bilden!";
                 bBadge.className = "status-badge " + (balance >= 0 ? "badge-good" : "badge-danger");
 
+                // Prognose & Idealer Abschlag
                 const yearKwh = (globalAvg * 365) * bw * zz, yearTotal = (yearKwh * getTier(yearKwh).price) + (getTier(yearKwh).base * 12);
-                const budget = monthly * (parseInt(document.getElementById('paymentCount').value)||12), ratio = yearTotal / budget;
-                let pColor = "var(--ios-green)", pClass = "badge-good", pText = "Abschlag perfekt";
-                if (ratio < 0.90) { pColor = "var(--ios-blue)"; pClass = "badge-info"; pText = "Abschlag senken möglich"; }
-                else if (ratio > 1.15) { pColor = "var(--ios-red)"; pClass = "badge-danger"; pText = "Abschlag dringend erhöhen!"; }
-                else if (ratio > 1.05) { pColor = "var(--ios-orange)"; pClass = "badge-warn"; pText = "Abschlag leicht erhöhen"; }
+                const idealAbschlag = yearTotal / pCount;
+                const ratio = yearTotal / (monthly * pCount);
+                
+                let pColor = "var(--ios-green)", pClass = "badge-good", pText = "Abschlag passt";
+                if (ratio < 0.90) { pColor = "var(--ios-blue)"; pClass = "badge-info"; pText = "Überzahlung"; }
+                else if (ratio > 1.15) { pColor = "var(--ios-red)"; pClass = "badge-danger"; pText = "Unterdeckung!"; }
+                else if (ratio > 1.05) { pColor = "var(--ios-orange)"; pClass = "badge-warn"; pText = "Knapp kalkuliert"; }
 
                 document.getElementById('yearPrice').innerText = yearTotal.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
                 document.getElementById('yearPrice').style.color = pColor;
                 document.getElementById('predictionArea').style.borderColor = pColor;
-                document.getElementById('yearInfo').innerText = `Ø ${globalAvg.toFixed(2)} m³/Tag | Budget: ${budget.toFixed(0)}€`;
-                const pBadge = document.getElementById('predictionBadge');
-                pBadge.innerText = pText; pBadge.className = "status-badge " + pClass;
+                document.getElementById('yearInfo').innerText = `Ø ${globalAvg.toFixed(2)} m³/Tag | Prognose: ${yearKwh.toFixed(0)} kWh`;
+                document.getElementById('predictionBadge').innerText = pText;
+                document.getElementById('predictionBadge').className = "status-badge " + pClass;
 
+                document.getElementById('idealAbschlagBox').innerHTML = `💡 Idealer Abschlag: <b>${idealAbschlag.toLocaleString('de-DE', {style:'currency', currency:'EUR'})}</b><br><small>(Basierend auf aktuellem Verbrauch)</small>`;
+
+                // Historie
                 const body = document.getElementById('historyBody'); body.innerHTML = '';
                 for (let i = history.length - 1; i >= 0; i--) {
                     const h = history[i], prev = history[i-1];
@@ -197,8 +202,8 @@
                         if (m3Day < globalAvg * 0.9) { trendIcon = '↘︎'; tColor = "var(--ios-blue)"; }
                         else if (m3Day > globalAvg * 1.1) { trendIcon = '↗︎'; tColor = "var(--ios-red)"; }
                     }
-                    const diffText = prev ? `+${(h.meter-prev.meter).toFixed(2)} (${((h.meter-prev.meter)/((new Date(h.date)-new Date(prev.date))/86400000)).toFixed(2)}/T)` : "-";
-                    body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td style="color:${tColor}; font-weight:bold; font-size:18px;">${trendIcon}</td><td>${h.meter.toFixed(2)}<span class="m3-val">${diffText}</span></td><td style="text-align:right; font-weight:700;">${calculateCostForEntry(h.meter, h.date, history[0])?.total.toFixed(2)}€</td><td style="text-align:right;"><button class="btn-danger-text" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
+                    const diffText = prev ? `+${(h.meter-prev.meter).toFixed(2)}` : "-";
+                    body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td style="color:${tColor}; font-weight:bold;">${trendIcon}</td><td>${h.meter.toFixed(2)}<span class="m3-val">${diffText}</span></td><td style="text-align:right; font-weight:700;">${calculateCostForEntry(h.meter, h.date, history[0])?.total.toFixed(2)}€</td><td style="text-align:right;"><button class="btn-danger-text" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
                 }
                 updateChart();
             }
@@ -223,16 +228,7 @@
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Exportiert!")); }
         function importBackup() { const c = prompt("Backup-Code:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        
-        function clearHistory() {
-            if (confirm("Möchtest du wirklich ALLE Daten löschen?")) {
-                if (confirm("Bist du GANZ sicher? Diese Aktion kann nicht rückgängig gemacht werden!")) {
-                    history = [];
-                    localStorage.setItem('gas_history_v7', JSON.stringify(history));
-                    location.reload();
-                }
-            }
-        }
+        function clearHistory() { if (confirm("ALLE Daten löschen?")) { if (confirm("Wirklich? Unwiderruflich!")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); location.reload(); } } }
 
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
