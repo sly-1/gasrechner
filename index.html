@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.6</title>
+    <title>GasZähler Pro v8.5.7</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.6</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.7</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -116,20 +116,29 @@
             })
         };
 
+        // VERSCHÄRFTE PLAUSIBILITÄT v8.5.7
         let isInvalid = isNaN(mVal) || dVal === "";
-        if(!isInvalid && db.length > 0) {
-            const nD = new Date(dVal);
-            const prev = db.reduce((p, c) => (new Date(c.d) < nD && (!p || new Date(c.d) > new Date(p.d))) ? c : p, null);
-            const next = db.reduce((n, c) => (new Date(c.d) > nD && (!n || new Date(c.d) < new Date(n.d))) ? c : n, null);
-            if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ < " + prev.m; }
-            else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ > " + next.m; }
+        if(!isInvalid) {
+            const nD = new Date(dVal).toISOString().split('T')[0];
+            const duplicate = db.find(e => e.d === nD);
+            const nTime = new Date(dVal).getTime();
+            const prev = db.reduce((p, c) => (new Date(c.d).getTime() < nTime && (!p || new Date(c.d).getTime() > new Date(p.d).getTime())) ? c : p, null);
+            const next = db.reduce((n, c) => (new Date(c.d).getTime() > nTime && (!n || new Date(c.d).getTime() < new Date(n.d).getTime())) ? c : n, null);
+
+            if(duplicate) { isInvalid = true; saveBtn.innerText = "⚠️ Datum existiert schon"; }
+            else if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ Stand muss > " + prev.m; }
+            else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ Stand muss < " + next.m; }
             else { saveBtn.innerText = "💾 Stand speichern"; }
+            
             if(isInvalid) saveBtn.classList.add('btn-warn'); else saveBtn.classList.remove('btn-warn');
         }
         saveBtn.disabled = isInvalid;
 
         let wDb = [...db]; 
-        if (!isNaN(mVal)) { wDb.push({ d: dVal, m: mVal, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
+        if (!isNaN(mVal) && !db.find(e => e.d === dVal)) { 
+            wDb.push({ d: dVal, m: mVal, id: 'pre' }); 
+            wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); 
+        }
 
         if (wDb.length > 0) {
             const last = wDb[wDb.length-1], first = wDb[0];
@@ -143,8 +152,6 @@
             const bufferedMonthly = baseMonthly * 1.10;
 
             const bT = document.getElementById('badgeTrend');
-            
-            // KORREKTUR: Empfohlener Abschlag gerundet auf volle Euro
             bT.innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${Math.round(bufferedMonthly)} € / Monat`;
             
             if (cfg.pay > bufferedMonthly * 1.15) bT.className = "badge bg-blue";
