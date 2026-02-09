@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.7</title>
+    <title>GasZähler Pro v8.5.8</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -12,7 +12,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; padding-bottom: 100px; }
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
-        .scroll-area { max-height: 300px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; -webkit-overflow-scrolling: touch; }
+        .scroll-area { max-height: 280px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; -webkit-overflow-scrolling: touch; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .data-table th { background: #f8f8f8; padding: 10px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
         .data-table td { padding: 12px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
@@ -31,11 +31,15 @@
         .btn-warn { background: var(--ios-red) !important; }
         .btn-success { background: var(--ios-green) !important; }
         .btn-tool { background: var(--ios-gray); color: white; border: none; padding: 8px; border-radius: 6px; font-size: 11px; flex: 1; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .stat-item { background: #F8F8F8; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #EEE; }
+        .stat-label { font-size: 9px; color: var(--ios-gray); text-transform: uppercase; display: block; }
+        .stat-val { font-size: 14px; font-weight: 700; color: #333; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.7</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.8</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -79,6 +83,11 @@
                 <tbody id="historyTable"></tbody>
             </table>
         </div>
+        <div class="stats-grid" id="statsArea">
+            <div class="stat-item"><span class="stat-label">Diesen Monat</span><span class="stat-val" id="statMonth">0 m³</span></div>
+            <div class="stat-item"><span class="stat-label">Ø Tag (Gesamt)</span><span class="stat-val" id="statDay">0.00 m³</span></div>
+            <div class="stat-item" style="grid-column: span 2;"><span class="stat-label">Kosten Ø Tag (inkl. Puffer/Basis)</span><span class="stat-val" id="statCostDay">0.00 €</span></div>
+        </div>
     </div>
 
     <div style="display:flex; gap:8px;">
@@ -89,9 +98,7 @@
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
-
     function savePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
-
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
@@ -105,7 +112,6 @@
         const mVal = parseFloat(document.getElementById('newMeter').value);
         const dVal = document.getElementById('newDate').value;
         const saveBtn = document.getElementById('saveBtn');
-        
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
@@ -116,7 +122,6 @@
             })
         };
 
-        // VERSCHÄRFTE PLAUSIBILITÄT v8.5.7
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid) {
             const nD = new Date(dVal).toISOString().split('T')[0];
@@ -124,21 +129,16 @@
             const nTime = new Date(dVal).getTime();
             const prev = db.reduce((p, c) => (new Date(c.d).getTime() < nTime && (!p || new Date(c.d).getTime() > new Date(p.d).getTime())) ? c : p, null);
             const next = db.reduce((n, c) => (new Date(c.d).getTime() > nTime && (!n || new Date(c.d).getTime() < new Date(n.d).getTime())) ? c : n, null);
-
             if(duplicate) { isInvalid = true; saveBtn.innerText = "⚠️ Datum existiert schon"; }
             else if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ Stand muss > " + prev.m; }
             else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ Stand muss < " + next.m; }
             else { saveBtn.innerText = "💾 Stand speichern"; }
-            
             if(isInvalid) saveBtn.classList.add('btn-warn'); else saveBtn.classList.remove('btn-warn');
         }
         saveBtn.disabled = isInvalid;
 
         let wDb = [...db]; 
-        if (!isNaN(mVal) && !db.find(e => e.d === dVal)) { 
-            wDb.push({ d: dVal, m: mVal, id: 'pre' }); 
-            wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); 
-        }
+        if (!isNaN(mVal) && !db.find(e => e.d === dVal)) { wDb.push({ d: dVal, m: mVal, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
 
         if (wDb.length > 0) {
             const last = wDb[wDb.length-1], first = wDb[0];
@@ -151,9 +151,8 @@
             const baseMonthly = ((projKwh * tier.cent) + (tier.base * 12)) / 12;
             const bufferedMonthly = baseMonthly * 1.10;
 
+            document.getElementById('badgeTrend').innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${Math.round(bufferedMonthly)} € / Monat`;
             const bT = document.getElementById('badgeTrend');
-            bT.innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${Math.round(bufferedMonthly)} € / Monat`;
-            
             if (cfg.pay > bufferedMonthly * 1.15) bT.className = "badge bg-blue";
             else if (cfg.pay >= bufferedMonthly - 1) bT.className = "badge bg-green";
             else if (cfg.pay >= baseMonthly) bT.className = "badge bg-orange";
@@ -163,11 +162,21 @@
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
             const saldo = (pMonths * cfg.pay) - costSoFar;
-            
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
             if (saldo > 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Aktuelles Guthaben"; }
             else { bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus"; }
+
+            // STATS BERECHNUNG
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monEntries = wDb.filter(e => new Date(e.d) >= startOfMonth);
+            if(monEntries.length > 1) {
+                const consumed = monEntries[monEntries.length-1].m - monEntries[0].m;
+                document.getElementById('statMonth').innerText = consumed.toFixed(1) + " m³";
+            }
+            document.getElementById('statDay').innerText = (avgKwhDay / (cfg.bw * cfg.zz)).toFixed(2) + " m³";
+            document.getElementById('statCostDay').innerText = ((bufferedMonthly * 12) / 365).toFixed(2) + " €";
 
             renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz));
         }
@@ -199,14 +208,9 @@
         const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
         document.getElementById('newMeter').value = ""; 
-        btn.classList.add('btn-success');
-        btn.innerText = "Gespeichert! ✅";
-        setTimeout(() => {
-            btn.classList.remove('btn-success');
-            refreshAll(); 
-        }, 800);
+        btn.classList.add('btn-success'); btn.innerText = "Gespeichert! ✅";
+        setTimeout(() => { btn.classList.remove('btn-success'); refreshAll(); }, 800);
     }
-
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
