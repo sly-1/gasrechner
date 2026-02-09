@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>GasZähler Pro v8.3.30</title>
+<title>GasZähler Pro v8.3.32</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{--ios-blue:#007AFF;--ios-red:#FF3B30;--ios-bg:#F2F2F7;--ios-card:#FFFFFF;--ios-text-secondary:#8E8E93;--ios-green:#34C759;--ios-orange:#FF9500;--ios-gray:#E5E5EA;--ios-neutral:#D1D1D6}
@@ -43,11 +43,11 @@ button:disabled{background:var(--ios-neutral);color:#888;cursor:not-allowed}
 <div id="lockScreen"><h2>PIN erforderlich</h2><input type="password" id="pinInput" class="pin-input" inputmode="numeric" placeholder="••••"><button onclick="unlockApp()">Entsperren</button></div>
 <div id="toast">✅ Gespeichert</div>
 <div id="main">
-<h1 style="text-align:center;margin-bottom:20px">GasZähler Pro v8.3.30</h1>
+<h1 style="text-align:center;margin-bottom:20px">🔥 GasZähler Pro v8.3.32</h1>
 <div class="card"><label>Ablesung</label>
 <div class="input-row">
-<div class="input-group"><input type="date" id="newDate"></div>
-<div class="input-group"><input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()"><div id="errorHint" class="error-hint">Wert zu niedrig!</div></div>
+<div class="input-group"><input type="date" id="newDate" oninput="liveUpdate()"></div>
+<div class="input-group"><input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()"><div id="errorHint" class="error-hint">Wert unlogisch!</div></div>
 </div>
 <details><summary style="color:var(--ios-blue);font-size:13px;cursor:pointer;font-weight:700">⚙️ Einstellungen</summary>
 <div style="margin-top:15px;border-top:1px solid #eee;padding-top:15px">
@@ -76,9 +76,14 @@ function getActiveTier(k,t){for(let s of t)if(k<=s.limit)return s;return t[t.len
 function liveUpdate(){
 ['bw','zz','pay','start','tiers','firstPayDate'].forEach(i=>{localStorage.setItem('gas_pref_'+i,document.getElementById(i).value)});
 const c={bw:parseFloat(document.getElementById('bw').value)||10.55,zz:parseFloat(document.getElementById('zz').value)||0.95,pay:parseFloat(document.getElementById('pay').value)||150,start:parseFloat(document.getElementById('start').value)||0,tiers:document.getElementById('tiers').value.split('\n').map(l=>{const p=l.split(':').map(Number);return{limit:p[0],cent:p[1]/100,base:p[2]}})};
-const mI=document.getElementById('newMeter'),eH=document.getElementById('errorHint'),lV=db.length>0?db[db.length-1].m:c.start,v=parseFloat(mI.value);
-let ok=true;if(mI.value!==""&&v<=lV){ok=false;mI.classList.add('input-error');eH.style.display="block"}else{mI.classList.remove('input-error');eH.style.display="none"}
-document.getElementById('saveBtn').disabled=!ok||mI.value==="";const cM=(mI.value!=="")?v:(db.length>0?lV:null),cD=document.getElementById('newDate').value;
+const mI=document.getElementById('newMeter'),eH=document.getElementById('errorHint'),cD=document.getElementById('newDate').value,v=parseFloat(mI.value);
+let ok=true;if(mI.value!==""){
+let bef=db.filter(x=>x.d<cD).sort((a,b)=>new Date(b.d)-new Date(a.d))[0];
+let aft=db.filter(x=>x.d>cD).sort((a,b)=>new Date(a.d)-new Date(b.d))[0];
+let minV=bef?bef.m:c.start,maxV=aft?aft.m:Infinity;
+if(v<=minV||v>=maxV){ok=false;mI.classList.add('input-error');eH.style.display="block"}else{mI.classList.remove('input-error');eH.style.display="none"}
+}
+document.getElementById('saveBtn').disabled=!ok||mI.value==="";const cM=(mI.value!=="")?v:(db.length>0?db[db.length-1].m:null);
 if(cM!==null&&db.length>0){const k=(cM-c.start)*c.bw*c.zz,d=Math.max(1,(new Date(cD)-new Date(db[0].d))/86400000),a=(cM-db[0].m)/d,t=getActiveTier(k,c.tiers),co=(k*t.cent)+((t.base*12/365)*d),sP=document.getElementById('firstPayDate').value?new Date(document.getElementById('firstPayDate').value):new Date(db[0].d);
 let pC=0,dD=new Date(sP);while(dD<=new Date(cD)&&pC<12){pC++;dD.setMonth(dD.getMonth()+1)}const sa=(pC*c.pay)-co;
 document.getElementById('outSaldo').innerText=sa.toLocaleString('de-DE',{style:'currency',currency:'EUR'});document.getElementById('outSaldo').style.color=sa>=0?"var(--ios-green)":"var(--ios-red)";
@@ -90,7 +95,7 @@ document.getElementById('badgeTrend').className="badge "+cl;document.getElementB
 document.getElementById('cardTrend').style.borderColor=ra>1.05?"var(--ios-orange)":(ra<.85?"var(--ios-blue)":"var(--ios-green)");
 const tb=document.getElementById('historyTable');tb.innerHTML='';for(let i=db.length-1;i>=0;i--){let tr="→",tc="";if(i>0){const vD=(db[i].m-db[i-1].m)/((new Date(db[i].d)-new Date(db[i-1].d))/86400000);if(vD>a*1.12){tr="↗︎";tc="trend-up"}else if(vD<a*.88){tr="↘︎";tc="trend-down"}}
 tb.innerHTML+=`<tr><td>${new Date(db[i].d).toLocaleDateString()}</td><td>${db[i].m.toFixed(2)}</td><td class="${tc}">${tr}</td><td><button style="color:red;background:none;border:none;width:auto;margin:0" onclick="delEntry(${db[i].id})">✕</button></td></tr>`}
-drawChart(lbls=[],dts=[]);}}
+drawChart();}}
 function drawChart(){const ctx=document.getElementById('mainChart').getContext('2d');const lb=[],dt=[];for(let i=1;i<db.length;i++){const d=(new Date(db[i].d)-new Date(db[i-1].d))/86400000;lb.push(new Date(db[i].d).toLocaleDateString());dt.push(d>0?((db[i].m-db[i-1].m)/d).toFixed(2):0)}
 document.getElementById('chartWrap').style.width=Math.max(window.innerWidth-90,db.length*55)+'px';if(myChart)myChart.destroy();
 myChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{data:dt,backgroundColor:'#007AFF',borderRadius:6}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{display:false},x:{grid:{display:false}}}}})}
