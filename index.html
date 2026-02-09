@@ -3,242 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.40</title>
-    
+    <title>GasZähler Pro v8.3.42</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-red: #FF3B30;
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-text-secondary: #8E8E93;
-            --ios-green: #34C759;
-            --ios-orange: #FF9500;
-            --ios-gray: #E5E5EA;
-            --ios-neutral: #D1D1D6;
+            --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
+            --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-orange: #FF9500;
+            --ios-gray: #E5E5EA; --ios-neutral: #D1D1D6;
         }
-
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--ios-bg);
-            margin: 0;
-            padding: 20px;
-            color: #000;
-            -webkit-font-smoothing: antialiased;
+            background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; -webkit-font-smoothing: antialiased;
         }
-
-        /* CARD DESIGN */
         .card {
-            background: var(--ios-card);
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            border-left: 6px solid var(--ios-neutral);
-            transition: all 0.3s ease;
+            background: var(--ios-card); padding: 18px; border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px;
+            border-left: 6px solid var(--ios-neutral); transition: border-color 0.4s;
         }
-
-        /* INPUTS */
-        .input-row { display: flex; gap: 12px; margin-bottom: 15px; }
+        .input-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; }
         .input-group { flex: 1; position: relative; }
-        
-        label { 
-            display: block; 
-            margin-bottom: 6px; 
-            font-size: 11px; 
-            color: var(--ios-text-secondary); 
-            text-transform: uppercase; 
-            font-weight: 700; 
-        }
-
         input, textarea {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid var(--ios-neutral);
-            border-radius: 12px;
-            font-size: 16px;
-            background: #fff;
-            -webkit-appearance: none;
+            width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px;
+            font-size: 16px; font-family: inherit; background: #fff; height: 48px; -webkit-appearance: none;
         }
-
-        input:focus {
-            outline: none;
-            border-color: var(--ios-blue);
-        }
-
-        /* FINANZ ANZEIGEN */
-        .result-main {
-            font-size: 38px;
-            font-weight: 800;
-            display: block;
-            margin: 8px 0;
-            letter-spacing: -1px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            margin-top: 10px;
-        }
-
+        label { display: block; margin-bottom: 5px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
+        .result-main { font-size: 34px; font-weight: 800; display: block; margin: 5px 0; letter-spacing: -1px; }
+        .badge { display: inline-block; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 8px; }
         .bg-good { background: #E7F9ED; color: var(--ios-green); }
         .bg-danger { background: #FFEBEB; color: var(--ios-red); }
         .bg-warn { background: #FFF4E5; color: var(--ios-orange); }
         .bg-info { background: #E5F1FF; color: var(--ios-blue); }
-
-        /* BUTTONS */
-        button {
-            width: 100%;
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        button:active { opacity: 0.7; }
-        button:disabled { background: var(--ios-neutral); }
-
-        /* CHART & TABLE */
-        .chart-container { height: 200px; margin: 20px 0; }
+        .trend-up { color: var(--ios-red); font-weight: bold; }
+        .trend-down { color: var(--ios-green); font-weight: bold; }
         
-        .history-scroll {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--ios-gray);
-            border-radius: 12px;
-            margin-top: 20px;
+        .chart-container-outer {
+            position: relative; width: 100%; background: #fafafa; border-radius: 10px;
+            border: 1px solid var(--ios-gray); height: 180px; overflow: hidden; margin-top: 10px;
         }
+        .chart-viewport { overflow-x: auto; height: 100%; }
+        .chart-wrapper { height: 160px; min-width: 100%; }
 
+        .history-scroll { max-height: 280px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--ios-gray); margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; }
-        th { 
-            position: sticky; top: 0; background: #fafafa;
-            padding: 12px; font-size: 11px; color: var(--ios-text-secondary);
-            text-align: left; border-bottom: 1px solid var(--ios-gray);
+        th { background: #fafafa; padding: 12px 8px; font-size: 11px; text-transform: uppercase; color: var(--ios-text-secondary); text-align: left; }
+        td { padding: 14px 8px; font-size: 14px; border-bottom: 1px solid #f2f2f7; background: #fff; }
+        
+        button {
+            width: 100%; max-width: 340px; display: block; margin: 12px auto;
+            background: var(--ios-blue); color: white; border: none; padding: 16px;
+            border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer;
         }
-        td { padding: 14px 12px; border-bottom: 1px solid #f2f2f7; font-size: 14px; }
-
-        /* LOCK SCREEN */
         #lockScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--ios-bg); z-index: 10000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg);
+            z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center;
         }
     </style>
 </head>
 <body>
 
 <div id="lockScreen">
-    <h2 style="margin-bottom:30px;">GasZähler gesperrt</h2>
-    <input type="password" id="pinInput" style="width:200px; text-align:center; font-size:24px;" inputmode="numeric" placeholder="••••">
-    <button style="margin-top:20px; max-width:200px;" onclick="unlockApp()">Entsperren</button>
+    <h2>PIN erforderlich</h2>
+    <input type="password" id="pinInput" style="width:180px; text-align:center; margin-bottom:20px;" inputmode="numeric" placeholder="••••">
+    <button onclick="unlockApp()">Entsperren</button>
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; margin-bottom:25px;">GasZähler Pro v8.3.40</h1>
+    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.42</h1>
 
     <div class="card">
-        <label>Zählerstand Erfassen</label>
+        <label>Ablesung</label>
         <div class="input-row">
-            <div class="input-group">
-                <input type="date" id="newDate" oninput="liveUpdate()">
-            </div>
-            <div class="input-group">
-                <input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()">
-            </div>
+            <div class="input-group"><input type="date" id="newDate" oninput="liveUpdate()"></div>
+            <div class="input-group"><input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()"></div>
         </div>
-        
         <details>
-            <summary style="color:var(--ios-blue); font-weight:700; font-size:14px; cursor:pointer;">⚙️ Erweiterte Einstellungen</summary>
-            <div style="padding-top:20px;">
-                <label>Tarif-Staffelung (Limit:Cent:Grundgebühr)</label>
+            <summary style="color:var(--ios-blue); font-size:13px; font-weight:700; cursor:pointer;">⚙️ Einstellungen</summary>
+            <div style="margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+                <label>Preise (Limit:Cent:Grundpreis)</label>
                 <textarea id="tiers" rows="2" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:15px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;">
                     <div><label>Brennwert</label><input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()"></div>
-                    <div><label>Monatsabschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
-                    <div><label>Zähler Start (m³)</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
+                    <div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
+                    <div><label>Start m³</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
                 </div>
-                
-                <label style="margin-top:15px;">Datum der 1. Zahlung</label>
+                <label style="margin-top:10px;">Datum 1. Zahlung</label>
                 <input type="date" id="firstPayDate" oninput="liveUpdate()">
-                
-                <label style="margin-top:15px;">App-PIN schützen</label>
-                <input type="password" id="pinSetting" placeholder="Passwort vergeben" oninput="savePin()">
+                <label style="margin-top:10px;">App-PIN</label>
+                <input type="password" id="pinSetting" oninput="savePin()">
             </div>
         </details>
     </div>
 
     <div class="card" id="cardSaldo" style="text-align:center">
-        <label>Aktueller Finanz-Saldo</label>
+        <label>Finanz-Saldo (Ist-Stand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
         <div id="badgeSaldo" class="badge">Berechne...</div>
     </div>
 
     <div class="card" id="cardTrend" style="text-align:center">
-        <label>Jahres-Prognose (inkl. 10% Puffer)</label>
+        <label>Jahres-Prognose (+10% Puffer)</label>
         <span class="result-main" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge">Daten fehlen</div>
+        <div id="badgeTrend" class="badge">Eingabe fehlt</div>
     </div>
 
-    <button id="saveBtn" onclick="doSave()">💾 Eintrag dauerhaft speichern</button>
+    <button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
 
     <div class="card">
-        <label>Verbrauchsentwicklung (m³/Tag)</label>
-        <div class="chart-container"><canvas id="mainChart"></canvas></div>
-        
+        <label>Verbrauch m³/Tag</label>
+        <div class="chart-container-outer">
+            <div class="chart-viewport">
+                <div class="chart-wrapper" id="chartWrap"><canvas id="mainChart"></canvas></div>
+            </div>
+        </div>
         <div class="history-scroll">
             <table>
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>m³ Stand</th>
-                        <th>Status</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Datum</th><th>Stand</th><th>Trend</th><th></th></tr></thead>
                 <tbody id="historyTable"></tbody>
             </table>
         </div>
     </div>
 
     <div style="display:flex; gap:10px;">
-        <button style="background:var(--ios-gray); color:#000;" onclick="doExport()">Backup</button>
-        <button style="background:var(--ios-gray); color:#000;" onclick="doImport()">Import</button>
+        <button style="flex:1; background:var(--ios-gray); color:#000;" onclick="doExport()">Backup</button>
+        <button style="flex:1; background:var(--ios-gray); color:#000;" onclick="doImport()">Restore</button>
     </div>
-    
-    <button style="background:none; color:red; margin-top:30px;" onclick="doReset()">⚠️ KOMPLETTE DATENBANK LÖSCHEN</button>
+    <button style="background:none; color:red; font-size:12px;" onclick="doReset()">⚠️ DATENBANK LÖSCHEN</button>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
     let myChart = null;
 
-    // PIN LOGIK
     function savePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
     function unlockApp() {
         if (document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) {
-            document.getElementById('lockScreen').style.display = "none";
-            refreshAll();
-        } else { alert("Falscher PIN"); }
+            document.getElementById('lockScreen').style.display = "none"; refreshAll();
+        } else alert("Falscher PIN");
     }
 
-    // HAUPT-LOGIK
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
@@ -246,210 +150,131 @@
     }
 
     function liveUpdate() {
-        // RADIKALES RESET DER ANZEIGE (Löst das Problem beim Löschen)
+        // Atomic Reset
         document.getElementById('outSaldo').innerText = "0,00 €";
         document.getElementById('outYear').innerText = "0,00 €";
+        document.getElementById('badgeTrend').innerText = "Eingabe fehlt";
         document.getElementById('badgeTrend').className = "badge";
-        document.getElementById('badgeTrend').innerText = "Berechne...";
 
-        // KONFIGURATION
-        const config = {
+        const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
             pay: parseFloat(document.getElementById('pay').value) || 150,
             start: parseFloat(document.getElementById('start').value) || 0,
-            tiers: document.getElementById('tiers').value.split('\n').map(line => {
-                const parts = line.split(':').map(Number);
-                return { limit: parts[0], cent: parts[1]/100, base: parts[2] };
+            tiers: document.getElementById('tiers').value.split('\n').map(l => {
+                const p = l.split(':').map(Number);
+                return { limit: p[0], cent: p[1]/100, base: p[2] };
             })
         };
 
-        // DATEN-POOL (DB + VORSCHAU)
-        let displayDb = [...db];
-        const previewMeter = parseFloat(document.getElementById('newMeter').value);
-        if (!isNaN(previewMeter)) {
-            displayDb.push({ d: document.getElementById('newDate').value, m: previewMeter, id: 'preview' });
-            displayDb.sort((a,b) => new Date(a.d) - new Date(b.d));
+        let dDb = [...db];
+        const mIn = document.getElementById('newMeter');
+        if (mIn.value !== "") {
+            dDb.push({ d: document.getElementById('newDate').value, m: parseFloat(mIn.value), id: 'pre' });
+            dDb.sort((a,b) => new Date(a.d) - new Date(b.d));
         }
 
-        // BERECHNUNGS-KERN
-        if (displayDb.length > 0) {
-            const first = displayDb[0];
-            const last = displayDb[displayDb.length - 1];
-            
-            const totalDays = Math.max(1, (new Date(last.d) - new Date(first.d)) / (1000 * 60 * 60 * 24));
-            const avgDailyMeter = (displayDb.length > 1) ? (last.m - first.m) / totalDays : 0;
+        if (dDb.length > 0) {
+            const first = dDb[0], last = dDb[dDb.length-1];
+            const days = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
+            const dailyAvg = (dDb.length > 1) ? (last.m - first.m) / days : 0;
 
-            // 1. PROGNOSE
-            const yearlyKwh = (avgDailyMeter * 365) * config.bw * config.zz;
-            const activeTier = config.tiers.find(t => yearlyKwh <= t.limit) || config.tiers[config.tiers.length - 1];
-            const yearlyCost = (yearlyKwh * activeTier.cent) + (activeTier.base * 12);
+            const yKwh = (dailyAvg * 365) * cfg.bw * cfg.zz;
+            const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const yCost = (yKwh * tier.cent) + (tier.base * 12);
+            document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
-            document.getElementById('outYear').innerText = yearlyCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-            
-            const ratio = yearlyCost / (config.pay * 12);
-            let badgeClass = "bg-good", badgeText = "Abschlag passt!";
-            
-            if (ratio > 1.15) { 
-                badgeClass = "bg-danger"; 
-                badgeText = "Zu niedrig! Empfehlung: " + ((yearlyCost/12) * 1.1).toFixed(0) + " €";
-            } else if (ratio > 1.05) { 
-                badgeClass = "bg-warn"; 
-                badgeText = "Knappe Deckung";
-            } else if (ratio < 0.85) {
-                badgeClass = "bg-info";
-                badgeText = "Abschlag zu hoch";
-            }
-            
-            document.getElementById('badgeTrend').className = "badge " + badgeClass;
-            document.getElementById('badgeTrend').innerText = badgeText;
-            document.getElementById('cardTrend').style.borderColor = (ratio > 1.05) ? "var(--ios-red)" : "var(--ios-green)";
+            const ratio = yCost / (cfg.pay * 12);
+            let cl="bg-good", tx="Abschlag passt!";
+            if(ratio > 1.15) { cl="bg-danger"; tx="Zu niedrig! Empfehlung: "+((yCost/12)*1.1).toFixed(0)+"€"; }
+            else if(ratio > 1.05) { cl="bg-warn"; tx="Knappe Deckung"; }
+            document.getElementById('badgeTrend').className = "badge " + cl;
+            document.getElementById('badgeTrend').innerText = tx;
 
-            // 2. SALDO (IST-STAND)
-            const consumedKwh = (last.m - config.start) * config.bw * config.zz;
-            const currentCost = (consumedKwh * activeTier.cent) + ((activeTier.base * 12 / 365) * totalDays);
-            
-            const startDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
-            let paymentsMade = 0;
-            let checkDate = new Date(startDate);
-            while (checkDate <= new Date(last.d) && paymentsMade < 12) {
-                paymentsMade++;
-                checkDate.setMonth(checkDate.getMonth() + 1);
-            }
+            const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
+            const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
+            const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
+            let pCount = 0; let dD = new Date(sDate);
+            while(dD <= new Date(last.d) && pCount < 12) { pCount++; dD.setMonth(dD.getMonth()+1); }
+            const saldo = (pCount * cfg.pay) - costSoFar;
+            document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            document.getElementById('outSaldo').style.color = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+            document.getElementById('badgeSaldo').className = "badge " + (saldo >= 0 ? "bg-good" : "bg-danger");
+            document.getElementById('badgeSaldo').innerText = saldo >= 0 ? "Guthaben" : "Nachzahlung";
 
-            const currentSaldo = (paymentsMade * config.pay) - currentCost;
-            document.getElementById('outSaldo').innerText = currentSaldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-            document.getElementById('outSaldo').style.color = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-            document.getElementById('badgeSaldo').className = "badge " + (currentSaldo >= 0 ? "bg-good" : "bg-danger");
-            document.getElementById('badgeSaldo').innerText = currentSaldo >= 0 ? "Im Guthaben" : "Nachzahlung";
-
-            // 3. UI: TABELLE & CHART
-            updateTable(displayDb);
-            updateChart(displayDb);
+            renderTable(dDb, dailyAvg);
+            renderChart(dDb);
         } else {
-            // Wenn DB leer ist, Chart löschen
             if(myChart) myChart.destroy();
-            document.getElementById('historyTable').innerHTML = '<tr><td colspan="4">Keine Daten vorhanden</td></tr>';
+            document.getElementById('historyTable').innerHTML = '';
         }
     }
 
-    function updateTable(data) {
-        const tableBody = document.getElementById('historyTable');
-        tableBody.innerHTML = '';
-        
-        [...data].reverse().forEach(entry => {
-            const isPreview = entry.id === 'preview';
-            const row = `
-                <tr style="${isPreview ? 'opacity: 0.5; font-style: italic;' : ''}">
-                    <td>${new Date(entry.d).toLocaleDateString()}</td>
-                    <td>${entry.m.toFixed(3)}</td>
-                    <td>${isPreview ? 'Vorschau' : 'Gespeichert'}</td>
-                    <td>
-                        ${isPreview ? '' : `<button style="background:none; color:red; padding:0; width:auto;" onclick="delEntry(${entry.id})">Löschen</button>`}
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function updateChart(data) {
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (myChart) myChart.destroy();
-
-        const chartLabels = [];
-        const chartData = [];
-
-        for (let i = 1; i < data.length; i++) {
-            const daysDiff = (new Date(data[i].d) - new Date(data[i-1].d)) / (1000 * 60 * 60 * 24);
-            const usagePerDay = daysDiff > 0 ? (data[i].m - data[i-1].m) / daysDiff : 0;
-            
-            chartLabels.push(new Date(data[i].d).toLocaleDateString());
-            chartData.push(usagePerDay.toFixed(2));
-        }
-
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: 'm³/Tag',
-                    data: chartData,
-                    borderColor: '#007AFF',
-                    backgroundColor: 'rgba(0,122,255,0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { beginAtZero: true },
-                    x: { ticks: { maxRotation: 45, minRotation: 45 } }
-                }
+    function renderTable(data, avg) {
+        const tb = document.getElementById('historyTable'); tb.innerHTML = '';
+        [...data].reverse().forEach((e, i, arr) => {
+            let tr = "→", tc = "";
+            const idx = data.indexOf(e);
+            if (idx > 0) {
+                const dM = data[idx].m - data[idx-1].m;
+                const dD = (new Date(data[idx].d) - new Date(data[idx-1].d)) / 86400000;
+                const v = dD > 0 ? dM / dD : 0;
+                if (v > avg * 1.12) { tr = "↗︎"; tc = "trend-up"; }
+                else if (v < avg * 0.88) { tr = "↘︎"; tc = "trend-down"; }
             }
+            const isP = e.id === 'pre';
+            tb.innerHTML += `<tr style="${isP?'opacity:0.5':''}">
+                <td>${new Date(e.d).toLocaleDateString()}</td>
+                <td>${e.m.toFixed(3)}</td>
+                <td class="${tc}">${tr}</td>
+                <td>${isP?'':`<button style="color:red;background:none;width:auto;margin:0;padding:0" onclick="delEntry(${e.id})">✕</button>`}</td>
+            </tr>`;
         });
     }
 
-    // ACTIONS
+    function renderChart(data) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        const lb = [], val = [];
+        for (let i = 1; i < data.length; i++) {
+            const d = (new Date(data[i].d) - new Date(data[i-1].d)) / 86400000;
+            lb.push(new Date(data[i].d).toLocaleDateString());
+            val.push(d > 0 ? ((data[i].m - data[i-1].m) / d).toFixed(2) : 0);
+        }
+        document.getElementById('chartWrap').style.width = Math.max(300, data.length * 50) + 'px';
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar', data: { labels: lb, datasets: [{ data: val, backgroundColor: '#007AFF', borderRadius: 5 }] },
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
     function doSave() {
-        const meter = parseFloat(document.getElementById('newMeter').value);
-        const date = document.getElementById('newDate').value;
-        if (isNaN(meter) || !date) { alert("Bitte Werte eingeben"); return; }
-        
-        db.push({ d: date, m: meter, id: Date.now() });
+        const m = parseFloat(document.getElementById('newMeter').value);
+        if (isNaN(m)) return;
+        db.push({ d: document.getElementById('newDate').value, m, id: Date.now() });
         document.getElementById('newMeter').value = "";
         refreshAll();
     }
 
     function delEntry(id) {
-        if (confirm("Eintrag wirklich entfernen? Die Prognose wird sofort neu berechnet.")) {
-            db = db.filter(entry => entry.id !== id);
-            refreshAll();
-        }
+        if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); }
     }
 
-    function doExport() {
-        const dataStr = JSON.stringify(db);
-        navigator.clipboard.writeText(dataStr).then(() => alert("Daten in Zwischenablage kopiert!"));
-    }
-
+    function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() {
-        const dataStr = prompt("JSON Backup hier einfügen:");
-        if (dataStr) {
-            try {
-                db = JSON.parse(dataStr);
-                refreshAll();
-            } catch(e) { alert("Fehler beim Import!"); }
-        }
+        const s = prompt("JSON:");
+        if (s) { try { db = JSON.parse(s); refreshAll(); } catch(e) { alert("Fehler!"); } }
     }
+    function doReset() { if(confirm("LÖSCHEN?") && prompt("LÖSCHEN") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
-    function doReset() {
-        if (confirm("Wirklich alles löschen?") && prompt("Bestätigen mit: LÖSCHEN") === "LÖSCHEN") {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    // INITIALISIERUNG
     window.onload = () => {
-        // Einstellungen laden
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
-            const saved = localStorage.getItem('gas_pref_' + id);
-            if (saved) document.getElementById(id).value = saved;
+            const v = localStorage.getItem('gas_pref_' + id);
+            if(v) document.getElementById(id).value = v;
         });
-
         document.getElementById('newDate').valueAsDate = new Date();
-        
-        const pin = localStorage.getItem('gas_pin_v8');
-        if (pin) {
-            document.getElementById('lockScreen').style.display = "flex";
-            document.getElementById('pinSetting').value = pin;
-        } else {
-            refreshAll();
-        }
+        if (localStorage.getItem('gas_pin_v8')) document.getElementById('lockScreen').style.display = "flex";
+        else refreshAll();
     };
 </script>
 </body>
