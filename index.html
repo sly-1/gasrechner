@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.87</title>
+    <title>GasZähler Pro v8.3.90</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,6 +13,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; }
         
+        /* LAYOUT LOCK */
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         
@@ -21,27 +22,28 @@
         }
 
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
-
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
         
-        .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
+        .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; transition: background 0.3s; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
 
         .chart-box { width: 100%; height: 160px; margin: 10px 0; }
 
-        .scroll-area { max-height: 180px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table td { padding: 10px 5px; border-bottom: 1px solid #F2F2F7; text-align: center; }
+        .scroll-area { max-height: 200px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
+        .data-table td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
 
-        .btn-main { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; }
-        .btn-util { background: var(--ios-gray); color: white; border: none; padding: 8px; border-radius: 6px; font-size: 11px; flex: 1; }
+        .btn-main { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: all 0.2s; }
+        .btn-main:disabled { background: #D1D1D6; color: #8E8E93; }
+        .btn-warn { background: var(--ios-red) !important; color: white !important; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.87</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.90</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -54,9 +56,10 @@
         <details style="margin-top:10px;">
             <summary style="color:var(--ios-blue); font-size:12px; font-weight:600;">⚙️ Setup & PIN</summary>
             <div style="padding-top:8px;">
+                <label>Tarife (Limit:Cent:Basis)</label>
                 <textarea id="tiers" rows="2" style="height:45px; margin-bottom:8px;" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <div><label>BW</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
+                    <div><label>Brennwert</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.95" oninput="liveUpdate()"></div>
                     <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
@@ -71,16 +74,16 @@
         </details>
     </div>
 
-    <div class="card" id="cardSaldo">
-        <label style="text-align:center;">Saldo (Ist)</label>
+    <div class="card">
+        <label style="text-align:center;">Finanz-Saldo (Ist)</label>
         <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge bg-gray">Daten fehlen</div>
+        <div id="badgeSaldo" class="badge bg-gray">Warte auf Daten...</div>
     </div>
 
-    <div class="card" id="cardTrend">
-        <label style="text-align:center;">Prognose (Jahr)</label>
+    <div class="card">
+        <label style="text-align:center;">Jahres-Prognose</label>
         <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge bg-gray">Daten fehlen</div>
+        <div id="badgeTrend" class="badge bg-gray">Warte auf Daten...</div>
     </div>
 
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
@@ -88,15 +91,18 @@
     <div class="card">
         <div class="chart-box"><canvas id="mainChart"></canvas></div>
         <div class="scroll-area">
-            <table class="data-table"><tbody id="historyTable"></tbody></table>
+            <table class="data-table">
+                <thead><tr><th>Datum</th><th>Stand</th><th>Trend</th><th>Del</th></tr></thead>
+                <tbody id="historyTable"></tbody>
+            </table>
         </div>
     </div>
 
     <div style="display:flex; gap:8px;">
-        <button class="btn-util" onclick="doExport()">Backup</button>
-        <button class="btn-util" onclick="doImport()">Restore</button>
+        <button style="flex:1; background:var(--ios-gray); color:white; border:none; padding:8px; border-radius:6px; font-size:11px;" onclick="doExport()">Backup</button>
+        <button style="flex:1; background:var(--ios-gray); color:white; border:none; padding:8px; border-radius:6px; font-size:11px;" onclick="doImport()">Restore</button>
     </div>
-    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">♻️ ALLES LÖSCHEN</button>
+    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">♻️ SYSTEM-RESET</button>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
@@ -116,17 +122,38 @@
     function liveUpdate() {
         const mVal = parseFloat(document.getElementById('newMeter').value);
         const dVal = document.getElementById('newDate').value;
+        const saveBtn = document.getElementById('saveBtn');
+        
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
-            pay: parseFloat(document.getElementById('pay').value) || 199,
+            pay: parseFloat(document.getElementById('pay').value) || 0,
             start: parseFloat(document.getElementById('start').value) || 0,
             tiers: document.getElementById('tiers').value.split('\n').map(l => {
                 const p = l.split(':').map(Number); return { limit: p[0]||999999, cent: p[1]/100||0, base: p[2]||0 };
             })
         };
 
-        document.getElementById('saveBtn').disabled = isNaN(mVal) || dVal === "";
+        // CHRONO-PLAUSI
+        let isInvalid = isNaN(mVal) || dVal === "";
+        if(!isInvalid && db.length > 0) {
+            const newD = new Date(dVal);
+            const prev = [...db].reverse().find(e => new Date(e.d) < newD);
+            const next = db.find(e => new Date(e.d) > newD);
+            
+            if(prev && mVal < prev.m) {
+                isInvalid = true; saveBtn.innerText = "⚠️ Wert < " + prev.m;
+            } else if(next && mVal > next.m) {
+                isInvalid = true; saveBtn.innerText = "⚠️ Wert > " + next.m;
+            } else {
+                saveBtn.innerText = "💾 Stand speichern";
+            }
+            
+            if(isInvalid) saveBtn.classList.add('btn-warn');
+            else saveBtn.classList.remove('btn-warn');
+        }
+        saveBtn.disabled = isInvalid;
+
         let wDb = [...db]; 
         if (!isNaN(mVal)) { wDb.push({ d: dVal, m: mVal, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
 
@@ -137,7 +164,7 @@
             const yKwh = (totalAvg * 365) * cfg.bw * cfg.zz;
             const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
 
-            // PROGNOSE
+            // PROGNOSE-AMPEL
             const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
             document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
@@ -147,20 +174,19 @@
                 bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt";
             }
 
-            // SALDO
+            // SALDO-AMPEL
             const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
             const saldo = (pMonths * cfg.pay) - costSoFar;
-            document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
+            document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
             if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
             else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
 
-            renderTable(wDb, totalAvg); 
-            renderChart(wDb);
+            renderTable(wDb, totalAvg); renderChart(wDb);
         }
     }
 
@@ -178,7 +204,7 @@
             tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
-                <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
+                <td style="color:${pCol}; font-weight:bold; font-size:16px;">${pfeil}</td>
                 <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);font-weight:bold;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
@@ -200,9 +226,24 @@
     }
 
     function doSave() { 
+        const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
-        document.getElementById('newMeter').value = ""; refreshAll(); 
+        
+        // Feedback
+        document.getElementById('newMeter').value = ""; 
+        btn.innerHTML = "✅ Gespeichert!";
+        btn.classList.replace('btn-main', 'bg-green'); 
+        btn.disabled = true;
+
+        refreshAll(); 
+
+        setTimeout(() => {
+            btn.innerHTML = "💾 Stand speichern";
+            btn.classList.replace('bg-green', 'btn-main');
+            liveUpdate();
+        }, 2000);
     }
+
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
