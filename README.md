@@ -1,33 +1,40 @@
-# ⛽ GasZähler Pro v8.3.9 – Ultimate Edition
+# ⛽ GasZähler Pro v8.3.10 – Ultimate Control
 
-Eine hochpräzise Progressive Web App (PWA) zur vollständigen Kontrolle deines Gasverbrauchs und deiner Finanzen. Entwickelt für maximale Transparenz und Datensicherheit.
+GasZähler Pro ist eine hochoptimierte Progressive Web App (PWA), die speziell für die präzise Überwachung von Gasverbrauch und Heizkosten entwickelt wurde. Sie kombiniert technische Genauigkeit mit intuitiven Finanz-Analysen.
 
-## 🚀 Neue Features in v8.3.9
-* **Dynamische Bestpreis-Logik:** Die App berechnet automatisch, ob du mit deinem aktuellen Verbrauch in der günstigeren Preisstufe landest und passt die Kostenrechnung in Echtzeit an.
-* **Konfigurierbare Preis-Staffeln:** Tarife sind nicht mehr fest im Code, sondern direkt in den Einstellungen über das Format `Limit:Cent:Grundpreis` editierbar.
-* **Doppel-Ampel-System:** Sofortiges visuelles Feedback für den aktuellen Kontostand (Guthaben/Nachzahlung) sowie die Jahresprognose (Abschlags-Check).
-* **Live-Preview Mode:** Teste neue Zählerstände direkt im Eingabefeld. Die App zeigt vorläufige Berechnungen in einem dezenten "Draft-Stil" an, ohne die Historie zu verändern.
+## 🌟 Top-Features (v8.3.10)
 
-## 🛠 Kern-Funktionen
-### 💰 Finanz-Dashboard
-* **Echtzeit-Saldo:** Vergleich deiner gezahlten Abschläge mit den real aufgelaufenen Kosten.
-* **Safety Advisor:** Empfehlung für einen "Sicheren Abschlag" basierend auf der Jahresprognose inklusive eines 10%igen Puffers.
-* **Kommerzielle Rundung:** Alle Empfehlungen werden für eine saubere Budgetplanung auf volle Euro gerundet.
+### 🛡️ Daten-Integrität & Plausibilität
+* **Rücklauf-Schutz:** Die App erkennt unlogische Eingaben. Ist ein eingegebener Zählerstand niedriger als der vorherige, wird die Speicherung blockiert und das Feld markiert.
+* **Live-Vorschau:** Berechnungen werden bereits während der Eingabe im "Draft-Modus" (ausgegraut) angezeigt, um Fehler vor dem Speichern zu vermeiden.
 
-### 📈 Analyse & Trends
-* **Trend-Indikatoren:** Symbole (↗︎, ↘︎, →) zeigen sofort, ob dein aktueller Tagesverbrauch über oder unter deinem langjährigen Durchschnitt liegt.
-* **Interaktives Chart:** Visualisierung des m³-Verbrauchs pro Tag über den Zeitverlauf.
-* **Automatisierte Hochrechnung:** Präzise Jahresprognose unter Berücksichtigung von Brennwert und Zustandszahl.
+### 💰 Intelligentes Tarif-Management
+* **Bestpreis-Automatik:** Vollautomatische Berechnung des günstigsten Tarifs bei Anbietern mit verbrauchsabhängigen Preisstaffeln.
+* **Frei konfigurierbare Staffeln:** Tarife können direkt in den Einstellungen im Format `Limit:Arbeitspreis:Grundpreis` hinterlegt werden (z.B. für die 6.000 kWh Grenze).
+* **Brennwert & z-Zahl:** Berücksichtigung technischer Faktoren zur exakten Umrechnung von m³ in kWh.
 
-### 🔒 Sicherheit & Privatsphäre
-* **Privacy First:** Alle Daten werden ausschließlich lokal im `LocalStorage` deines Browsers gespeichert. Keine Cloud, kein Tracking.
-* **App-Lock:** Optionaler Schutz durch eine PIN-Abfrage beim Start der Anwendung.
-* **Daten-Hoheit:** Integrierte Export- und Importfunktionen für manuelle Backups.
+### 🚦 Visuelles Feedback (Doppel-Ampel)
+* **Konto-Status:** Sofortige Anzeige, ob du aktuell ein Guthaben (Grün) hast oder eine Nachzahlung (Rot) droht.
+* **Abschlags-Check:** Die Jahresprognose bewertet deinen monatlichen Abschlag:
+    * 🟦 **Blau:** Abschlag deutlich zu hoch.
+    * 🟩 **Grün:** Abschlag ideal gewählt.
+    * 🟧 **Orange:** Knapp kalkuliert.
+    * 🟥 **Rot:** Abschlag muss dringend erhöht werden.
+
+### 📊 Analyse & Trends
+* **Trend-Indikatoren:** Pfeile (↗︎, ↘︎, →) vergleichen deinen aktuellen Tagesverbrauch mit dem historischen Durchschnitt.
+* **Sicherer Abschlag:** Berechnet basierend auf der Prognose einen empfohlenen Abschlag inkl. 10% Sicherheitspuffer.
+* **Interaktive Historie:** Grafische Darstellung des Verbrauchsverlaufs mittels Chart.js.
 
 ## ⚙️ Einrichtung der Preis-Staffeln
-Trage deine Tarife in den Einstellungen wie folgt ein (eine Stufe pro Zeile):
-`6000:12.80:5.36`  (Bis 6.000 kWh: 12,80 ct/kWh und 5,36 € Grundpreis)
-`99999:11.79:10.41` (Darüber: 11,79 ct/kWh und 10,41 € Grundpreis)
+In den Einstellungen kannst du deine Tarife zeilenweise definieren:
+`6000:12.80:5.36` (Stufe 1: bis 6.000 kWh, 12.8 ct, 5.36 € Grundpreis)
+`99999:11.79:10.41` (Stufe 2: alles darüber, 11.79 ct, 10.41 € Grundpreis)
+
+## 🔒 Privatsphäre & Sicherheit
+* **Offline-First:** Alle Daten verbleiben im `LocalStorage` deines Geräts. Keine Cloud-Anbindung, kein Tracking.
+* **App-Lock:** Optionaler Schutz durch eine 4-stellige PIN beim App-Start.
+* **Backup:** Einfacher Export/Import der gesamten Historie als Text-String.
 
 ---
-*Entwickelt als leichtgewichtige Single-File-Lösung für maximale Performance auf iOS und Android.*
+*Optimiert für die Installation als Web-App auf dem Homescreen (iOS & Android).*
