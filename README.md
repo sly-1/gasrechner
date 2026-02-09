@@ -1,66 +1,65 @@
-# ⛽ GasZähler Pro v8.3.13 – Data Integrity Edition
+# ⛽ GasZähler Pro v8.3.14 – Balanced Stability Edition
 
-**GasZähler Pro** ist eine hochpräzise, datenschutzorientierte Progressive Web App (PWA) zur Überwachung von Gasverbrauch und Heizkosten. In Zeiten schwankender Energiepreise bietet sie Hausbesitzern und Mietern die volle Kontrolle – ohne Cloud, ohne Abo und zu 100 % lokal auf deinem Gerät.
-
----
-
-## 🚦 Das Doppel-Ampel-System (Finanz-Analyse)
-
-Die v8.3.13 nutzt eine duale Berechnungslogik, um dir sowohl den aktuellen finanziellen Stand als auch die zukünftige Entwicklung in Echtzeit zu visualisieren:
-
-### 1. Saldo-Ampel (Der Ist-Zustand)
-Diese Ampel vergleicht die Summe deiner bisher geleisteten Abschlagszahlungen mit den real aufgelaufenen Kosten für das verbrauchte Gas bis zum heutigen Tag.
-* 🟢 **Guthaben:** Deine bisherigen Zahlungen decken den aktuellen Verbrauch. Du bist "im Plus".
-* 🔴 **Nachzahlung:** Dein Verbrauch war höher als die bisherigen Zahlungen. Würdest du heute die Abrechnung erhalten, müsstest du den Differenzbetrag nachzahlen.
-
-### 2. Prognose-Ampel (Der Soll-Zustand für das Jahr)
-Diese Ampel analysiert deinen durchschnittlichen Tagesverbrauch ($m^3/Tag$) über den gesamten Zeitraum und rechnet diesen auf 365 Tage hoch. Das Ergebnis wird mit deiner jährlichen Abschlags-Summe verglichen.
-* 🔵 **Blau (Viel zu hoch):** Dein Abschlag ist deutlich höher als dein tatsächlicher Bedarf. Du zahlst dem Anbieter quasi einen zinslosen Kredit.
-* 🟢 **Grün (Ideal):** Dein Abschlag und dein prognostizierter Verbrauch passen perfekt zusammen.
-* 🟠 **Orange (Knapp):** Dein Verbrauch ist gestiegen. Es könnte am Jahresende eine kleine Nachzahlung drohen.
-* 🔴 **Rot (Sofort Erhöhen!):** Dein aktueller Abschlag wird die prognostizierten Jahreskosten nicht decken. Eine Erhöhung des Abschlags ist dringend ratsam, um einen "Zahlungsschock" zu vermeiden.
+**GasZähler Pro** ist eine hochpräzise, datenschutzorientierte Progressive Web App (PWA) zur Überwachung von Gasverbrauch und Heizkosten. Entwickelt für Hausbesitzer und Mieter, bietet sie maximale Transparenz über die finanzielle Entwicklung deines Energieverbrauchs – ohne Cloud-Zwang und zu 100 % lokal auf deinem Gerät.
 
 ---
 
-## 🚀 Die Highlights der v8.3.13
+## 🚦 Das Doppel-Ampel-System (Echtzeit-Analyse)
 
-### 📊 Optimierte Chart-Navigation (Sticky-Axis)
-Für Nutzer mit vielen Datenpunkten wurde das Diagramm-System revolutioniert:
-* **Fixierte Y-Achse:** Während du horizontal durch die Zeit wischst, bleibt die Beschriftung der vertikalen Achse ($m^3/Tag$) am linken Rand fest verankert.
-* **Dynamische Breite:** Das Diagramm wächst pro Eintrag um 45px mit, sodass die Balken niemals gestaucht werden.
-* **Auto-Focus:** Die App springt beim Öffnen automatisch ganz nach rechts zu den aktuellsten Daten.
+Die App nutzt eine duale Analyse-Logik, um dir sowohl den aktuellen Kontostand als auch die voraussichtliche Jahresabrechnung zu visualisieren:
 
-### 🔒 Maximale Datensicherheit (Safe-Delete)
-Um versehentlichen Datenverlust zu verhindern, wurde eine Sicherheitsbarriere eingebaut:
-* **Text-Validierung:** Das Zurücksetzen der Datenbank erfordert die manuelle Eingabe des Bestätigungswortes **"LÖSCHEN"**.
-* **Plausibilitäts-Check:** Die App blockiert Eingaben, die physikalisch unmöglich sind (z. B. wenn der neue Zählerstand niedriger ist als der letzte gespeicherte Wert).
+### 1. Saldo-Ampel (Ist-Zustand: "Habe ich aktuell genug gezahlt?")
+Diese Ampel vergleicht die Summe deiner bisher geleisteten Abschlagszahlungen mit den real aufgelaufenen Kosten seit dem Datum deiner ersten Zahlung.
+* 🟢 **Guthaben:** Deine geleisteten Zahlungen übersteigen die aktuellen Kosten. Du bist finanziell im sicheren Bereich.
+* 🔴 **Nachzahlung:** Dein realer Verbrauch ist höher als die bisherigen Abschläge. Würde heute abgerechnet, müsstest du den Differenzbetrag sofort begleichen.
 
-### 📐 UI & Ergonomie
-* **Grid-Layout:** Alle Einstellungen sind in einem platzsparenden Raster angeordnet, was das vertikale Scrollen auf dem Smartphone massiv reduziert.
-* **Sticky-Header-Tabelle:** Die Spaltentitel der Historie bleiben beim Durchscrollen der Liste immer oben sichtbar.
-* **Live-Vorschau:** Alle Berechnungen (Saldo, Prognose) werden bereits während der Eingabe im "Draft-Modus" (kursiv) angezeigt.
+### 2. Prognose-Ampel (Soll-Zustand: "Reicht mein Abschlag für das Jahr?")
+Basierend auf deinem Durchschnittsverbrauch ($m^3/Tag$) berechnet die App die voraussichtlichen Gesamtkosten für 365 Tage und vergleicht diese mit deiner jährlichen Abschlags-Summe.
+* 🔵 **Blau (Zu hoch):** Dein Abschlag ist deutlich zu hoch angesetzt. Du gewährst deinem Anbieter ein zinsloses Darlehen.
+* 🟢 **Grün (Ideal):** Abschlag und Verbrauch sind perfekt aufeinander abgestimmt. Keine Überraschungen zu erwarten.
+* 🟠 **Orange (Knapp):** Eine leichte Nachzahlung zeichnet sich ab. Eine moderate Erhöhung des Abschlags wird empfohlen.
+* 🔴 **Rot (Korrektur nötig!):** Dein Abschlag wird die Jahreskosten nicht decken. Erhöhe deinen Abschlag zeitnah, um eine hohe Einmalzahlung zu vermeiden.
 
 ---
 
-## 🛠 Technische Details & Konfiguration
+## 🚀 Highlights der v8.3.14
 
-### Die Berechnungsformel
-Die App wandelt das gemessene Volumen deines Zählers ($m^3$) nach der offiziellen Formel in thermische Energie um:
+### 📐 Neu: Full-Width Layout für Konfiguration
+In der Version 8.3.14 wurde die Ergonomie der Einstellungen entscheidend verbessert:
+* **Datum-Stabilität:** Das Feld für die **1. Abschlagszahlung** nutzt nun die volle Displaybreite. Dies verhindert Darstellungsfehler und Fehlberechnungen des Saldos auf schmalen Smartphones.
+* **Separater PIN-Bereich:** Die PIN-Sperre wurde logisch unter das Datumsfeld verschoben, um Eingabefehler zu minimieren.
+
+### 📊 Sticky-Axis Chart (Fixierte Achse)
+Das Verbrauchsdiagramm wurde für die Langzeitnutzung optimiert:
+* **Fixierte Skala:** Beim horizontalen Scrollen durch deine monatlichen Verbräuche bleibt die Y-Achse (Verbrauch in $m^3/Tag$) am linken Rand fixiert.
+* **Smart-Focus:** Beim Öffnen der App springt das Diagramm automatisch zum aktuellsten Datenpunkt ganz rechts.
+
+### 🔒 Safe-Delete Sicherheitssystem
+Ein versehentliches Löschen der Datenbank ist durch eine zweistufige Barriere geschützt:
+* **Klartext-Bestätigung:** Das vollständige Zurücksetzen erfordert die manuelle Eingabe des Wortes **"LÖSCHEN"**.
+* **Eingabe-Validierung:** Die App verhindert das Speichern von Zählerständen, die niedriger als der letzte Eintrag sind, um die Statistik sauber zu halten.
+
+---
+
+## 🛠 Technische Details & Einrichtung
+
+### Berechnungslogik
+Die Umrechnung von Volumen in Energie erfolgt nach der physikalischen Grundformel:
 $$kWh = (m^3_{aktuell} - m^3_{start}) \times Brennwert \times Zustandszahl$$
 
-### Bestpreis-Automatik (Preisstaffeln)
-Du kannst beliebig viele Preisstufen hinterlegen. Die App nutzt immer die Stufe, die deiner Jahresprognose entspricht.
+### Bestpreis-Engine (Tarifstaffeln)
+Die App unterstützt Preisstaffeln (z.B. günstigerer Arbeitspreis ab einer bestimmten Abnahmemenge).
 **Format:** `VerbrauchsLimit:ArbeitspreisCent:GrundpreisEuro`
-*Beispiel:*
-`6000:12.80:5.36` (Tarif bis 6.000 kWh)
-`99999:11.79:10.41` (Tarif ab 6.001 kWh)
+*Beispiel für einen zweistufigen Tarif:*
+`6000:12.80:5.36` (Bis 6.000 kWh)
+`99999:11.79:10.41` (Über 6.000 kWh)
 
 ---
 
-## 📱 Installation als PWA
-1. Datei im Browser auf dem Smartphone öffnen.
-2. Im Menü (Teilen-Icon) auf **"Zum Home-Bildschirm hinzufügen"** tippen.
-3. Die App startet nun im Vollbildmodus ohne störende Browser-Leisten.
+## 📱 PWA-Installation
+1. Öffne die App im mobilen Browser (z.B. Safari oder Chrome).
+2. Wähle im Menü **"Zum Home-Bildschirm hinzufügen"**.
+3. Die App wird nun als eigenständige Anwendung ohne Browser-Adressleiste gestartet.
 
 ---
-*Entwickelt für maximale Transparenz und Datensouveränität.*
+*Präzise. Sicher. Lokal. Dein Verbrauch unter deiner Kontrolle.*
