@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.13</title>
+    <title>GasZähler Pro v8.3.14</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -17,19 +17,21 @@
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .pin-input { font-size: 24px; padding: 15px; width: 160px; text-align: center; border-radius: 12px; border: 1px solid var(--ios-neutral); margin-bottom: 20px; }
         
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 6px solid var(--ios-neutral); }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 6px solid var(--ios-neutral); transition: border-color 0.3s; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 5px; font-family: inherit; }
         
+        /* Layout Grid Fix v8.3.14 */
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .full-width { grid-column: span 2; }
         
-        /* Sticky Chart Container */
+        /* Sticky Chart Layout */
         .chart-container-outer { position: relative; width: 100%; background: #fafafa; border-radius: 8px; border: 1px solid var(--ios-gray); overflow: hidden; height: 160px; }
         .y-axis-fixed { position: absolute; left: 0; top: 0; width: 45px; height: 100%; background: #fafafa; z-index: 5; display: flex; flex-direction: column; justify-content: space-between; padding: 15px 0 40px 5px; font-size: 9px; color: var(--ios-text-secondary); border-right: 1px solid #eee; }
         .chart-viewport { overflow-x: auto; overflow-y: hidden; margin-left: 45px; height: 100%; -webkit-overflow-scrolling: touch; }
         .chart-wrapper { height: 150px; }
 
-        /* Scroll Table */
+        /* Table & History */
         .table-container { max-height: 250px; overflow-y: auto; border-radius: 8px; border: 1px solid var(--ios-gray); margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; }
         thead { position: sticky; top: 0; background: var(--ios-card); z-index: 10; box-shadow: 0 1px 0 var(--ios-gray); }
@@ -46,8 +48,8 @@
         .badge-info { background: #E5F1FF; color: var(--ios-blue); border-color: var(--ios-blue); }
 
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
-        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; }
-        .btn-danger-text { background: transparent; color: var(--ios-red); padding: 5px; font-size: 14px; margin-top: 20px; border: none; }
+        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; margin-bottom: 10px; }
+        .btn-danger-text { background: transparent; color: var(--ios-red); padding: 5px; font-size: 14px; margin-top: 20px; border: none; width: 100%; text-align: center; }
         
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
@@ -65,50 +67,54 @@
     <div id="mainContent">
         <h1 style="display: flex; align-items: center; gap: 10px;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="#FF9500"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.13
+            GasZähler Pro v8.3.14
         </h1>
         
         <div class="card">
-            <label>Zählerstand (m³)</label>
+            <label>Neuer Zählerstand (m³)</label>
             <div style="display: flex; gap: 8px;">
                 <input type="date" id="readingDate">
-                <input type="number" id="meter" step="0.001" placeholder="Stand eingeben" oninput="renderAll()">
+                <input type="number" id="meter" step="0.001" placeholder="m³ Stand" oninput="renderAll()">
             </div>
             <details style="margin-top: 10px;">
-                <summary style="color:var(--ios-blue); font-size:12px; cursor:pointer; font-weight:bold;">⚙️ Tarife & System</summary>
+                <summary style="color:var(--ios-blue); font-size:12px; cursor:pointer; font-weight:bold;">⚙️ Tarife & Einstellungen</summary>
                 <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
                     <label>Staffeln (Limit:Cent:Grundpreis)</label>
                     <textarea id="priceTiers" rows="2" style="font-size:12px;" oninput="renderAll()"></textarea>
+                    
                     <div class="settings-grid">
-                        <div><label>Brennwert</label><input type="number" id="brennwert" step="0.1" oninput="renderAll()"></div>
-                        <div><label>z-Zahl</label><input type="number" id="zZahl" step="0.001" oninput="renderAll()"></div>
-                    </div>
-                    <div class="settings-grid">
+                        <div><label>Brennwert</label><input type="number" id="brennwert" step="0.001" oninput="renderAll()"></div>
+                        <div><label>z-Zahl</label><input type="number" id="zZahl" step="0.0001" oninput="renderAll()"></div>
                         <div><label>Abschlag (€)</label><input type="number" id="monthlyPayment" step="1" oninput="renderAll()"></div>
-                        <div><label>Start-m³</label><input type="number" id="startOffset" step="1" oninput="renderAll()"></div>
-                    </div>
-                    <div class="settings-grid">
-                        <div><label>1. Zahlung</label><input type="date" id="firstPaymentDate" oninput="renderAll()"></div>
-                        <div><label>PIN</label><input type="password" id="appPin" oninput="savePin()"></div>
+                        <div><label>Start-m³</label><input type="number" id="startOffset" step="0.001" oninput="renderAll()"></div>
+                        
+                        <div class="full-width">
+                            <label>Datum der 1. Zahlung</label>
+                            <input type="date" id="firstPaymentDate" oninput="renderAll()">
+                        </div>
+                        <div class="full-width">
+                            <label>App-Sperre (PIN)</label>
+                            <input type="password" id="appPin" placeholder="PIN festlegen" oninput="savePin()">
+                        </div>
                     </div>
                 </div>
             </details>
         </div>
 
         <div class="card" id="cardSaldo" style="text-align:center">
-            <label>Aktueller Saldo (Ist)</label>
+            <label>Aktueller Saldo (Ist-Stand)</label>
             <span class="result-price" id="balanceOutput">0,00 €</span>
             <div id="balanceBadge" class="status-badge">...</div>
         </div>
 
         <div class="card" id="cardPrognose" style="text-align:center">
-            <label>Jahres-Prognose (Soll)</label>
+            <label>Jahres-Prognose (Soll-Stand)</label>
             <span class="result-price" id="yearPrice">0,00 €</span>
             <div id="yearInfo" style="font-size:11px; color:var(--ios-text-secondary); margin-top:5px;"></div>
             <div id="predictionBadge" class="status-badge">...</div>
         </div>
 
-        <button id="saveBtn" onclick="saveData()">💾 Speichern</button>
+        <button id="saveBtn" onclick="saveData()">💾 Daten Speichern</button>
 
         <div class="card">
             <label>Trend & Historie</label>
@@ -149,7 +155,6 @@
         }
 
         function renderAll() {
-            // Speichern der Settings
             ['brennwert', 'zZahl', 'firstPaymentDate', 'monthlyPayment', 'startOffset', 'priceTiers'].forEach(id => {
                 localStorage.setItem('gas_' + id, document.getElementById(id).value);
             });
@@ -159,7 +164,6 @@
             const isPreview = meterInput.value !== "";
             const lastMeter = history.length > 0 ? history[history.length-1].meter : 0;
             
-            // Plausibilitätscheck
             if (isPreview && parseFloat(meterInput.value) < lastMeter) {
                 meterInput.style.borderColor = "var(--ios-red)";
                 saveBtn.disabled = true;
@@ -177,7 +181,7 @@
                 const totalDays = Math.max(1, (new Date(curDate) - new Date(history[0].date)) / 86400000);
                 const globalAvg = (curMeter - history[0].meter) / totalDays;
                 
-                // 1. SALDO-AMPEL
+                // --- 1. SALDO-AMPEL ---
                 const tier = getTier(totalKwh);
                 const currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
                 const monthly = parseFloat(document.getElementById('monthlyPayment').value)||0;
@@ -197,7 +201,7 @@
                 bBadge.innerText = balance >= 0 ? "✅ Guthaben" : "⚠️ Nachzahlung";
                 bBadge.className = "status-badge " + (balance >= 0 ? "badge-good" : "badge-danger");
 
-                // 2. PROGNOSE-AMPEL
+                // --- 2. PROGNOSE-AMPEL ---
                 const yearKwh = (globalAvg * 365) * bw * zz;
                 const yearTier = getTier(yearKwh);
                 const yearTotal = (yearKwh * yearTier.price) + (yearTier.base * 12);
@@ -206,7 +210,7 @@
                 yEl.classList.toggle('is-preview', isPreview);
                 
                 const ratio = yearTotal / (monthly * 12);
-                let pClass = "badge-good", pText = "Abschlag passt", pColor = "var(--ios-green)";
+                let pClass = "badge-good", pText = "Passt", pColor = "var(--ios-green)";
                 if (ratio < 0.90) { pClass="badge-info"; pText="Zu hoch"; pColor="var(--ios-blue)"; }
                 else if (ratio > 1.15) { pClass="badge-danger"; pText="Erhöhen!"; pColor="var(--ios-red)"; }
                 else if (ratio > 1.05) { pClass="badge-warn"; pText="Knapp"; pColor="var(--ios-orange)"; }
@@ -264,7 +268,7 @@
 
         function secureClear() {
             if (confirm("Wirklich alles löschen?")) {
-                if (prompt("Zur Sicherheit bitte LÖSCHEN eingeben:") === "LÖSCHEN") { localStorage.clear(); location.reload(); }
+                if (prompt("Bitte LÖSCHEN eingeben zur Bestätigung:") === "LÖSCHEN") { localStorage.clear(); location.reload(); }
             }
         }
 
@@ -277,9 +281,10 @@
         }
         function checkPin() { if (document.getElementById('pinEntry').value === localStorage.getItem('gas_app_pin')) { document.getElementById('lockScreen').style.display = "none"; document.getElementById('mainContent').style.display = "block"; renderAll(); } }
         function savePin() { localStorage.setItem('gas_app_pin', document.getElementById('appPin').value); }
-        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function deleteEntry(id) { if(confirm("Eintrag löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert!")); }
         function importBackup() { const c = prompt("Backup-String einfügen:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        
         document.getElementById('readingDate').valueAsDate = new Date();
         initAuth();
     </script>
