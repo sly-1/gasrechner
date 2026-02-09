@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.85</title>
+    <title>GasZähler Pro v8.3.86</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -11,101 +11,98 @@
             --ios-green: #34C759; --ios-gray: #8E8E93;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 10px; width: 100%; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; }
         
-        .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; }
-
-        /* ABSOLUTER FIX FÜR OBEN RECHTS & LINKS */
-        .header-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .header-table td { padding: 0 5px; vertical-align: bottom; width: 50%; }
+        /* HARTER LAYOUT LOCK */
+        .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
+        .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         
         input, textarea { 
-            width: 100%; height: 46px; padding: 10px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; display: block;
+            width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none;
         }
 
-        label { display: block; margin-bottom: 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; overflow: hidden; white-space: nowrap; }
+        label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
 
-        .result-main { font-size: 32px; font-weight: 800; display: block; text-align: center; margin: 5px 0; color: #1C1C1E; }
+        .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
         
-        /* AMPEL FIX */
-        .badge-box { 
-            display: block; width: 100%; padding: 14px; border-radius: 12px; 
-            font-size: 14px; font-weight: 800; text-align: center; color: white; margin-top: 8px;
-            min-height: 44px;
-        }
+        /* AMPEL-KLASSEN */
+        .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
+        .bg-red { background-color: var(--ios-red) !important; }
+        .bg-green { background-color: var(--ios-green) !important; }
+        .bg-gray { background-color: var(--ios-gray) !important; }
 
-        /* CHART BOX */
-        .chart-area { width: 100%; height: 180px; margin-top: 10px; position: relative; }
+        .chart-box { width: 100%; height: 160px; margin: 10px 0; }
 
-        .table-area { max-height: 180px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 10px; }
-        table.history-list { width: 100%; border-collapse: collapse; font-size: 13px; }
-        table.history-list td { padding: 12px 5px; border-bottom: 1px solid #F2F2F7; }
+        .scroll-area { max-height: 180px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table td { padding: 10px 5px; border-bottom: 1px solid #F2F2F7; text-align: center; }
 
-        .btn-main { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; }
+        .btn-main { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; }
+        .btn-util { background: var(--ios-gray); color: white; border: none; padding: 8px; border-radius: 6px; font-size: 11px; flex: 1; }
     </style>
 </head>
 <body>
 
-<div id="main">
-    <h1 style="text-align:center; font-size: 16px; margin: 5px 0;">🔥 GasZähler Pro v8.3.85</h1>
-
     <div class="card">
-        <table class="header-table">
+        <table class="fixed-table">
             <tr>
                 <td><label>Datum</label><input type="date" id="newDate" oninput="liveUpdate()"></td>
-                <td><label>Zählerstand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()"></td>
+                <td><label>Stand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()"></td>
             </tr>
         </table>
         
-        <details style="margin-top:15px;">
-            <summary style="color:var(--ios-blue); font-size:13px; font-weight:600;">⚙️ Einstellungen</summary>
-            <div style="padding-top:10px;">
-                <label>Tarife (Limit:Cent:Basis)</label>
-                <textarea id="tiers" rows="2" style="height:50px;" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px;">
-                    <div><label>Brennwert</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
+        <details style="margin-top:10px;">
+            <summary style="color:var(--ios-blue); font-size:12px; font-weight:600;">⚙️ Setup & PIN</summary>
+            <div style="padding-top:8px;">
+                <textarea id="tiers" rows="2" style="height:45px; margin-bottom:8px;" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div><label>BW</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.95" oninput="liveUpdate()"></div>
-                    <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
+                    <div><label>Abschlag</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
                 </div>
-                <label style="margin-top:8px;">1. Zahlung</label>
-                <input type="date" id="firstPayDate" oninput="liveUpdate()">
+                <table class="fixed-table" style="margin-top:8px;">
+                    <tr>
+                        <td><label>1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()"></td>
+                        <td><label>PIN</label><input type="password" id="pinSetting" oninput="savePin()" placeholder="****"></td>
+                    </tr>
+                </table>
             </div>
         </details>
     </div>
 
     <div class="card" id="cardSaldo">
-        <label style="text-align:center;">Finanz-Saldo (Aktuell)</label>
-        <span class="result-main" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge-box" style="background: var(--ios-gray);">Warte auf Daten...</div>
+        <label style="text-align:center;">Saldo (Ist)</label>
+        <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
+        <div id="badgeSaldo" class="badge bg-gray">Daten fehlen</div>
     </div>
 
     <div class="card" id="cardTrend">
-        <label style="text-align:center;">Jahres-Prognose (+10%)</label>
-        <span class="result-main" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge-box" style="background: var(--ios-gray);">Status...</div>
+        <label style="text-align:center;">Prognose (Jahr)</label>
+        <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
+        <div id="badgeTrend" class="badge bg-gray">Daten fehlen</div>
     </div>
 
-    <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
+    <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Speichern</button>
 
     <div class="card">
-        <div class="chart-area"><canvas id="mainChart"></canvas></div>
-        <div class="table-area">
-            <table class="history-list"><tbody id="historyTable"></tbody></table>
+        <div class="chart-box"><canvas id="mainChart"></canvas></div>
+        <div class="scroll-area">
+            <table class="data-table"><tbody id="historyTable"></tbody></table>
         </div>
     </div>
 
-    <div style="display:flex; gap:10px; margin-top:10px;">
-        <button style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--ios-gray); color:white; font-size:12px;" onclick="doExport()">Backup</button>
-        <button style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--ios-gray); color:white; font-size:12px;" onclick="doImport()">Restore</button>
+    <div style="display:flex; gap:8px;">
+        <button class="btn-util" onclick="doExport()">Backup</button>
+        <button class="btn-util" onclick="doImport()">Restore</button>
     </div>
-    
-    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin: 25px 0; text-decoration:underline; font-size:12px;" onclick="doReset()">♻️ SYSTEM-RESET (LÖSCHEN)</button>
-</div>
+    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">ALLES LÖSCHEN</button>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
     let myChart = null;
+
+    function savePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
 
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
@@ -130,7 +127,6 @@
         };
 
         document.getElementById('saveBtn').disabled = isNaN(mVal) || dVal === "";
-
         let wDb = [...db]; 
         if (!isNaN(mVal)) { wDb.push({ d: dVal, m: mVal, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
 
@@ -141,17 +137,17 @@
             const yKwh = (totalAvg * 365) * cfg.bw * cfg.zz;
             const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
 
-            // PROGNOSE & AMPEL
+            // PROGNOSE
             const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
             document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
             if(yCost > (cfg.pay * 12)) {
-                bT.style.backgroundColor = "#FF3B30"; bT.innerText = "🚨 Erhöhen auf " + Math.round(yCost/12) + "€";
+                bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yCost/12)+"€)";
             } else {
-                bT.style.backgroundColor = "#34C759"; bT.innerText = "✅ Abschlag passt!";
+                bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt";
             }
 
-            // SALDO & AMPEL
+            // SALDO
             const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
@@ -160,14 +156,8 @@
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
             const bS = document.getElementById('badgeSaldo');
-            const cS = document.getElementById('cardSaldo');
-            if(saldo >= 0) {
-                bS.style.backgroundColor = "#34C759"; bS.innerText = "💰 Guthaben";
-                cS.style.borderLeftColor = "#34C759";
-            } else {
-                bS.style.backgroundColor = "#FF3B30"; bS.innerText = "⚠️ Nachzahlung";
-                cS.style.borderLeftColor = "#FF3B30";
-            }
+            if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
+            else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
 
             renderTable(wDb, totalAvg); 
             renderChart(wDb);
@@ -182,22 +172,20 @@
             if(idx > 0) {
                 const dD = (new Date(data[idx].d)-new Date(data[idx-1].d))/86400000;
                 const v = dD > 0 ? (data[idx].m-data[idx-1].m)/dD : 0;
-                if(v > totalAvg * 1.05) { pfeil="↗"; pCol="#FF3B30"; }
-                else if(v < totalAvg * 0.95) { pfeil="↘"; pCol="#34C759"; }
+                if(v > totalAvg * 1.05) { pfeil="↗"; pCol="var(--ios-red)"; }
+                else if(v < totalAvg * 0.95) { pfeil="↘"; pCol="var(--ios-green)"; }
             }
-            const style = e.id === 'pre' ? 'font-style:italic; color:var(--ios-blue);' : '';
-            tb.innerHTML += `<tr style="${style}">
+            tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
-                <td><b>${e.m.toFixed(3)} m³</b></td>
+                <td><b>${e.m.toFixed(3)}</b></td>
                 <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
-                <td>${e.id==='pre'?'':'<span style="color:red; font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
+                <td>${e.id==='pre'?'':'<span style="color:red;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
     }
 
     function renderChart(data) {
-        const filtered = data.filter(e => e.id !== 'pre');
-        if(filtered.length < 2) return;
+        const filtered = data.filter(e => e.id !== 'pre'); if(filtered.length < 2) return;
         const lb = [], val = [];
         for (let i = 1; i < filtered.length; i++) {
             const d = (new Date(filtered[i].d)-new Date(filtered[i-1].d))/86400000;
@@ -206,7 +194,7 @@
         }
         if(myChart) myChart.destroy();
         myChart = new Chart(document.getElementById('mainChart').getContext('2d'), { 
-            type: 'bar', data: { labels: lb, datasets: [{ data: val, backgroundColor: '#007AFF', borderRadius: 5 }] }, 
+            type: 'bar', data: { labels: lb, datasets: [{ data: val, backgroundColor: '#007AFF', borderRadius: 4 }] }, 
             options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } } 
         });
     }
@@ -222,6 +210,7 @@
 
     window.onload = () => {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
+        const p = localStorage.getItem('gas_pin_v8'); if(p) document.getElementById('pinSetting').value = p;
         document.getElementById('newDate').valueAsDate = new Date();
         refreshAll();
     };
