@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.90</title>
+    <title>GasZähler Pro v8.3.91</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,7 +13,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; }
         
-        /* LAYOUT LOCK */
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         
@@ -24,7 +23,7 @@
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
         
-        .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; transition: background 0.3s; }
+        .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
@@ -36,14 +35,19 @@
         .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
         .data-table td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
 
-        .btn-main { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: all 0.2s; }
-        .btn-main:disabled { background: #D1D1D6; color: #8E8E93; }
-        .btn-warn { background: var(--ios-red) !important; color: white !important; }
+        /* BUTTON FIX: Breite bleibt immer 100% */
+        .btn-main { 
+            width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; 
+            padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: background 0.2s; 
+            margin: 0; cursor: pointer;
+        }
+        .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
+        .btn-warn { background: var(--ios-red) !important; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.90</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.91</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -77,13 +81,13 @@
     <div class="card">
         <label style="text-align:center;">Finanz-Saldo (Ist)</label>
         <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge bg-gray">Warte auf Daten...</div>
+        <div id="badgeSaldo" class="badge bg-gray">Warte...</div>
     </div>
 
     <div class="card">
         <label style="text-align:center;">Jahres-Prognose</label>
         <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge bg-gray">Warte auf Daten...</div>
+        <div id="badgeTrend" class="badge bg-gray">Warte...</div>
     </div>
 
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
@@ -134,20 +138,14 @@
             })
         };
 
-        // CHRONO-PLAUSI
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid && db.length > 0) {
             const newD = new Date(dVal);
             const prev = [...db].reverse().find(e => new Date(e.d) < newD);
             const next = db.find(e => new Date(e.d) > newD);
-            
-            if(prev && mVal < prev.m) {
-                isInvalid = true; saveBtn.innerText = "⚠️ Wert < " + prev.m;
-            } else if(next && mVal > next.m) {
-                isInvalid = true; saveBtn.innerText = "⚠️ Wert > " + next.m;
-            } else {
-                saveBtn.innerText = "💾 Stand speichern";
-            }
+            if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert < " + prev.m; }
+            else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert > " + next.m; }
+            else { saveBtn.innerText = "💾 Stand speichern"; }
             
             if(isInvalid) saveBtn.classList.add('btn-warn');
             else saveBtn.classList.remove('btn-warn');
@@ -164,23 +162,17 @@
             const yKwh = (totalAvg * 365) * cfg.bw * cfg.zz;
             const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
 
-            // PROGNOSE-AMPEL
             const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
             document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if(yCost > (cfg.pay * 12)) {
-                bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yCost/12)+"€)";
-            } else {
-                bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt";
-            }
+            if(yCost > (cfg.pay * 12)) { bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yCost/12)+"€)"; }
+            else { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt"; }
 
-            // SALDO-AMPEL
             const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
             const saldo = (pMonths * cfg.pay) - costSoFar;
-            
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
             if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
@@ -204,7 +196,7 @@
             tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
-                <td style="color:${pCol}; font-weight:bold; font-size:16px;">${pfeil}</td>
+                <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
                 <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);font-weight:bold;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
@@ -229,17 +221,16 @@
         const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
         
-        // Feedback
         document.getElementById('newMeter').value = ""; 
         btn.innerHTML = "✅ Gespeichert!";
-        btn.classList.replace('btn-main', 'bg-green'); 
+        btn.style.backgroundColor = "var(--ios-green)"; // Direkt-Zuweisung für Safari-Stabilität
         btn.disabled = true;
 
         refreshAll(); 
 
         setTimeout(() => {
             btn.innerHTML = "💾 Stand speichern";
-            btn.classList.replace('bg-green', 'btn-main');
+            btn.style.backgroundColor = ""; // Reset auf CSS-Standard
             liveUpdate();
         }, 2000);
     }
