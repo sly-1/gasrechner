@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.98</title>
+    <title>GasZähler Pro v8.3.99</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -17,13 +17,18 @@
         input, textarea { width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; }
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
+        
+        /* Chart-Spezial: Verhindert Scroll-Blockade */
+        .card-chart { padding-left: 16px; padding-right: 16px; }
+        .chart-box { width: 100%; height: 160px; margin: 10px 0; pointer-events: none; }
+        
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-blue { background-color: var(--ios-blue) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
-        .chart-box { width: 100%; height: 160px; margin: 10px 0; }
+        
         .scroll-area { max-height: 200px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
@@ -35,7 +40,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.98</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.99</h1>
 
     <div class="card" id="inputCard">
         <table class="fixed-table">
@@ -80,7 +85,8 @@
 
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
-    <div class="card">
+    <div class="card card-chart">
+        <label style="text-align:center; display:block;">Verbrauch pro Tag (m³)</label>
         <div class="chart-box"><canvas id="mainChart"></canvas></div>
         <div class="scroll-area">
             <table class="data-table">
