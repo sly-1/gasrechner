@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.95</title>
+    <title>GasZähler Pro v8.3.96</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -12,26 +12,21 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; padding-bottom: 300px; }
-        
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
-        
         input, textarea { width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; }
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
-        
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
-
         .chart-box { width: 100%; height: 160px; margin: 10px 0; }
         .scroll-area { max-height: 200px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
         .data-table td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
-
         .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: background 0.2s; margin: 5px 0; cursor: pointer; }
         .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
         .btn-warn { background: var(--ios-red) !important; }
@@ -39,7 +34,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.95</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.96</h1>
 
     <div class="card" id="inputCard">
         <table class="fixed-table">
@@ -109,6 +104,7 @@
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
+        // Speichere Präferenzen
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
             const el = document.getElementById(id); if(el) localStorage.setItem('gas_pref_' + id, el.value);
         });
@@ -130,7 +126,11 @@
             })
         };
 
-        // CHRONO-PLAUSI
+        // SOFORT-SPEICHERN der Setup-Werte im Hintergrund
+        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
+            const el = document.getElementById(id); if(el) localStorage.setItem('gas_pref_' + id, el.value);
+        });
+
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid && db.length > 0) {
             const newD = new Date(dVal);
@@ -149,29 +149,21 @@
         if (wDb.length > 0) {
             const last = wDb[wDb.length-1], first = wDb[0];
             const daysUsed = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
-            
             const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const avgKwhDay = (last.m - first.m) / daysUsed * cfg.bw * cfg.zz;
             const projectedYearKwh = avgKwhDay * 365;
 
-            // Kosten & Tarife
             const tier = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
             const yearBase = (projectedYearKwh * tier.cent) + (tier.base * 12);
             const yearBuffered = (projectedYearKwh * tier.cent * 1.10) + (tier.base * 12);
             const neededPayBuffered = yearBuffered / 12;
 
-            // PROGNOSE ANZEIGE
             document.getElementById('outYear').innerText = yearBuffered.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if (cfg.pay >= neededPayBuffered - 0.5) {
-                bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag sicher";
-            } else if (cfg.pay >= (yearBase / 12)) {
-                bT.className = "badge bg-orange"; bT.innerText = "⚠️ Puffer angegriffen (" + Math.round(neededPayBuffered) + "€ empf.)";
-            } else {
-                bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig (" + Math.round(neededPayBuffered) + "€ empf.)";
-            }
+            if (cfg.pay >= neededPayBuffered - 0.5) { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag sicher"; }
+            else if (cfg.pay >= (yearBase / 12)) { bT.className = "badge bg-orange"; bT.innerText = "⚠️ Puffer angegriffen (" + Math.round(neededPayBuffered) + "€ empf.)"; }
+            else { bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig (" + Math.round(neededPayBuffered) + "€ empf.)"; }
 
-            // SALDO ANZEIGE
             const actualCostBuffered = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
@@ -179,13 +171,9 @@
             
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
-            if (saldo >= 0) {
-                bS.className = "badge bg-green"; bS.innerText = "💰 Im Budget";
-            } else if (saldo > -(actualCostBuffered * 0.09)) {
-                bS.className = "badge bg-orange"; bS.innerText = "⚠️ Puffer-Verbrauch";
-            } else {
-                bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus";
-            }
+            if (saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Im Budget"; }
+            else if (saldo > -(actualCostBuffered * 0.09)) { bS.className = "badge bg-orange"; bS.innerText = "⚠️ Puffer-Verbrauch"; }
+            else { bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus"; }
 
             renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz)); renderChart(wDb);
         }
@@ -230,9 +218,7 @@
         const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
         document.getElementById('newMeter').value = ""; 
-        btn.innerHTML = "✅ Gespeichert!";
-        btn.style.backgroundColor = "var(--ios-green)";
-        btn.disabled = true;
+        btn.innerHTML = "✅ Gespeichert!"; btn.style.backgroundColor = "var(--ios-green)"; btn.disabled = true;
         refreshAll(); 
         setTimeout(() => { btn.innerHTML = "💾 Stand speichern"; btn.style.backgroundColor = ""; liveUpdate(); }, 2000);
     }
