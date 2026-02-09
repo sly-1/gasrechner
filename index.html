@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.4</title>
+    <title>GasZähler Pro v8.5.5</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -26,15 +26,16 @@
         .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-blue { background-color: var(--ios-blue) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
-        .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; margin: 10px 0; cursor: pointer; }
+        .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; margin: 10px 0; cursor: pointer; transition: all 0.3s; }
         .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
         .btn-warn { background: var(--ios-red) !important; }
+        .btn-success { background: var(--ios-green) !important; }
         .btn-tool { background: var(--ios-gray); color: white; border: none; padding: 8px; border-radius: 6px; font-size: 11px; flex: 1; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.4</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.5</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -66,7 +67,7 @@
         <label style="text-align:center;">Finanz-Status</label>
         <span style="font-size:24px; font-weight:800; display:block; text-align:center; margin: 5px 0;" id="outSaldo">0,00 €</span>
         <div id="badgeSaldo" class="badge bg-gray">Lade...</div>
-        <div id="badgeTrend" class="badge bg-gray">Lade...</div>
+        <div id="badgeTrend" class="badge bg-gray" style="line-height: 1.4;">Lade...</div>
     </div>
 
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
@@ -142,13 +143,14 @@
             const bufferedMonthly = baseMonthly * 1.10;
 
             const bT = document.getElementById('badgeTrend');
-            bT.innerText = "Prognose: " + (bufferedMonthly * 12).toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
-            // FIX: Abschlagsdynamik Logik
-            if (cfg.pay > bufferedMonthly * 1.15) { bT.className = "badge bg-blue"; bT.innerText += " (💎 Hoch)"; }
-            else if (cfg.pay >= bufferedMonthly - 1) { bT.className = "badge bg-green"; bT.innerText += " (✅ Ideal)"; }
-            else if (cfg.pay >= baseMonthly) { bT.className = "badge bg-orange"; bT.innerText += " (⚠️ Puffer knapp)"; }
-            else { bT.className = "badge bg-red"; bT.innerText += " (🚨 Zu niedrig!)"; }
+            // WIEDER DA: Empfohlene Abschlags Summe
+            bT.innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${bufferedMonthly.toFixed(2)} € / Monat`;
+            
+            if (cfg.pay > bufferedMonthly * 1.15) bT.className = "badge bg-blue";
+            else if (cfg.pay >= bufferedMonthly - 1) bT.className = "badge bg-green";
+            else if (cfg.pay >= baseMonthly) bT.className = "badge bg-orange";
+            else bT.className = "badge bg-red";
 
             const costSoFar = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
@@ -186,7 +188,20 @@
         });
     }
 
-    function doSave() { db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); document.getElementById('newMeter').value = ""; refreshAll(); }
+    function doSave() { 
+        const btn = document.getElementById('saveBtn');
+        db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
+        document.getElementById('newMeter').value = ""; 
+        
+        // WIEDER DA: Bestätigung beim Speichern
+        btn.classList.add('btn-success');
+        btn.innerText = "Gespeichert! ✅";
+        setTimeout(() => {
+            btn.classList.remove('btn-success');
+            refreshAll(); 
+        }, 800);
+    }
+
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
