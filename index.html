@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.83</title>
+    <title>GasZähler Pro v8.3.84</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,45 +13,43 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 10px; width: 100%; }
         
-        .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; }
 
-        /* DER FIX FÜR OBEN: ECHTE TABELLE */
-        .force-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .force-table td { padding: 0 4px; vertical-align: bottom; }
+        /* TABELLEN-ZWANG FÜR DAS LAYOUT OBEN */
+        .force-layout { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .force-layout td { padding: 0 4px; vertical-align: bottom; }
         
         input, textarea { 
-            width: 100%; height: 46px; padding: 10px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none;
+            width: 100%; height: 46px; padding: 10px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff;
         }
 
         label { display: block; margin-bottom: 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
 
-        .result-main { font-size: 34px; font-weight: 800; display: block; text-align: center; margin: 10px 0; color: #1C1C1E; }
+        .result-main { font-size: 34px; font-weight: 800; display: block; text-align: center; margin: 5px 0; color: #1C1C1E; }
         
-        /* AMPEL: Massive Signalwirkung */
+        /* AMPEL-STYLING */
         .badge-box { 
-            display: block; width: 100%; padding: 12px; border-radius: 12px; 
-            font-size: 14px; font-weight: 700; text-align: center; color: white;
-            transition: background 0.3s; margin-top: 5px;
+            display: block; width: 100%; padding: 14px; border-radius: 12px; 
+            font-size: 14px; font-weight: 800; text-align: center; color: white; margin-top: 5px;
         }
 
-        .chart-container { width: 100%; height: 160px; margin-bottom: 15px; }
+        .chart-wrap { width: 100%; height: 160px; margin-bottom: 10px; position: relative; }
 
-        .history-container { max-height: 200px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 10px; }
+        .table-wrap { max-height: 200px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 10px; }
         table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         table.data-table td { padding: 12px 8px; border-bottom: 1px solid #F2F2F7; }
 
-        button.main-btn { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; }
-        .util-row { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-gray { background: var(--ios-gray); color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; }
+        .btn-blue { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; }
+        .btn-util { background: var(--ios-gray); color: white; border: none; padding: 10px; border-radius: 8px; font-size: 12px; flex: 1; }
     </style>
 </head>
 <body>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 18px; margin: 10px 0;">🔥 GasZähler Pro v8.3.83</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 10px 0;">🔥 GasZähler Pro v8.3.84</h1>
 
     <div class="card">
-        <table class="force-table">
+        <table class="force-layout">
             <tr>
                 <td style="width: 45%;"><label>Datum</label><input type="date" id="newDate" oninput="liveUpdate()"></td>
                 <td style="width: 55%;"><label>Stand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()"></td>
@@ -59,54 +57,59 @@
         </table>
         
         <details style="margin-top:15px;">
-            <summary style="color:var(--ios-blue); font-size:13px; font-weight:600; padding: 5px 0;">⚙️ Setup & Tarife</summary>
+            <summary style="color:var(--ios-blue); font-size:13px; font-weight:600; padding: 5px 0;">⚙️ Einstellungen</summary>
             <div style="padding-top:10px;">
                 <label>Tarife (Limit:Cent:Basis)</label>
                 <textarea id="tiers" rows="2" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;">
-                    <div><label>Brennwert</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
+                    <div><label>BW</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.95" oninput="liveUpdate()"></div>
                     <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
                 </div>
-                <label style="margin-top:10px;">Datum 1. Zahlung</label>
-                <input type="date" id="firstPayDate" oninput="liveUpdate()">
+                <label style="margin-top:10px;">1. Zahlung / PIN</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="firstPayDate" oninput="liveUpdate()">
+                    <input type="password" id="pinSetting" oninput="savePin()" placeholder="PIN">
+                </div>
             </div>
         </details>
     </div>
 
-    <div class="card">
+    <div class="card" id="cardSaldo">
         <label style="text-align:center;">Finanz-Saldo (Ist-Stand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge-box" style="background: #ccc;">Berechne...</div>
+        <div id="badgeSaldo" class="badge-box" style="background: var(--ios-gray);">Berechne...</div>
     </div>
 
-    <div class="card">
+    <div class="card" id="cardTrend">
         <label style="text-align:center;">Jahres-Prognose (+10%)</label>
         <span class="result-main" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge-box" style="background: #ccc;">Status</div>
+        <div id="badgeTrend" class="badge-box" style="background: var(--ios-gray);">Berechne...</div>
     </div>
 
-    <button class="main-btn" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
+    <button class="btn-blue" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
-        <div class="chart-container"><canvas id="mainChart"></canvas></div>
-        <div class="history-container">
+        <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+        <div class="table-wrap">
             <table class="data-table"><tbody id="historyTable"></tbody></table>
         </div>
     </div>
 
-    <div class="util-row">
-        <button class="btn-gray" onclick="doExport()">Backup (Copy)</button>
-        <button class="btn-gray" onclick="doImport()">Restore</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn-util" onclick="doExport()">Backup</button>
+        <button class="btn-util" onclick="doImport()">Restore</button>
     </div>
     
-    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin-top:20px; text-decoration:underline; font-size:12px;" onclick="doReset()">♻️ ALLES LÖSCHEN (RESET)</button>
+    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin-top:25px; text-decoration:underline; font-size:12px; padding-bottom:30px;" onclick="doReset()">♻️ ALLES LÖSCHEN</button>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
     let myChart = null;
+
+    function savePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
 
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
@@ -142,17 +145,17 @@
             const yKwh = (totalAvg * 365) * cfg.bw * cfg.zz;
             const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
 
-            // PROGNOSE
+            // PROGNOSE & AMPEL
             const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
             document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
             if(yCost > (cfg.pay * 12)) {
-                bT.style.backgroundColor = "#FF3B30"; bT.innerText = "Erhöhen auf " + Math.round(yCost/12) + " €";
+                bT.style.backgroundColor = "var(--ios-red)"; bT.innerText = "Erhöhen auf " + Math.round(yCost/12) + " €";
             } else {
-                bT.style.backgroundColor = "#34C759"; bT.innerText = "Abschlag passt!";
+                bT.style.backgroundColor = "var(--ios-green)"; bT.innerText = "Abschlag passt!";
             }
 
-            // SALDO
+            // SALDO & AMPEL
             const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
@@ -161,34 +164,36 @@
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
             const bS = document.getElementById('badgeSaldo');
+            const cS = document.getElementById('cardSaldo');
             if(saldo >= 0) {
-                bS.style.backgroundColor = "#34C759"; bS.innerText = "Guthaben verfügbar";
+                bS.style.backgroundColor = "var(--ios-green)"; bS.innerText = "Guthaben verfügbar";
+                cS.style.borderLeftColor = "var(--ios-green)";
             } else {
-                bS.style.backgroundColor = "#FF3B30"; bS.innerText = "Nachzahlung droht";
+                bS.style.backgroundColor = "var(--ios-red)"; bS.innerText = "Nachzahlung droht";
+                cS.style.borderLeftColor = "var(--ios-red)";
             }
 
-            renderTable(wDb, totalAvg); 
-            renderChart(wDb);
+            renderTable(wDb, totalAvg); renderChart(wDb);
         }
     }
 
     function renderTable(data, totalAvg) {
         const tb = document.getElementById('historyTable'); tb.innerHTML = '';
         [...data].reverse().forEach(e => {
-            let pfeil = "→", pCol = "#8E8E93";
+            let pfeil = "→", pCol = "var(--ios-gray)";
             const idx = data.indexOf(e);
             if(idx > 0) {
                 const dD = (new Date(data[idx].d)-new Date(data[idx-1].d))/86400000;
                 const v = dD > 0 ? (data[idx].m-data[idx-1].m)/dD : 0;
-                if(v > totalAvg * 1.05) { pfeil="↗"; pCol="red"; }
-                else if(v < totalAvg * 0.95) { pfeil="↘"; pCol="green"; }
+                if(v > totalAvg * 1.05) { pfeil="↗"; pCol="var(--ios-red)"; }
+                else if(v < totalAvg * 0.95) { pfeil="↘"; pCol="var(--ios-green)"; }
             }
             const style = e.id === 'pre' ? 'font-style:italic; color:var(--ios-blue);' : '';
             tb.innerHTML += `<tr style="${style}">
                 <td>${new Date(e.d).toLocaleDateString()}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
                 <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
-                <td>${e.id==='pre'?'':'<span style="color:red; font-weight:bold;" onclick="delEntry('+e.id+')">✕</span>'}</td>
+                <td>${e.id==='pre'?'':'<span style="color:red; padding:5px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
     }
@@ -213,13 +218,14 @@
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
         document.getElementById('newMeter').value = ""; refreshAll(); 
     }
-    function delEntry(id) { if(confirm("Eintrag unwiderruflich löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
-    function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Daten in Zwischenablage!")); }
-    function doImport() { const s = prompt("JSON-Daten hier einfügen:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Fehler!");} } }
-    function doReset() { if (confirm("ACHTUNG: Alle Daten werden gelöscht!") && prompt("Bitte 'LÖSCHEN' eingeben:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
+    function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
+    function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Backup kopiert!")); }
+    function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
+    function doReset() { if (confirm("ALLES LÖSCHEN?") && prompt("Typ LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
     window.onload = () => {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
+        const pin = localStorage.getItem('gas_pin_v8'); if(pin) document.getElementById('pinSetting').value = pin;
         document.getElementById('newDate').valueAsDate = new Date();
         refreshAll();
     };
