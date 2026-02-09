@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.44</title>
+    <title>GasZähler Pro v8.3.46</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -31,8 +31,10 @@
             margin: 0;
             padding: 20px;
             color: #000;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* CARD DESIGN */
         .card {
             background: var(--ios-card);
             padding: 20px;
@@ -43,8 +45,34 @@
             transition: border-color 0.5s ease;
         }
 
-        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .input-group { flex: 1; }
+        /* INPUTS - KORRIGIERTE GRÖSSEN */
+        .input-row { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 15px; 
+            width: 100%; 
+        }
+
+        .input-group { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        input, textarea {
+            width: 100%;
+            display: block;
+            padding: 12px;
+            border: 1px solid var(--ios-neutral);
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fff;
+            height: 48px;
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        textarea { height: auto; min-height: 60px; padding: 10px; }
 
         label { 
             display: block; 
@@ -55,16 +83,7 @@
             font-weight: 700; 
         }
 
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--ios-neutral);
-            border-radius: 10px;
-            font-size: 16px;
-            background: #fff;
-            height: 48px;
-        }
-
+        /* ERGEBNIS ANZEIGE */
         .result-main {
             font-size: 34px;
             font-weight: 800;
@@ -73,7 +92,7 @@
             letter-spacing: -1px;
         }
 
-        /* AMPEL-SYSTEM */
+        /* AMPEL SYSTEM */
         .badge {
             display: inline-block;
             padding: 8px 14px;
@@ -90,6 +109,7 @@
         .trend-up { color: var(--ios-red); font-weight: bold; }
         .trend-down { color: var(--ios-green); font-weight: bold; }
 
+        /* GRAFIK & TABELLE */
         .chart-container-outer {
             width: 100%;
             background: #fafafa;
@@ -124,6 +144,7 @@
             background: #fff; 
         }
 
+        /* BUTTONS */
         button {
             width: 100%;
             background: var(--ios-blue);
@@ -137,6 +158,8 @@
             margin-top: 10px;
         }
 
+        button:active { opacity: 0.8; }
+
         #lockScreen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--ios-bg); z-index: 10000;
@@ -147,16 +170,16 @@
 <body>
 
 <div id="lockScreen">
-    <h2>Sicherheits-PIN</h2>
+    <h2 style="margin-bottom:20px;">Sicherheits-PIN</h2>
     <input type="password" id="pinInput" style="width:180px; text-align:center; margin-bottom:20px;" inputmode="numeric" placeholder="••••">
     <button onclick="unlockApp()" style="max-width:200px;">Entsperren</button>
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.44</h1>
+    <h1 style="text-align:center; margin-bottom: 25px;">🔥 GasZähler Pro v8.3.46</h1>
 
     <div class="card">
-        <label>Zählerstand eingeben</label>
+        <label>Zählerstand erfassen</label>
         <div class="input-row">
             <div class="input-group">
                 <input type="date" id="newDate" oninput="liveUpdate()">
@@ -183,7 +206,7 @@
                 <input type="date" id="firstPayDate" oninput="liveUpdate()">
                 
                 <label style="margin-top:10px;">App-PIN setzen</label>
-                <input type="password" id="pinSetting" oninput="savePin()" placeholder="PIN vergeben">
+                <input type="password" id="pinSetting" oninput="savePin()" placeholder="Passwort vergeben">
             </div>
         </details>
     </div>
@@ -191,19 +214,19 @@
     <div class="card" id="cardSaldo" style="text-align:center">
         <label>Aktueller Saldo (Ist-Zustand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge">Daten werden geladen...</div>
+        <div id="badgeSaldo" class="badge">Warte auf Daten...</div>
     </div>
 
     <div class="card" id="cardTrend" style="text-align:center">
-        <label>Hochrechnung Jahr (+10% Puffer)</label>
+        <label>Jahres-Prognose (+10% Puffer)</label>
         <span class="result-main" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge">Eingabe erforderlich</div>
+        <div id="badgeTrend" class="badge">Eingabe fehlt</div>
     </div>
 
     <button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
 
     <div class="card">
-        <label>Verbrauchstrend (m³/Tag)</label>
+        <label>Verbrauch m³/Tag</label>
         <div class="chart-container-outer"><canvas id="mainChart"></canvas></div>
         
         <div class="history-scroll">
@@ -211,9 +234,9 @@
                 <thead>
                     <tr>
                         <th>Datum</th>
-                        <th>m³</th>
+                        <th>m³ Stand</th>
                         <th>Trend</th>
-                        <th>Optionen</th>
+                        <th>Aktion</th>
                     </tr>
                 </thead>
                 <tbody id="historyTable"></tbody>
@@ -230,39 +253,30 @@
 </div>
 
 <script>
-    // Initialisierung der Datenbank
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
     let myChart = null;
 
-    // PIN-Sicherheit
+    // PIN LOGIK
     function savePin() {
-        const val = document.getElementById('pinSetting').value;
-        localStorage.setItem('gas_pin_v8', val);
+        localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value);
     }
 
     function unlockApp() {
-        const input = document.getElementById('pinInput').value;
-        const stored = localStorage.getItem('gas_pin_v8');
-        if (input === stored) {
+        if (document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) {
             document.getElementById('lockScreen').style.display = "none";
             refreshAll();
-        } else {
-            alert("PIN ist leider falsch.");
-        }
+        } else { alert("Falscher PIN"); }
     }
 
-    // Refresh-Zyklus
+    // HAUPT LOGIK
     function refreshAll() {
-        // Sortierung sicherstellen
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
-        // Speichern
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
-        // Ansicht aktualisieren
         liveUpdate();
     }
 
     function liveUpdate() {
-        // --- DER ATOMIC RESET (HIER WERDEN DIE WERTE GELEERT) ---
+        // RESET DER ANZEIGE (Löst das Problem beim Löschen)
         document.getElementById('outSaldo').innerText = "0,00 €";
         document.getElementById('outYear').innerText = "0,00 €";
         document.getElementById('badgeTrend').innerText = "Eingabe fehlt";
@@ -270,242 +284,141 @@
         document.getElementById('cardTrend').style.borderColor = "var(--ios-neutral)";
         document.getElementById('cardSaldo').style.borderColor = "var(--ios-neutral)";
 
-        // 1. Konfiguration einlesen
-        const config = {
+        const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
             pay: parseFloat(document.getElementById('pay').value) || 150,
             start: parseFloat(document.getElementById('start').value) || 0,
             tiers: document.getElementById('tiers').value.split('\n').map(l => {
-                const parts = l.split(':').map(Number);
-                return { limit: parts[0], cent: parts[1]/100, base: parts[2] };
+                const p = l.split(':').map(Number);
+                return { limit: p[0], cent: p[1]/100, base: p[2] };
             })
         };
 
-        // 2. Temporäre Arbeits-DB erstellen (inklusive Vorschau-Eingabe)
-        let workingDb = [...db];
-        const meterInput = document.getElementById('newMeter').value;
-        if (meterInput !== "") {
-            workingDb.push({ 
-                d: document.getElementById('newDate').value, 
-                m: parseFloat(meterInput), 
-                id: 'preview' 
-            });
-            workingDb.sort((a,b) => new Date(a.d) - new Date(b.d));
+        // Temporäre Daten für die Live-Vorschau
+        let dDb = [...db];
+        const previewVal = document.getElementById('newMeter').value;
+        if (previewVal !== "") {
+            dDb.push({ d: document.getElementById('newDate').value, m: parseFloat(previewVal), id: 'preview' });
+            dDb.sort((a,b) => new Date(a.d) - new Date(b.d));
         }
 
-        // 3. Wenn Daten vorhanden sind, berechnen
-        if (workingDb.length > 0) {
-            const firstEntry = workingDb[0];
-            const lastEntry = workingDb[workingDb.length - 1];
+        if (dDb.length > 0) {
+            const first = dDb[0];
+            const last = dDb[dDb.length - 1];
+            const totalDays = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
             
-            // Tage seit Start der Aufzeichnung
-            const timeDiff = new Date(lastEntry.d) - new Date(firstEntry.d);
-            const totalDays = Math.max(1, timeDiff / (1000 * 60 * 60 * 24));
-            
-            // Durchschnittlicher Tagesverbrauch in m³
-            let avgDailyMeter = 0;
-            if (workingDb.length > 1) {
-                avgDailyMeter = (lastEntry.m - firstEntry.m) / totalDays;
-            }
+            // Durchschnitt m³/Tag
+            const avgM = dDb.length > 1 ? (last.m - first.m) / totalDays : 0;
 
-            // --- PROGNOSE-BERECHNUNG (AMPEL 1) ---
-            const projectedKwh = (avgDailyMeter * 365) * config.bw * config.zz;
-            const myTier = config.tiers.find(t => projectedKwh <= t.limit) || config.tiers[config.tiers.length - 1];
-            const projectedYearCost = (projectedKwh * myTier.cent) + (myTier.base * 12);
+            // 1. PROGNOSE & AMPEL
+            const yearKwh = (avgM * 365) * cfg.bw * cfg.zz;
+            const tier = cfg.tiers.find(t => yearKwh <= t.limit) || cfg.tiers[cfg.tiers.length - 1];
+            const yearCost = (yearKwh * tier.cent) + (tier.base * 12);
+            document.getElementById('outYear').innerText = yearCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             
-            document.getElementById('outYear').innerText = projectedYearCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-            
-            const costRatio = projectedYearCost / (config.pay * 12);
-            let trendClass = "bg-good";
-            let trendText = "Abschlag passt!";
-            let trendBorder = "var(--ios-green)";
+            const ratio = yearCost / (cfg.pay * 12);
+            let bCl = "bg-good", bTx = "Abschlag passt!", bBord = "var(--ios-green)";
+            if(ratio > 1.15) { bCl="bg-danger"; bTx="Zu niedrig! Empf: "+((yearCost/12)*1.1).toFixed(0)+"€"; bBord="var(--ios-red)"; }
+            else if(ratio > 1.05) { bCl="bg-warn"; bTx="Knappe Deckung"; bBord="var(--ios-orange)"; }
+            document.getElementById('badgeTrend').className = "badge " + bCl;
+            document.getElementById('badgeTrend').innerText = bTx;
+            document.getElementById('cardTrend').style.borderColor = bBord;
 
-            if (costRatio > 1.15) {
-                trendClass = "bg-danger";
-                trendText = "Zu niedrig! Empf: " + ((projectedYearCost/12) * 1.1).toFixed(0) + " €";
-                trendBorder = "var(--ios-red)";
-            } else if (costRatio > 1.05) {
-                trendClass = "bg-warn";
-                trendText = "Knappe Deckung";
-                trendBorder = "var(--ios-orange)";
-            }
+            // 2. SALDO & AMPEL
+            const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
+            const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * totalDays);
+            const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
+            let pMonths = 0; let checkD = new Date(sDate);
+            while(checkD <= new Date(last.d) && pMonths < 12) { pMonths++; checkD.setMonth(checkD.getMonth() + 1); }
+            const saldo = (pMonths * cfg.pay) - costSoFar;
             
-            document.getElementById('badgeTrend').className = "badge " + trendClass;
-            document.getElementById('badgeTrend').innerText = trendText;
-            document.getElementById('cardTrend').style.borderColor = trendBorder;
+            document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            document.getElementById('outSaldo').style.color = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+            document.getElementById('badgeSaldo').className = "badge " + (saldo >= 0 ? "bg-good" : "bg-danger");
+            document.getElementById('badgeSaldo').innerText = saldo >= 0 ? "Im Guthaben" : "Nachzahlung droht";
+            document.getElementById('cardSaldo').style.borderColor = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
 
-            // --- SALDO-BERECHNUNG (AMPEL 2) ---
-            const totalKwhUsed = (lastEntry.m - config.start) * config.bw * config.zz;
-            const realCostsSoFar = (totalKwhUsed * myTier.cent) + ((myTier.base * 12 / 365) * totalDays);
-            
-            const startDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(firstEntry.d);
-            let monthsPaid = 0;
-            let tempDate = new Date(startDate);
-            while (tempDate <= new Date(lastEntry.d) && monthsPaid < 12) {
-                monthsPaid++;
-                tempDate.setMonth(tempDate.getMonth() + 1);
-            }
-
-            const currentSaldo = (monthsPaid * config.pay) - realCostsSoFar;
-            document.getElementById('outSaldo').innerText = currentSaldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-            document.getElementById('outSaldo').style.color = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-            
-            const saldoClass = currentSaldo >= 0 ? "bg-good" : "bg-danger";
-            document.getElementById('badgeSaldo').className = "badge " + saldoClass;
-            document.getElementById('badgeSaldo').innerText = currentSaldo >= 0 ? "Im Guthaben" : "Nachzahlung droht";
-            document.getElementById('cardSaldo').style.borderColor = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-
-            // Historie und Chart zeichnen
-            renderHistory(workingDb, avgDailyMeter);
-            renderBarChart(workingDb);
+            renderTable(dDb, avgM);
+            renderChart(dDb);
         } else {
-            // Leere Datenbank-Behandlung
             if(myChart) myChart.destroy();
-            document.getElementById('historyTable').innerHTML = '<tr><td colspan="4" style="text-align:center">Keine Daten verfügbar.</td></tr>';
+            document.getElementById('historyTable').innerHTML = '<tr><td colspan="4" style="text-align:center">Keine Daten vorhanden.</td></tr>';
         }
     }
 
-    function renderHistory(data, globalAvg) {
-        const table = document.getElementById('historyTable');
-        table.innerHTML = '';
-        
-        // Umgekehrte Reihenfolge (Neueste oben)
-        const reversedData = [...data].reverse();
-        
-        reversedData.forEach((entry) => {
-            let trendSymbol = "→";
-            let trendColorClass = "";
-            
-            const originalIndex = data.indexOf(entry);
-            if (originalIndex > 0) {
-                const diffMeter = data[originalIndex].m - data[originalIndex - 1].m;
-                const diffTime = (new Date(data[originalIndex].d) - new Date(data[originalIndex - 1].d)) / (1000 * 60 * 60 * 24);
-                const currentUsage = diffTime > 0 ? diffMeter / diffTime : 0;
-
-                if (currentUsage > globalAvg * 1.15) {
-                    trendSymbol = "↗︎";
-                    trendColorClass = "trend-up";
-                } else if (currentUsage < globalAvg * 0.85) {
-                    trendSymbol = "↘︎";
-                    trendColorClass = "trend-down";
-                }
+    function renderTable(data, avg) {
+        const tb = document.getElementById('historyTable');
+        tb.innerHTML = '';
+        [...data].reverse().forEach(entry => {
+            let trSym = "→", trCl = "";
+            const idx = data.indexOf(entry);
+            if (idx > 0) {
+                const diffM = data[idx].m - data[idx-1].m;
+                const diffD = (new Date(data[idx].d) - new Date(data[idx-1].d)) / 86400000;
+                const curV = diffD > 0 ? diffM / diffD : 0;
+                if(curV > avg * 1.15) { trSym="↗︎"; trCl="trend-up"; }
+                else if(curV < avg * 0.85) { trSym="↘︎"; trCl="trend-down"; }
             }
-
-            const isPreview = entry.id === 'preview';
-            const row = `
-                <tr style="${isPreview ? 'opacity:0.5; font-style:italic;' : ''}">
-                    <td>${new Date(entry.d).toLocaleDateString()}</td>
-                    <td>${entry.m.toFixed(3)}</td>
-                    <td class="${trendColorClass}">${trendSymbol}</td>
-                    <td>
-                        ${isPreview ? '⏳' : `<button style="background:none; color:red; width:auto; margin:0; padding:0; font-size:18px;" onclick="delEntry(${entry.id})">✕</button>`}
-                    </td>
-                </tr>
-            `;
-            table.innerHTML += row;
+            const isP = entry.id === 'preview';
+            tb.innerHTML += `<tr style="${isP?'opacity:0.5;font-style:italic':''}">
+                <td>${new Date(entry.d).toLocaleDateString()}</td>
+                <td>${entry.m.toFixed(3)}</td>
+                <td class="${trCl}">${trSym}</td>
+                <td>${isP?'⏳':`<button style="background:none;color:red;width:auto;margin:0;padding:0;font-size:18px" onclick="delEntry(${entry.id})">✕</button>`}</td>
+            </tr>`;
         });
     }
 
-    function renderBarChart(data) {
+    function renderChart(data) {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        const labels = [];
-        const values = [];
-
+        const labels = [], values = [];
         for (let i = 1; i < data.length; i++) {
-            const days = (new Date(data[i].d) - new Date(data[i-1].d)) / (1000 * 60 * 60 * 24);
-            const mPerDay = days > 0 ? (data[i].m - data[i-1].m) / days : 0;
-            
+            const days = (new Date(data[i].d) - new Date(data[i-1].d)) / 86400000;
             labels.push(new Date(data[i].d).toLocaleDateString());
-            values.push(mPerDay.toFixed(2));
+            values.push(days > 0 ? ((data[i].m - data[i-1].m) / days).toFixed(2) : 0);
         }
-
         if (myChart) myChart.destroy();
-        
         myChart = new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Verbrauch m³/Tag',
-                    data: values,
-                    backgroundColor: '#007AFF',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
+            data: { labels: labels, datasets: [{ data: values, backgroundColor: '#007AFF', borderRadius: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     }
 
     function doSave() {
         const m = parseFloat(document.getElementById('newMeter').value);
-        if (isNaN(m)) {
-            alert("Bitte geben Sie einen gültigen Zählerstand ein.");
-            return;
-        }
-        db.push({ 
-            d: document.getElementById('newDate').value, 
-            m: m, 
-            id: Date.now() 
-        });
+        if (isNaN(m)) return;
+        db.push({ d: document.getElementById('newDate').value, m: m, id: Date.now() });
         document.getElementById('newMeter').value = "";
         refreshAll();
     }
 
     function delEntry(id) {
-        if (confirm("Diesen Eintrag unwiderruflich löschen?")) {
-            db = db.filter(item => item.id !== id);
-            refreshAll();
-        }
+        if (confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); }
     }
 
     function doExport() {
-        const json = JSON.stringify(db);
-        navigator.clipboard.writeText(json).then(() => alert("Sicherungskopie in die Zwischenablage kopiert!"));
+        navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!"));
     }
 
     function doImport() {
-        const json = prompt("Fügen Sie hier Ihren Backup-String (JSON) ein:");
-        if (json) {
-            try {
-                db = JSON.parse(json);
-                refreshAll();
-            } catch(e) {
-                alert("Ungültiges Format!");
-            }
-        }
+        const s = prompt("JSON:");
+        if (s) { try { db = JSON.parse(s); refreshAll(); } catch(e) { alert("Fehler!"); } }
     }
 
     function doReset() {
-        if (confirm("Möchten Sie wirklich die gesamte Datenbank löschen?") && prompt("Schreiben Sie LÖSCHEN zur Bestätigung") === "LÖSCHEN") {
-            localStorage.clear();
-            location.reload();
-        }
+        if (confirm("ALLES LÖSCHEN?") && prompt("LÖSCHEN") === "LÖSCHEN") { localStorage.clear(); location.reload(); }
     }
 
     window.onload = () => {
-        // Letzte Einstellungen laden
-        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(key => {
-            const saved = localStorage.getItem('gas_pref_' + key);
-            if (saved && document.getElementById(key)) {
-                document.getElementById(key).value = saved;
-            }
+        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(k => {
+            const v = localStorage.getItem('gas_pref_' + k);
+            if (v && document.getElementById(k)) document.getElementById(k).value = v;
         });
-
-        // Heutiges Datum als Standard
         document.getElementById('newDate').valueAsDate = new Date();
-        
-        // PIN-Check
-        if (localStorage.getItem('gas_pin_v8')) {
-            document.getElementById('lockScreen').style.display = "flex";
-        } else {
-            refreshAll();
-        }
+        if (localStorage.getItem('gas_pin_v8')) document.getElementById('lockScreen').style.display = "flex";
+        else refreshAll();
     };
 </script>
 </body>
