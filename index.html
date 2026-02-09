@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.93</title>
+    <title>GasZähler Pro v8.3.94</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -33,7 +33,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.93</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.94</h1>
 
     <div class="card" id="inputCard">
         <table class="fixed-table">
@@ -65,13 +65,13 @@
     </div>
 
     <div class="card">
-        <label style="text-align:center;">Finanz-Saldo (inkl. 10% Puffer)</label>
+        <label style="text-align:center;">Finanz-Saldo (Echtzeit)</label>
         <span style="font-size:24px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
         <div id="badgeSaldo" class="badge bg-gray">Warte...</div>
     </div>
 
     <div class="card">
-        <label style="text-align:center;">Jahres-Prognose (inkl. 10% Puffer)</label>
+        <label style="text-align:center;">Jahres-Prognose (+10%)</label>
         <span style="font-size:24px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
         <div id="badgeTrend" class="badge bg-gray">Warte...</div>
     </div>
@@ -110,19 +110,22 @@
     }
 
     function liveUpdate() {
-        const mVal = parseFloat(document.getElementById('newMeter').value);
+        const mInput = document.getElementById('newMeter');
+        const mVal = parseFloat(mInput.value);
         const dVal = document.getElementById('newDate').value;
         const saveBtn = document.getElementById('saveBtn');
+        
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
             pay: parseFloat(document.getElementById('pay').value) || 0,
             start: parseFloat(document.getElementById('start').value) || 0,
             tiers: document.getElementById('tiers').value.split('\n').map(l => {
-                const p = l.split(':').map(Number); return { limit: p[0]||999999, cent: p[1]/100||0, base: p[2]||0 };
+                const p = l.split(':').map(Number); return { limit: p[0]||999999, cent: (p[1]||0)/100, base: p[2]||0 };
             })
         };
 
+        // CHRONO-PLAUSI
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid && db.length > 0) {
             const newD = new Date(dVal);
@@ -140,36 +143,41 @@
 
         if (wDb.length > 0) {
             const last = wDb[wDb.length-1], first = wDb[0];
-            const days = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
-            const totalAvg = (last.m - first.m) / days;
-            const yKwh = (totalAvg * 365) * cfg.bw * cfg.zz;
-            const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const daysUsed = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
+            
+            // kWh Berechnung
+            const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
+            const avgKwhPerDay = (last.m - first.m) / daysUsed * cfg.bw * cfg.zz;
+            const projectedYearKwh = avgKwhPerDay * 365;
 
-            // 1. JAHRES-PROGNOSE (inkl. 10% Puffer)
-            const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
-            document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            // Tarif-Fallen-Check & Kosten (PROGNOSE)
+            const tierY = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const yearCosts = (projectedYearKwh * tierY.cent * 1.10) + (tierY.base * 12);
+            
+            document.getElementById('outYear').innerText = yearCosts.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if(yCost > (cfg.pay * 12)) { bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yCost/12)+"€)"; }
+            if(yearCosts > (cfg.pay * 12)) { bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yearCosts/12)+"€)"; }
             else { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt"; }
 
-            // 2. FINANZ-SALDO (inkl. 10% Puffer auf verbrauchte kWh)
-            const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
-            const costSoFar = (kwhSoFar * tier.cent * 1.1) + ((tier.base * 12 / 365) * days);
+            // SALDO BERECHNUNG (Live)
+            const tierS = cfg.tiers.find(t => (totalKwh / daysUsed * 365) <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const actualCost = (totalKwh * tierS.cent * 1.10) + (tierS.base * (daysUsed / 30.44)); 
+            
+            // Zahlungs-Monate
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
-            const saldo = (pMonths * cfg.pay) - costSoFar;
             
+            const saldo = (pMonths * cfg.pay) - actualCost;
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
             if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
             else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
 
-            renderTable(wDb, totalAvg); renderChart(wDb);
+            renderTable(wDb, avgKwhPerDay / (cfg.bw * cfg.zz)); renderChart(wDb);
         }
     }
 
-    // ... (restliche Render-Funktionen identisch zu v8.3.92) ...
-    function renderTable(data, totalAvg) {
+    function renderTable(data, totalAvgM3) {
         const tb = document.getElementById('historyTable'); tb.innerHTML = '';
         [...data].reverse().forEach(e => {
             let pfeil = "→", pCol = "var(--ios-gray)";
@@ -177,8 +185,8 @@
             if(idx > 0) {
                 const dD = (new Date(data[idx].d)-new Date(data[idx-1].d))/86400000;
                 const v = dD > 0 ? (data[idx].m-data[idx-1].m)/dD : 0;
-                if(v > totalAvg * 1.05) { pfeil="↗"; pCol="var(--ios-red)"; }
-                else if(v < totalAvg * 0.95) { pfeil="↘"; pCol="var(--ios-green)"; }
+                if(v > totalAvgM3 * 1.05) { pfeil="↗"; pCol="var(--ios-red)"; }
+                else if(v < totalAvgM3 * 0.95) { pfeil="↘"; pCol="var(--ios-green)"; }
             }
             tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
