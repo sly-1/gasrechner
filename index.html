@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.0</title>
+    <title>GasZähler Pro v8.5.1</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -11,29 +11,51 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; padding-bottom: 50px; }
+        
+        .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
+        
+        /* TABELLEN-SCROLL-LOGIK */
+        .scroll-area { 
+            max-height: 380px; 
+            overflow-y: auto; 
+            background: #fff; 
+            border-radius: 8px; 
+            border: 1px solid #eee;
+            -webkit-overflow-scrolling: touch; /* Flüssiges Scrollen auf iOS */
+        }
+        
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .data-table th { 
+            background: #f8f8f8; 
+            padding: 10px 4px; 
+            font-size: 10px; 
+            color: var(--ios-gray); 
+            text-transform: uppercase; 
+            border-bottom: 1px solid #eee; 
+            position: sticky; 
+            top: 0; 
+            z-index: 5;
+        }
+        .data-table td { padding: 12px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
+
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         input, textarea { width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; }
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
-        .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-blue { background-color: var(--ios-blue) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
-        .scroll-area { max-height: 400px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table th { background: #f8f8f8; padding: 10px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
-        .data-table td { padding: 12px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
-        .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: background 0.2s; margin: 5px 0; cursor: pointer; }
-        .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
+        .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; margin: 5px 0; cursor: pointer; }
+        .btn-main:disabled { background: #D1D1D6; color: #8E8E93; }
         .btn-warn { background: var(--ios-red) !important; }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.0</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.1</h1>
 
     <div class="card" id="inputCard">
         <table class="fixed-table">
@@ -54,12 +76,8 @@
                     <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
                 </div>
-                <table class="fixed-table" style="margin-top:8px;">
-                    <tr>
-                        <td><label>1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()"></td>
-                        <td><label>PIN</label><input type="password" id="pinSetting" oninput="savePin()" placeholder="****"></td>
-                    </tr>
-                </table>
+                <input type="date" id="firstPayDate" style="margin-top:8px;" oninput="liveUpdate()">
+                <input type="password" id="pinSetting" style="margin-top:8px;" oninput="savePin()" placeholder="PIN">
             </div>
         </details>
     </div>
@@ -79,10 +97,10 @@
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
-        <label style="text-align:center; display:block; margin-bottom:10px;">Historie & Verbrauch</label>
+        <label style="text-align:center; display:block; margin-bottom:10px;">Historie & Trend</label>
         <div class="scroll-area">
             <table class="data-table">
-                <thead><tr><th>Datum</th><th>Stand</th><th>m³/Tag</th><th>Del</th></tr></thead>
+                <thead><tr><th>Datum</th><th>Stand</th><th>Trend</th><th>m³/Tag</th><th>Del</th></tr></thead>
                 <tbody id="historyTable"></tbody>
             </table>
         </div>
@@ -92,7 +110,6 @@
         <button style="flex:1; background:var(--ios-gray); color:white; border:none; padding:8px; border-radius:6px; font-size:11px;" onclick="doExport()">Backup</button>
         <button style="flex:1; background:var(--ios-gray); color:white; border:none; padding:8px; border-radius:6px; font-size:11px;" onclick="doImport()">Restore</button>
     </div>
-    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">♻️ SYSTEM-RESET</button>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
@@ -123,15 +140,14 @@
             })
         };
 
+        // Validierung
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid && db.length > 0) {
             const newD = new Date(dVal);
             const prev = db.reduce((p, c) => (new Date(c.d) < newD && (!p || new Date(c.d) > new Date(p.d))) ? c : p, null);
             const next = db.reduce((n, c) => (new Date(c.d) > newD && (!n || new Date(c.d) < new Date(n.d))) ? c : n, null);
-            if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert < " + prev.m; }
-            else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert > " + next.m; }
-            else { saveBtn.innerText = "💾 Stand speichern"; }
-            if(isInvalid) saveBtn.classList.add('btn-warn'); else saveBtn.classList.remove('btn-warn');
+            if(prev && mVal < prev.m) isInvalid = true;
+            else if(next && mVal > next.m) isInvalid = true;
         }
         saveBtn.disabled = isInvalid;
 
@@ -147,45 +163,46 @@
 
             const tier = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
             const yearBase = (projectedYearKwh * tier.cent) + (tier.base * 12);
-            const yearBuffered = (projectedYearKwh * tier.cent * 1.10) + (tier.base * 12);
-            const neededPayBuffered = yearBuffered / 12;
-
+            const yearBuffered = yearBase * 1.10;
+            
             document.getElementById('outYear').innerText = yearBuffered.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if (cfg.pay > neededPayBuffered * 1.15) { bT.className = "badge bg-blue"; bT.innerText = "💎 Überzahlung (>15%)"; }
-            else if (cfg.pay >= neededPayBuffered - 0.5) { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag ideal"; }
-            else if (cfg.pay >= (yearBase / 12)) { bT.className = "badge bg-orange"; bT.innerText = "⚠️ Puffer knapp"; }
-            else { bT.className = "badge bg-red"; bT.innerText = "🚨 Anpassung nötig"; }
+            if (cfg.pay > (yearBuffered/12) * 1.15) { bT.className = "badge bg-blue"; bT.innerText = "💎 Hohe Überzahlung"; }
+            else if (cfg.pay >= (yearBuffered/12) - 0.5) { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag ideal"; }
+            else { bT.className = "badge bg-red"; bT.innerText = "🚨 Erhöhen!"; }
 
             const actualCostBuffered = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
             const saldo = (pMonths * cfg.pay) - actualCostBuffered;
-            
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            
             const bS = document.getElementById('badgeSaldo');
-            if (saldo > (actualCostBuffered * 0.15)) { bS.className = "badge bg-blue"; bS.innerText = "💎 Hohes Guthaben"; }
-            else if (saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Im Budget"; }
-            else { bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus"; }
+            if (saldo > 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; }
+            else { bS.className = "badge bg-red"; bS.innerText = "🚨 Nachzahlung"; }
 
-            renderTable(wDb);
+            renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz));
         }
     }
 
-    function renderTable(data) {
+    function renderTable(data, totalAvgM3) {
         const tb = document.getElementById('historyTable'); tb.innerHTML = '';
         [...data].reverse().forEach(e => {
             const idx = data.indexOf(e);
-            let m3Tag = "-";
+            let m3Tag = "0.00", pfeil = "→", pCol = "var(--ios-gray)";
             if(idx > 0) {
                 const diffD = (new Date(data[idx].d)-new Date(data[idx-1].d))/86400000;
-                m3Tag = diffD > 0 ? ((data[idx].m-data[idx-1].m)/diffD).toFixed(2) : "0.00";
+                const v = diffD > 0 ? (data[idx].m-data[idx-1].m)/diffD : 0;
+                m3Tag = v.toFixed(2);
+                if(v > totalAvgM3 * 1.05) { pfeil="↗"; pCol="var(--ios-red)"; }
+                else if(v < totalAvgM3 * 0.95) { pfeil="↘"; pCol="var(--ios-green)"; }
             }
             tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
+                <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
                 <td>${m3Tag}</td>
-                <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);font-weight:bold;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
+                <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
     }
@@ -199,7 +216,6 @@
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
-    function doReset() { if (confirm("ALLES LÖSCHEN?") && prompt("Typ LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
     window.onload = () => {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
