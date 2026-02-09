@@ -1,40 +1,63 @@
-# ⛽ GasZähler Pro v8.3.10 – Ultimate Control
+# ⛽ GasZähler Pro v8.3.11 – Ultimate Control Edition
 
-GasZähler Pro ist eine hochoptimierte Progressive Web App (PWA), die speziell für die präzise Überwachung von Gasverbrauch und Heizkosten entwickelt wurde. Sie kombiniert technische Genauigkeit mit intuitiven Finanz-Analysen.
+**GasZähler Pro** ist eine hochpräzise, datenschutzorientierte Progressive Web App (PWA), die speziell für Hausbesitzer und Mieter entwickelt wurde, um die volle Kontrolle über Gaskosten und Verbrauchsverhalten zu behalten. 
 
-## 🌟 Top-Features (v8.3.10)
-
-### 🛡️ Daten-Integrität & Plausibilität
-* **Rücklauf-Schutz:** Die App erkennt unlogische Eingaben. Ist ein eingegebener Zählerstand niedriger als der vorherige, wird die Speicherung blockiert und das Feld markiert.
-* **Live-Vorschau:** Berechnungen werden bereits während der Eingabe im "Draft-Modus" (ausgegraut) angezeigt, um Fehler vor dem Speichern zu vermeiden.
-
-### 💰 Intelligentes Tarif-Management
-* **Bestpreis-Automatik:** Vollautomatische Berechnung des günstigsten Tarifs bei Anbietern mit verbrauchsabhängigen Preisstaffeln.
-* **Frei konfigurierbare Staffeln:** Tarife können direkt in den Einstellungen im Format `Limit:Arbeitspreis:Grundpreis` hinterlegt werden (z.B. für die 6.000 kWh Grenze).
-* **Brennwert & z-Zahl:** Berücksichtigung technischer Faktoren zur exakten Umrechnung von m³ in kWh.
-
-### 🚦 Visuelles Feedback (Doppel-Ampel)
-* **Konto-Status:** Sofortige Anzeige, ob du aktuell ein Guthaben (Grün) hast oder eine Nachzahlung (Rot) droht.
-* **Abschlags-Check:** Die Jahresprognose bewertet deinen monatlichen Abschlag:
-    * 🟦 **Blau:** Abschlag deutlich zu hoch.
-    * 🟩 **Grün:** Abschlag ideal gewählt.
-    * 🟧 **Orange:** Knapp kalkuliert.
-    * 🟥 **Rot:** Abschlag muss dringend erhöht werden.
-
-### 📊 Analyse & Trends
-* **Trend-Indikatoren:** Pfeile (↗︎, ↘︎, →) vergleichen deinen aktuellen Tagesverbrauch mit dem historischen Durchschnitt.
-* **Sicherer Abschlag:** Berechnet basierend auf der Prognose einen empfohlenen Abschlag inkl. 10% Sicherheitspuffer.
-* **Interaktive Historie:** Grafische Darstellung des Verbrauchsverlaufs mittels Chart.js.
-
-## ⚙️ Einrichtung der Preis-Staffeln
-In den Einstellungen kannst du deine Tarife zeilenweise definieren:
-`6000:12.80:5.36` (Stufe 1: bis 6.000 kWh, 12.8 ct, 5.36 € Grundpreis)
-`99999:11.79:10.41` (Stufe 2: alles darüber, 11.79 ct, 10.41 € Grundpreis)
-
-## 🔒 Privatsphäre & Sicherheit
-* **Offline-First:** Alle Daten verbleiben im `LocalStorage` deines Geräts. Keine Cloud-Anbindung, kein Tracking.
-* **App-Lock:** Optionaler Schutz durch eine 4-stellige PIN beim App-Start.
-* **Backup:** Einfacher Export/Import der gesamten Historie als Text-String.
+Keine Cloud, kein Abo, keine Datenweitergabe – alles bleibt lokal auf deinem Gerät.
 
 ---
-*Optimiert für die Installation als Web-App auf dem Homescreen (iOS & Android).*
+
+## 🚀 Die Highlights der v8.3.11
+
+### 1. Intelligente Finanz-Ampel (Dual-Status)
+Die App bewertet deine finanzielle Situation in Echtzeit auf zwei Ebenen:
+* **Der Kontostand:** Vergleicht gezahlte Abschläge mit verbrauchtem Gas. 
+    * 🟢 **Grün:** Du hast ein Guthaben.
+    * 🔴 **Rot:** Du bist im Minus (Nachzahlungsgefahr).
+* **Die Prognose:** Analysiert, ob dein monatlicher Abschlag für das restliche Jahr reicht.
+    * 🔵 **Blau:** Abschlag viel zu hoch (Geld verschenkt).
+    * 🟢 **Grün:** Abschlag ist perfekt eingestellt.
+    * 🟠 **Orange:** Warnung, es könnte knapp werden.
+    * 🔴 **Rot:** Sofortige Erhöhung empfohlen, um Nachzahlungen zu vermeiden.
+
+### 2. Bestpreis-Abrechnungs-Engine
+Viele Gasanbieter nutzen Preisstaffeln (z.B. günstigerer Arbeitspreis ab 6.000 kWh). 
+* Die App prüft bei jedem Eintrag automatisch, in welche Staffel deine Jahresprognose fällt.
+* Die Kosten werden sofort auf Basis des voraussichtlich günstigsten Tarifs berechnet.
+
+### 3. Daten-Integrität (Plausibilitäts-Check)
+Ein Gaszähler läuft niemals rückwärts. 
+* **Schutzfunktion:** Die App blockiert Eingaben, die niedriger als der letzte gespeicherte Stand sind.
+* **Visuelles Feedback:** Das Eingabefeld färbt sich rot, falls ein Tippfehler vorliegt.
+
+### 4. Optimierte Benutzeroberfläche
+* **Scrollable History:** Die Tabellenansicht ist in einem festen Fenster gekapselt. Auch nach Jahren der Nutzung bleibt die App kompakt und der "Speichern"-Button sofort erreichbar.
+* **Sticky Header:** Die Spaltenüberschriften bleiben beim Scrollen der Historie immer sichtbar.
+* **Live-Preview:** Alle Berechnungen (Guthaben, Prognose) werden bereits *während* des Tippens als "Vorschau" (kursiv/gegraut) angezeigt.
+
+---
+
+## 🛠 Technische Details & Einrichtung
+
+### Umrechnungsformel
+Die App berechnet die thermische Energie nach der Standardformel:
+$kWh = m^3 \times Brennwert \times Zustandszahl$
+
+### Preis-Staffeln konfigurieren
+Trage deine Tarife in den Einstellungen wie folgt ein (Limit:Cent:Grundpreis):
+`6000:12.80:5.36` (Bis 6.000 kWh)
+`99999:11.79:10.41` (Ab 6.001 kWh)
+
+### Installation als App
+1.  Öffne die HTML-Datei in deinem mobilen Browser (Safari/Chrome).
+2.  Wähle **"Zum Home-Bildschirm hinzufügen"**.
+3.  Die App startet nun ohne Browser-Leiste im Vollbildmodus.
+
+---
+
+## 🔒 Datenschutz & Sicherheit
+* **Lokal:** Alle Daten werden im `LocalStorage` deines Browsers gespeichert.
+* **PIN-Schutz:** Aktiviere in den Einstellungen eine 4-stellige PIN, um unbefugten Zugriff zu verhindern.
+* **Backup-System:** Nutze die Export-Funktion, um deine Daten als Text-String zu sichern (z.B. in einer Notiz-App).
+
+---
+*Entwickelt für maximale Transparenz in Zeiten steigender Energiekosten.*
