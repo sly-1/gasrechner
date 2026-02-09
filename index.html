@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.70</title>
+    <title>GasZähler Pro v8.3.71</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -15,14 +15,37 @@
         
         .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid var(--ios-neutral); }
 
-        /* TABELLEN-LAYOUT FÜR INPUTS (BOMBENFEST) */
-        .input-table { width: 100%; border-spacing: 5px; border-collapse: separate; margin-left: -5px; }
-        .input-table td { width: 50%; vertical-align: top; padding: 0; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; font-size: 16px; background: #fff; height: 48px; outline: none; }
+        /* DER DEFINITIVE GRID-FIX FÜR 50/50 OBEN */
+        .input-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            width: 100%; 
+        }
+        .input-group { min-width: 0; } /* Verhindert das Ausbrechen bei langem Inhalt */
+        
+        input, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--ios-neutral); 
+            border-radius: 10px; 
+            font-size: 16px; 
+            background: #fff; 
+            height: 48px; 
+            appearance: none; -webkit-appearance: none;
+        }
+        
         label { display: block; margin-bottom: 4px; font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
 
-        /* NATIVES SCROLLEN OHNE ÜBERLAGERUNG */
-        .scroll-wrapper { width: 100%; overflow-x: scroll; background: #fff; border-radius: 10px; border: 1px solid var(--ios-gray); -webkit-overflow-scrolling: touch; }
+        /* SCROLL-BEREICH DIAGRAMM */
+        .scroll-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+            background: #fff; 
+            border-radius: 10px; 
+            border: 1px solid var(--ios-gray); 
+            -webkit-overflow-scrolling: touch; 
+        }
         .chart-area { height: 220px; width: 1000px; padding: 10px; }
 
         .table-scroll-container { max-height: 250px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--ios-gray); background: #fff; }
@@ -34,7 +57,6 @@
         .badge { display: block; width: fit-content; margin: 5px auto; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
         .bg-good { background: #E7F9ED; color: var(--ios-green); }
         .bg-danger { background: #FFEBEB; color: var(--ios-red); }
-        .bg-info { background: #E5F1FF; color: var(--ios-blue); }
 
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         button:disabled { opacity: 0.4; }
@@ -50,16 +72,20 @@
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0;">🔥 GasZähler Pro v8.3.70</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0;">🔥 GasZähler Pro v8.3.71</h1>
 
     <div class="card">
-        <table class="input-table">
-            <tr>
-                <td><label>Datum</label><input type="date" id="newDate" oninput="liveUpdate()"></td>
-                <td><label>Stand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()"></td>
-            </tr>
-        </table>
-        <div id="plausiError" style="color:var(--ios-red); font-size:10px; display:none; margin-top:4px; font-weight:bold; text-align:right; padding-right:5px;">Wert passt nicht!</div>
+        <div class="input-grid">
+            <div class="input-group">
+                <label>Datum</label>
+                <input type="date" id="newDate" oninput="liveUpdate()">
+            </div>
+            <div class="input-group">
+                <label>Stand (m³)</label>
+                <input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()">
+                <div id="plausiError" style="color:var(--ios-red); font-size:9px; display:none; margin-top:2px; font-weight:bold;">Wert passt nicht!</div>
+            </div>
+        </div>
         
         <details style="margin-top:10px;">
             <summary style="color:var(--ios-blue); font-size:12px; font-weight:700; cursor:pointer; padding: 5px 0;">⚙️ Einstellungen & Backup</summary>
