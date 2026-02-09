@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.25</title>
+    <title>GasZähler Pro v8.3.27</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -32,7 +32,23 @@
             -webkit-font-smoothing: antialiased; 
         }
 
-        /* SICHERHEITSEBENE */
+        /* VALIDIERUNGS-STYLES */
+        .input-error { 
+            border: 2px solid var(--ios-red) !important; 
+            background-color: #FFF5F5 !important; 
+        }
+        
+        .error-hint { 
+            color: var(--ios-red); 
+            font-size: 11px; 
+            font-weight: 700; 
+            margin-top: -8px; 
+            margin-bottom: 12px; 
+            display: none; 
+            padding-left: 5px;
+        }
+
+        /* LOCK SCREEN */
         #lockScreen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--ios-bg); z-index: 10000; display: none; 
@@ -44,7 +60,7 @@
             border-radius: 15px; border: 2px solid var(--ios-neutral); margin-bottom: 20px; 
         }
 
-        /* LAYOUT & CARDS */
+        /* CARDS & UI */
         .card { 
             background: var(--ios-card); padding: 18px; border-radius: 14px; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; 
@@ -56,7 +72,6 @@
             color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; 
         }
 
-        /* iOS DATUMS-SYMMETRIE FIX */
         input, textarea, select { 
             width: 100% !important; 
             max-width: 100% !important;
@@ -66,7 +81,6 @@
             -webkit-appearance: none; appearance: none;
         }
 
-        /* AMPEL & STATUS-INDIKATOREN */
         .badge { 
             display: inline-block; padding: 8px 14px; border-radius: 20px; 
             font-size: 12px; font-weight: 700; border: 1px solid transparent; 
@@ -119,6 +133,12 @@
             font-weight: 600; cursor: pointer; 
         }
 
+        button:disabled { 
+            background: var(--ios-neutral); 
+            color: #888;
+            cursor: not-allowed; 
+        }
+
         #toast { 
             position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-150px); 
             background: rgba(0,0,0,0.85); color: white; padding: 14px 28px; 
@@ -140,18 +160,21 @@
     <div id="main">
         <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px;">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--ios-orange)"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.25
+            GasZähler Pro v8.3.27
         </h1>
 
         <div class="card">
-            <label>Neue Ablesung</label>
+            <label>Aktuelle Ablesung</label>
             <div style="display: flex; gap: 10px;">
                 <input type="date" id="newDate">
-                <input type="number" id="newMeter" step="0.001" placeholder="Stand in m³" oninput="liveUpdate()">
+                <div style="flex:1;">
+                    <input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()">
+                    <div id="errorHint" class="error-hint">Wert muss höher als letzter Stand sein!</div>
+                </div>
             </div>
             
             <details style="margin-top: 10px;">
-                <summary style="color:var(--ios-blue); font-size:13px; cursor:pointer; font-weight:700; padding: 5px 0;">⚙️ Erweiterte Konfiguration</summary>
+                <summary style="color:var(--ios-blue); font-size:13px; cursor:pointer; font-weight:700; padding: 5px 0;">⚙️ Einstellungen & Tarife</summary>
                 <div style="margin-top:10px; border-top:1px solid #eee; padding-top:15px;">
                     <label>Preistabelle (Limit : Cent : Grundpreis)</label>
                     <textarea id="tiers" rows="2" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
@@ -159,35 +182,35 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div><label>Brennwert</label><input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()"></div>
                         <div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()"></div>
-                        <div><label>Ist-Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
-                        <div><label>Start m³</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
+                        <div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
+                        <div><label>Anfangsstand</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
                     </div>
                     
-                    <label>Datum der ersten Abschlagszahlung</label>
+                    <label>Datum der ersten Zahlung</label>
                     <input type="date" id="firstPayDate" oninput="liveUpdate()">
                     
-                    <label>App-Zugangs-PIN</label>
-                    <input type="password" id="pinSetting" placeholder="Kein PIN gesetzt" oninput="updatePin()">
+                    <label>Sicherheits-PIN</label>
+                    <input type="password" id="pinSetting" placeholder="Nicht gesetzt" oninput="updatePin()">
                 </div>
             </details>
         </div>
 
         <div class="card" id="cardSaldo" style="text-align:center">
-            <label>Aktueller Saldo (Bisher gezahlt vs. Kosten)</label>
+            <label>Aktueller Finanz-Saldo</label>
             <span class="result-main" id="outSaldo">0,00 €</span>
             <div id="badgeSaldo" class="badge">Daten werden berechnet...</div>
         </div>
 
         <div class="card" id="cardTrend" style="text-align:center">
-            <label>Jahres-Trend & Empfehlung (+10% Puffer)</label>
+            <label>Jahres-Trend (inkl. 10% Puffer)</label>
             <span class="result-main" id="outYear">0,00 €</span>
-            <div id="badgeTrend" class="badge">Bitte Zählerstand eingeben</div>
+            <div id="badgeTrend" class="badge">Eingabe erforderlich</div>
         </div>
 
-        <button id="saveBtn" onclick="doSave()">💾 Aktuellen Stand speichern</button>
+        <button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
 
         <div class="card">
-            <label>Verbrauchsverlauf (m³ pro Tag)</label>
+            <label>Verbrauchsanalyse (m³/Tag)</label>
             <div class="chart-container-outer">
                 <div class="y-axis-labels"><span>Max</span><span>Ø</span><span>0</span></div>
                 <div class="chart-viewport" id="chartView">
@@ -206,18 +229,17 @@
         </div>
 
         <div style="display:flex; gap:10px; margin-top:10px;">
-            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doExport()">Backup</button>
-            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doImport()">Restore</button>
+            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doExport()">Export</button>
+            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doImport()">Import</button>
         </div>
         
-        <button style="background:none; color:var(--ios-red); border:none; width:100%; margin-top:25px; font-size:13px; font-weight:600;" onclick="doReset()">⚠️ KOMPLETTE DATENBANK LÖSCHEN</button>
+        <button style="background:none; color:var(--ios-red); border:none; width:100%; margin-top:25px; font-size:12px; font-weight:600;" onclick="doReset()">⚠️ GESAMTE DATENBANK LÖSCHEN</button>
     </div>
 
     <script>
         let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
         let myChart = null;
 
-        // PREIS-STAFFEL-LOGIK
         function getActiveTier(kwh, tiers) {
             for (let t of tiers) {
                 if (kwh <= t.limit) return t;
@@ -225,9 +247,7 @@
             return tiers[tiers.length - 1];
         }
 
-        // KERN-BERECHNUNG
         function liveUpdate() {
-            // Speichern der Einstellungen
             ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
                 localStorage.setItem('gas_pref_' + id, document.getElementById(id).value);
             });
@@ -243,11 +263,24 @@
                 })
             };
 
+            // VALIDIERUNG GEGEN RÜCKWÄRTS-EINGABE
             const meterIn = document.getElementById('newMeter');
-            const lastVal = db.length > 0 ? db[db.length-1].m : 0;
-            document.getElementById('saveBtn').disabled = meterIn.value === "" || parseFloat(meterIn.value) < lastVal;
+            const errorHint = document.getElementById('errorHint');
+            const lastVal = db.length > 0 ? db[db.length-1].m : cfg.start;
+            const inputVal = parseFloat(meterIn.value);
 
-            const curM = meterIn.value !== "" ? parseFloat(meterIn.value) : (db.length > 0 ? lastVal : null);
+            let isValid = true;
+            if (meterIn.value !== "" && inputVal <= lastVal) {
+                isValid = false;
+                meterIn.classList.add('input-error');
+                errorHint.style.display = "block";
+            } else {
+                meterIn.classList.remove('input-error');
+                errorHint.style.display = "none";
+            }
+            document.getElementById('saveBtn').disabled = !isValid || meterIn.value === "";
+
+            const curM = meterIn.value !== "" ? inputVal : (db.length > 0 ? lastVal : null);
             const curD = document.getElementById('newDate').value;
 
             if (curM !== null && db.length > 0) {
@@ -258,7 +291,7 @@
                 const tier = getActiveTier(totalKwh, cfg.tiers);
                 const costNow = (totalKwh * tier.cent) + ((tier.base * 12 / 365) * daysTotal);
                 
-                // 1. SALDO-BERECHNUNG
+                // SALDO
                 const sPay = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(db[0].d);
                 let pCnt = 0; 
                 let cD = new Date(sPay);
@@ -277,35 +310,32 @@
                 bS.className = "badge " + (currentSaldo >= 0 ? "bg-good" : "bg-danger");
                 document.getElementById('cardSaldo').style.borderColor = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
 
-                // 2. PROGNOSE & 10% PUFFER-EMPFEHLUNG
+                // PROGNOSE & TEXTE
                 const yearKwh = (globalAvg * 365) * cfg.bw * cfg.zz;
                 const yTier = getActiveTier(yearKwh, cfg.tiers);
                 const yearCost = (yearKwh * yTier.cent) + (yTier.base * 12);
-                
-                // Berechnung des Abschlags inkl. 10% Puffer
-                const recPay = (yearCost / 12) * 1.10;
+                const recPay = (yearCost / 12) * 1.10; // +10% Puffer
                 
                 document.getElementById('outYear').innerText = yearCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
                 
                 const ratio = yearCost / (cfg.pay * 12);
                 let tCl, tTx;
-                
+
                 if (ratio > 1.15) { 
-                    tCl = "bg-danger"; tTx = "Zu niedrig! Neu-Soll: " + recPay.toFixed(0) + " €"; 
+                    tCl = "bg-danger"; tTx = "Abschlag zu niedrig! Empfehlung: " + recPay.toFixed(0) + " €"; 
                 } else if (ratio > 1.05) { 
-                    tCl = "bg-warn"; tTx = "Etwas knapp! Empf: " + recPay.toFixed(0) + " €"; 
+                    tCl = "bg-warn"; tTx = "Knappe Deckung! Empfehlung: " + recPay.toFixed(0) + " €"; 
                 } else if (ratio < 0.85) { 
-                    tCl = "bg-info"; tTx = "Zu hoch! Neu-Soll: " + recPay.toFixed(0) + " €"; 
+                    tCl = "bg-info"; tTx = "Abschlag zu hoch! Empfehlung: " + recPay.toFixed(0) + " €"; 
                 } else { 
-                    tCl = "bg-good"; tTx = "Ideal (+10% Puffer: " + recPay.toFixed(0) + " €)"; 
+                    tCl = "bg-good"; tTx = "Abschlag passt! (Ideal: " + recPay.toFixed(0) + " €)"; 
                 }
                 
                 const bT = document.getElementById('badgeTrend');
-                bT.className = "badge " + tCl;
-                bT.innerText = tTx;
+                bT.className = "badge " + tCl; bT.innerText = tTx;
                 document.getElementById('cardTrend').style.borderColor = (ratio > 1.05) ? "var(--ios-orange)" : (ratio < 0.85 ? "var(--ios-blue)" : "var(--ios-green)");
 
-                // 3. TABELLEN-RENDERING & TREND-PFEILE
+                // TABELLE
                 const tbody = document.getElementById('historyTable');
                 tbody.innerHTML = '';
                 for (let i = db.length - 1; i >= 0; i--) {
@@ -327,7 +357,6 @@
             }
         }
 
-        // CHART-FUNKTION
         function drawChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
             const labels = [], data = [];
@@ -345,11 +374,9 @@
             });
         }
 
-        // DATA-ACTIONS
         function doSave() {
             const m = parseFloat(document.getElementById('newMeter').value);
             const d = document.getElementById('newDate').value;
-            if (!m || !d) return;
             db.push({ d, m, id: Date.now() });
             db.sort((a,b) => new Date(a.d) - new Date(b.d));
             localStorage.setItem('gas_db_v8', JSON.stringify(db));
@@ -359,12 +386,12 @@
             liveUpdate();
         }
 
-        function delEntry(id) { if(confirm("Eintrag entfernen?")) { db = db.filter(x => x.id !== id); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
-        function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Backup in Zwischenablage!")); }
-        function doImport() { const s = prompt("JSON einfügen:"); if(s) { db = JSON.parse(s); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
-        function doReset() { if(confirm("Datenbank löschen?") && prompt("Bestätigung: LÖSCHEN")==="LÖSCHEN") { localStorage.clear(); location.reload(); } }
+        function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
+        function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
+        function doImport() { const s = prompt("JSON:"); if(s) { db = JSON.parse(s); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
+        function doReset() { if(confirm("RESET?") && prompt("LÖSCHEN")==="LÖSCHEN") { localStorage.clear(); location.reload(); } }
         function updatePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
-        function unlockApp() { if(document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) { document.getElementById('lockScreen').style.display = "none"; liveUpdate(); } else { alert("PIN falsch!"); } }
+        function unlockApp() { if(document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) { document.getElementById('lockScreen').style.display = "none"; liveUpdate(); } }
 
         window.onload = () => {
             ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
