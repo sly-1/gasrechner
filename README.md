@@ -1,65 +1,60 @@
-# ⛽ GasZähler Pro v8.3.14 – Balanced Stability Edition
-
-**GasZähler Pro** ist eine hochpräzise, datenschutzorientierte Progressive Web App (PWA) zur Überwachung von Gasverbrauch und Heizkosten. Entwickelt für Hausbesitzer und Mieter, bietet sie maximale Transparenz über die finanzielle Entwicklung deines Energieverbrauchs – ohne Cloud-Zwang und zu 100 % lokal auf deinem Gerät.
-
----
-
-## 🚦 Das Doppel-Ampel-System (Echtzeit-Analyse)
-
-Die App nutzt eine duale Analyse-Logik, um dir sowohl den aktuellen Kontostand als auch die voraussichtliche Jahresabrechnung zu visualisieren:
-
-### 1. Saldo-Ampel (Ist-Zustand: "Habe ich aktuell genug gezahlt?")
-Diese Ampel vergleicht die Summe deiner bisher geleisteten Abschlagszahlungen mit den real aufgelaufenen Kosten seit dem Datum deiner ersten Zahlung.
-* 🟢 **Guthaben:** Deine geleisteten Zahlungen übersteigen die aktuellen Kosten. Du bist finanziell im sicheren Bereich.
-* 🔴 **Nachzahlung:** Dein realer Verbrauch ist höher als die bisherigen Abschläge. Würde heute abgerechnet, müsstest du den Differenzbetrag sofort begleichen.
-
-### 2. Prognose-Ampel (Soll-Zustand: "Reicht mein Abschlag für das Jahr?")
-Basierend auf deinem Durchschnittsverbrauch ($m^3/Tag$) berechnet die App die voraussichtlichen Gesamtkosten für 365 Tage und vergleicht diese mit deiner jährlichen Abschlags-Summe.
-* 🔵 **Blau (Zu hoch):** Dein Abschlag ist deutlich zu hoch angesetzt. Du gewährst deinem Anbieter ein zinsloses Darlehen.
-* 🟢 **Grün (Ideal):** Abschlag und Verbrauch sind perfekt aufeinander abgestimmt. Keine Überraschungen zu erwarten.
-* 🟠 **Orange (Knapp):** Eine leichte Nachzahlung zeichnet sich ab. Eine moderate Erhöhung des Abschlags wird empfohlen.
-* 🔴 **Rot (Korrektur nötig!):** Dein Abschlag wird die Jahreskosten nicht decken. Erhöhe deinen Abschlag zeitnah, um eine hohe Einmalzahlung zu vermeiden.
+# ⚖️ GasZähler Pro v8.3.14
+> **High-End Energiemonitoring & Finanzprognose**
+> Eine professionelle Single-Page-Application (SPA) im nativen iOS-Design zur präzisen Erfassung, Analyse und Simulation von Gasverbrauchsdaten.
 
 ---
 
-## 🚀 Highlights der v8.3.14
-
-### 📐 Neu: Full-Width Layout für Konfiguration
-In der Version 8.3.14 wurde die Ergonomie der Einstellungen entscheidend verbessert:
-* **Datum-Stabilität:** Das Feld für die **1. Abschlagszahlung** nutzt nun die volle Displaybreite. Dies verhindert Darstellungsfehler und Fehlberechnungen des Saldos auf schmalen Smartphones.
-* **Separater PIN-Bereich:** Die PIN-Sperre wurde logisch unter das Datumsfeld verschoben, um Eingabefehler zu minimieren.
-
-### 📊 Sticky-Axis Chart (Fixierte Achse)
-Das Verbrauchsdiagramm wurde für die Langzeitnutzung optimiert:
-* **Fixierte Skala:** Beim horizontalen Scrollen durch deine monatlichen Verbräuche bleibt die Y-Achse (Verbrauch in $m^3/Tag$) am linken Rand fixiert.
-* **Smart-Focus:** Beim Öffnen der App springt das Diagramm automatisch zum aktuellsten Datenpunkt ganz rechts.
-
-### 🔒 Safe-Delete Sicherheitssystem
-Ein versehentliches Löschen der Datenbank ist durch eine zweistufige Barriere geschützt:
-* **Klartext-Bestätigung:** Das vollständige Zurücksetzen erfordert die manuelle Eingabe des Wortes **"LÖSCHEN"**.
-* **Eingabe-Validierung:** Die App verhindert das Speichern von Zählerständen, die niedriger als der letzte Eintrag sind, um die Statistik sauber zu halten.
+## 💎 Release Notes v8.3.14
+* **Layout-Architektur:** Korrektur des Grids für das Start-Zahlungsdatum (kein Overflow mehr auf iPhone SE/Mini).
+* **Ergonomie-Update:** Dynamische Button-Skalierung (max. 350px) für bessere Bedienbarkeit auf iPads und Desktops.
+* **Eingabe-Validierung:** Visuelles Feedback bei unplausiblen Zählerständen (Vermeidung von Negativ-Verbräuchen).
 
 ---
 
-## 🛠 Technische Details & Einrichtung
+## 🚦 Das Intelligente Ampel-System (Deep Dive)
+Die App nimmt dir die Interpretation der nackten Zahlen ab. Hier ist die Logik hinter den Status-Badges:
 
-### Berechnungslogik
-Die Umrechnung von Volumen in Energie erfolgt nach der physikalischen Grundformel:
-$$kWh = (m^3_{aktuell} - m^3_{start}) \times Brennwert \times Zustandszahl$$
+### 1. Saldo-Ampel (Echtzeit-Finanzcheck)
+Diese Ampel beantwortet die Frage: *"Habe ich bis heute genug Abschlag bezahlt?"*
+* 🟢 **Guthaben:** Die Summe der geleisteten Abschläge (basierend auf dem Datum der 1. Zahlung) ist höher als die tatsächlichen Kosten der verbrauchten kWh.
+* 🔴 **Nachzahlung:** Die aktuellen Kosten übersteigen die bereits geleisteten Zahlungen. Zeit für eine manuelle Rücklage.
 
-### Bestpreis-Engine (Tarifstaffeln)
-Die App unterstützt Preisstaffeln (z.B. günstigerer Arbeitspreis ab einer bestimmten Abnahmemenge).
-**Format:** `VerbrauchsLimit:ArbeitspreisCent:GrundpreisEuro`
-*Beispiel für einen zweistufigen Tarif:*
-`6000:12.80:5.36` (Bis 6.000 kWh)
-`99999:11.79:10.41` (Über 6.000 kWh)
+### 2. Prognose-Ampel (Jahres-Trendanalyse)
+Hier wird der aktuelle Durchschnittsverbrauch auf 365 Tage hochgerechnet und mit der Jahressumme deiner Abschläge verglichen.
+* 🔵 **Blau (Überzahlung):** Du zahlst deutlich zu viel (>10% Puffer). Senkung der Abschläge möglich.
+* 🟢 **Grün (Zielkurs):** Dein Verbrauch passt perfekt zu deinen Zahlungen (Abweichung < 5%).
+* 🟠 **Orange (Warnung):** Du liegst leicht über dem Soll (5% bis 15% Mehrverbrauch). 
+* 🔴 **Rot (Kritisch):** Dein prognostizierter Jahresverbrauch liegt >15% über deinem Zahlplan. Eine hohe Nachzahlung bei der Jahresabrechnung droht!
+
+---
+
+## 🛠 Technische Kern-Module & Logik
+
+### 1. Die Thermische Rechen-Engine
+Gas wird in Volumen ($m^3$) gemessen, aber in Energie ($kWh$) bezahlt. Die App berechnet dies präzise:
+
+* **Brennwert ($H_s$):** Energiegehalt pro $m^3$ (standardmäßig ca. 10.5 bis 11.5).
+* **Zustandszahl ($z$):** Korrekturfaktor für Temperatur und Luftdruck am Standort.
+* **Formel:** $$E_{\text{kWh}} = (V_{\text{neu}} - V_{\text{start}}) \cdot H_s \cdot z$$
+
+### 2. Dynamische Staffeltarife
+Unterstützt komplexe Versorgungsverträge durch Eingabe im Format `Limit:Cent:Grundpreis`. Die App wählt automatisch die günstigste Staffel basierend auf der Prognose.
+
+### 3. Trend-Analyse & Historie
+* **Trend-Pfeile:** Vergleicht den aktuellen Intervall-Verbrauch mit dem globalen Durchschnitt.
+* **Scrollable Charts:** Visualisierung der täglichen Lastgänge via Chart.js, optimiert für Touch-Gesten.
 
 ---
 
-## 📱 PWA-Installation
-1. Öffne die App im mobilen Browser (z.B. Safari oder Chrome).
-2. Wähle im Menü **"Zum Home-Bildschirm hinzufügen"**.
-3. Die App wird nun als eigenständige Anwendung ohne Browser-Adressleiste gestartet.
+## 🔒 Sicherheit & Datenschutz
+* **Local-First:** 100% datenschutzkonform. Daten werden im `localStorage` des Browsers sandboxed gespeichert.
+* **PIN-Protection:** AES-inspirierter Zugriffsschutz durch den integrierten Lock-Screen.
+* **Daten-Souveränität:** Manuelle Export- und Importfunktion via JSON-Backup-Strings.
 
 ---
-*Präzise. Sicher. Lokal. Dein Verbrauch unter deiner Kontrolle.*
+
+## 🚀 Setup-Anleitung
+1. **Einstellungen öffnen:** Klicke auf das Zahnrad-Symbol.
+2. **Parameter setzen:** Brennwert und z-Zahl laut letzter Abrechnung eintragen.
+3. **Zahlplan:** Datum der 1. Zahlung und monatlichen Abschlag hinterlegen.
+4. **Erfassung:** Ersten Zählerstand als "Start-m³" eintragen oder direkt in die Historie speichern.
