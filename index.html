@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.10</title>
+    <title>GasZähler Pro v8.3.11</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -15,11 +15,10 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--ios-bg); margin: 0; padding: 20px; color: #000; overflow-x: hidden; }
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .pin-input { font-size: 24px; padding: 15px; width: 160px; text-align: center; border-radius: 12px; border: 1px solid var(--ios-neutral); margin-bottom: 20px; letter-spacing: 5px; }
-        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 6px solid var(--ios-neutral); transition: all 0.3s ease; }
+        .card { background: var(--ios-card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border-left: 6px solid var(--ios-neutral); transition: all 0.3s ease; overflow: hidden; }
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; outline: none; margin-bottom: 5px; font-family: inherit; }
         
-        /* Validierungs-Style */
         input.invalid { border: 2px solid var(--ios-red); background-color: #FFF5F5; }
         .error-msg { color: var(--ios-red); font-size: 10px; font-weight: bold; margin-bottom: 10px; display: none; }
         input.invalid + .error-msg { display: block; }
@@ -35,13 +34,19 @@
         .badge-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
         .badge-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
         .badge-info { background: #E5F1FF; color: var(--ios-blue); border-color: var(--ios-blue); }
+
+        /* Scrollable Table Fix */
+        .table-container { max-height: 280px; overflow-y: auto; margin-top: 10px; border-radius: 8px; border: 1px solid var(--ios-gray); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { position: sticky; top: 0; background: var(--ios-card); z-index: 10; box-shadow: 0 1px 0 var(--ios-gray); }
+        th { font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; padding: 8px 4px; text-align: left; }
+        td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; font-size: 13px; }
+        .m3-val { color: var(--ios-text-secondary); font-size: 11px; display: block; }
+
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; }
-        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 16px; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--ios-gray); text-align: left; }
-        td { padding: 10px 2px; border-bottom: 1px solid #F2F2F7; font-size: 13px; }
-        .m3-val { color: var(--ios-text-secondary); font-size: 11px; display: block; }
+        .btn-danger-text { background: transparent; color: var(--ios-red); font-size: 16px; border: none; cursor: pointer; padding: 5px; }
+        
         .icon-svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
@@ -61,7 +66,7 @@
     <div id="mainContent">
         <h1 style="display:flex; align-items:center; gap:10px;">
             <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.10
+            GasZähler Pro v8.3.11
         </h1>
         
         <div class="card">
@@ -71,7 +76,7 @@
                     <input type="date" id="readingDate" style="flex:1;">
                     <input type="number" id="meter" step="0.001" placeholder="m³" style="flex:1;" oninput="renderAll()">
                 </div>
-                <div id="meterError" class="error-msg">⚠️ Wert muss höher als der letzte Stand sein!</div>
+                <div id="meterError" class="error-msg">⚠️ Wert unzulässig (niedriger als letzter Stand)!</div>
             </div>
             <details><summary style="color:var(--ios-blue); font-size:12px; cursor:pointer; margin-top:5px;">⚙️ Einstellungen & Tarife</summary>
                 <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
@@ -114,18 +119,17 @@
         <div class="card">
             <label>Historie & Trend</label>
             <div style="height: 120px;"><canvas id="gasChart"></canvas></div>
-            <table>
-                <thead><tr><th>Datum</th><th>Tr.</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
-                <tbody id="historyBody"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Datum</th><th>Tr.</th><th>m³</th><th style="text-align:right">Kosten</th><th></th></tr></thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
         </div>
         
         <div style="display: flex; gap: 8px;"><button class="btn-secondary" onclick="exportBackup()" style="flex:1;">Export</button><button class="btn-secondary" onclick="importBackup()" style="flex:1;">Import</button></div>
         
-        <button class="btn-danger-text" style="width:100%; margin-top:20px;" onclick="clearHistory()">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-            Alle Daten löschen
-        </button>
+        <button class="btn-danger-text" style="width:100%; margin-top:20px;" onclick="clearHistory()">Alle Daten löschen</button>
     </div>
 
     <script>
@@ -153,22 +157,19 @@
             const meterInput = document.getElementById('meter');
             const saveBtn = document.getElementById('saveBtn');
             const isPreview = meterInput.value !== "";
-            
             const lastMeter = history.length > 0 ? history[history.length-1].meter : 0;
             const currentVal = parseFloat(meterInput.value);
 
-            // PLAUSIBILITÄTS-CHECK
             if (isPreview && currentVal < lastMeter) {
                 meterInput.classList.add('invalid');
                 saveBtn.disabled = true;
             } else {
                 meterInput.classList.remove('invalid');
-                saveBtn.disabled = !isPreview; // Button nur aktiv wenn Text drin und valide
+                saveBtn.disabled = !isPreview;
             }
 
             const curMeter = isPreview ? currentVal : (history.length > 0 ? history[history.length-1].meter : null);
             const curDate = document.getElementById('readingDate').value;
-
             document.querySelectorAll('.result-price').forEach(el => isPreview ? el.classList.add('is-preview') : el.classList.remove('is-preview'));
 
             if (curMeter && history.length > 0) {
@@ -193,9 +194,9 @@
                 const yearKwh = (globalAvg * 365) * bw * zz;
                 const yearTier = getTier(yearKwh);
                 const yearTotal = (yearKwh * yearTier.price) + (yearTier.base * 12);
-                
                 const safeIdeal = Math.round((yearTotal / pCount) * 1.10);
                 const ratio = yearTotal / (monthly * pCount);
+                
                 let pColor = "var(--ios-green)", pClass = "badge-good", pText = "Abschlag perfekt";
                 if (ratio < 0.90) { pColor = "var(--ios-blue)"; pClass = "badge-info"; pText = "Zu hoch!"; }
                 else if (ratio > 1.15) { pColor = "var(--ios-red)"; pClass = "badge-danger"; pText = "Erhöhen!"; }
@@ -237,16 +238,12 @@
                 const stored = localStorage.getItem('gas_' + id);
                 if (stored) document.getElementById(id).value = stored;
             });
-            if (!document.getElementById('priceTiers').value) {
-                document.getElementById('priceTiers').value = "6000:12.80:5.36\n99999:11.79:10.41";
-            }
+            if (!document.getElementById('priceTiers').value) document.getElementById('priceTiers').value = "6000:12.80:5.36\n99999:11.79:10.41";
             const p = localStorage.getItem('gas_app_pin');
             if (p && p.trim() !== "") {
                 document.getElementById('lockScreen').style.display = "flex";
                 document.getElementById('mainContent').style.display = "none";
-            } else {
-                renderAll();
-            }
+            } else { renderAll(); }
         }
 
         function checkPin() {
@@ -258,25 +255,20 @@
         }
 
         function savePin() { localStorage.setItem('gas_app_pin', document.getElementById('appPin').value); }
-
         function saveData() {
             const m = parseFloat(document.getElementById('meter').value), d = document.getElementById('readingDate').value;
             if (isNaN(m) || !d) return;
             history.push({ date: d, meter: m, id: Date.now() });
             history.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
-            document.getElementById('meter').value = ""; 
-            renderAll();
+            document.getElementById('meter').value = ""; renderAll();
             const toast = document.getElementById('saveToast');
-            toast.classList.add('show'); 
-            setTimeout(() => toast.classList.remove('show'), 2000);
+            toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000);
         }
-
         function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Backup kopiert!")); }
         function importBackup() { const c = prompt("Backup einfügen:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
-        function clearHistory() { if (confirm("ALLE Daten löschen?") && confirm("Wirklich?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); location.reload(); } }
-
+        function clearHistory() { if (confirm("ALLE Daten löschen?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); location.reload(); } }
         function updateChart() {
             const ctx = document.getElementById('gasChart').getContext('2d');
             const l = [], d = [];
