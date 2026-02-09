@@ -1,410 +1,107 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.27</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { 
-            --ios-blue: #007AFF; 
-            --ios-red: #FF3B30; 
-            --ios-bg: #F2F2F7; 
-            --ios-card: #FFFFFF; 
-            --ios-text-secondary: #8E8E93; 
-            --ios-green: #34C759; 
-            --ios-orange: #FF9500; 
-            --ios-gray: #E5E5EA; 
-            --ios-neutral: #D1D1D6; 
-        }
-
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-        }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: var(--ios-bg); 
-            margin: 0; 
-            padding: 20px; 
-            color: #000; 
-            -webkit-font-smoothing: antialiased; 
-        }
-
-        /* VALIDIERUNGS-STYLES */
-        .input-error { 
-            border: 2px solid var(--ios-red) !important; 
-            background-color: #FFF5F5 !important; 
-        }
-        
-        .error-hint { 
-            color: var(--ios-red); 
-            font-size: 11px; 
-            font-weight: 700; 
-            margin-top: -8px; 
-            margin-bottom: 12px; 
-            display: none; 
-            padding-left: 5px;
-        }
-
-        /* LOCK SCREEN */
-        #lockScreen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--ios-bg); z-index: 10000; display: none; 
-            flex-direction: column; align-items: center; justify-content: center; 
-        }
-
-        .pin-input { 
-            font-size: 28px; padding: 15px; width: 180px; text-align: center; 
-            border-radius: 15px; border: 2px solid var(--ios-neutral); margin-bottom: 20px; 
-        }
-
-        /* CARDS & UI */
-        .card { 
-            background: var(--ios-card); padding: 18px; border-radius: 14px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; 
-            border-left: 6px solid var(--ios-neutral); transition: border-color 0.4s ease; 
-        }
-
-        label { 
-            display: block; margin-bottom: 5px; font-size: 11px; 
-            color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; 
-        }
-
-        input, textarea, select { 
-            width: 100% !important; 
-            max-width: 100% !important;
-            padding: 12px; border: 1px solid var(--ios-neutral); 
-            border-radius: 10px; font-size: 16px; margin-bottom: 10px; 
-            font-family: inherit; display: block; background: #fff;
-            -webkit-appearance: none; appearance: none;
-        }
-
-        .badge { 
-            display: inline-block; padding: 8px 14px; border-radius: 20px; 
-            font-size: 12px; font-weight: 700; border: 1px solid transparent; 
-            margin-top: 8px; line-height: 1.4; 
-        }
-
-        .bg-good   { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
-        .bg-danger { background: #FFEBEB; color: var(--ios-red); border-color: var(--ios-red); }
-        .bg-warn   { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
-        .bg-info   { background: #E5F1FF; color: var(--ios-blue); border-color: var(--ios-blue); }
-
-        .result-main { 
-            font-size: 34px; font-weight: 800; display: block; margin: 5px 0; 
-            letter-spacing: -1px; 
-        }
-
-        /* CHART & HISTORY */
-        .chart-container-outer { 
-            position: relative; width: 100%; background: #fafafa; 
-            border-radius: 10px; border: 1px solid var(--ios-gray); 
-            height: 180px; overflow: hidden; margin-top: 10px; 
-        }
-
-        .y-axis-labels { 
-            position: absolute; left: 0; top: 0; width: 45px; height: 100%; 
-            background: #fafafa; z-index: 5; display: flex; flex-direction: column; 
-            justify-content: space-between; padding: 15px 0 40px 5px; 
-            font-size: 10px; color: var(--ios-text-secondary); border-right: 1px solid #eee; 
-        }
-
-        .chart-viewport { overflow-x: auto; margin-left: 45px; height: 100%; }
-        .chart-wrapper { height: 160px; }
-
-        .history-scroll { 
-            max-height: 280px; overflow-y: auto; border-radius: 10px; 
-            border: 1px solid var(--ios-gray); margin-top: 15px; 
-        }
-
-        table { width: 100%; border-collapse: collapse; background: #fff; }
-        th { background: #fafafa; padding: 12px 8px; font-size: 11px; text-transform: uppercase; color: var(--ios-text-secondary); text-align: left; }
-        td { padding: 14px 8px; font-size: 14px; border-bottom: 1px solid #f2f2f7; }
-        
-        .trend-up { color: var(--ios-red); font-weight: bold; }
-        .trend-down { color: var(--ios-green); font-weight: bold; }
-
-        button { 
-            width: 100%; max-width: 340px; display: block; margin: 12px auto; 
-            background: var(--ios-blue); color: white; border: none; 
-            padding: 16px; border-radius: 12px; font-size: 17px; 
-            font-weight: 600; cursor: pointer; 
-        }
-
-        button:disabled { 
-            background: var(--ios-neutral); 
-            color: #888;
-            cursor: not-allowed; 
-        }
-
-        #toast { 
-            position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-150px); 
-            background: rgba(0,0,0,0.85); color: white; padding: 14px 28px; 
-            border-radius: 30px; z-index: 10001; transition: transform 0.5s; font-weight: 600; 
-        }
-        #toast.visible { transform: translateX(-50%) translateY(0); }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>GasZähler Pro v8.3.30</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--ios-blue:#007AFF;--ios-red:#FF3B30;--ios-bg:#F2F2F7;--ios-card:#FFFFFF;--ios-text-secondary:#8E8E93;--ios-green:#34C759;--ios-orange:#FF9500;--ios-gray:#E5E5EA;--ios-neutral:#D1D1D6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background-color:var(--ios-bg);margin:0;padding:20px;color:#000;-webkit-font-smoothing:antialiased}
+.input-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:15px}
+.input-group{flex:1;position:relative}
+input,textarea,select{width:100%!important;padding:12px;border:1px solid var(--ios-neutral);border-radius:10px;font-size:16px;margin:0;font-family:inherit;display:block;background:#fff;-webkit-appearance:none;height:48px}
+.input-error{border:2px solid var(--ios-red)!important;background-color:#FFF5F5!important}
+.error-hint{color:var(--ios-red);font-size:10px;font-weight:700;position:absolute;bottom:-16px;left:2px;display:none;white-space:nowrap}
+#lockScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--ios-bg);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center}
+.pin-input{font-size:28px;padding:15px;width:180px;text-align:center;border-radius:15px;border:2px solid var(--ios-neutral);margin-bottom:20px}
+.card{background:var(--ios-card);padding:18px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-bottom:15px;border-left:6px solid var(--ios-neutral);transition:border-color .4s}
+label{display:block;margin-bottom:5px;font-size:11px;color:var(--ios-text-secondary);text-transform:uppercase;font-weight:700}
+.badge{display:inline-block;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid transparent;margin-top:8px;line-height:1.4}
+.bg-good{background:#E7F9ED;color:var(--ios-green);border-color:var(--ios-green)}
+.bg-danger{background:#FFEBEB;color:var(--ios-red);border-color:var(--ios-red)}
+.bg-warn{background:#FFF4E5;color:var(--ios-orange);border-color:var(--ios-orange)}
+.bg-info{background:#E5F1FF;color:var(--ios-blue);border-color:var(--ios-blue)}
+.result-main{font-size:34px;font-weight:800;display:block;margin:5px 0;letter-spacing:-1px}
+.chart-container-outer{position:relative;width:100%;background:#fafafa;border-radius:10px;border:1px solid var(--ios-gray);height:180px;overflow:hidden;margin-top:10px}
+.y-axis-labels{position:absolute;left:0;top:0;width:45px;height:100%;background:#fafafa;z-index:5;display:flex;flex-direction:column;justify-content:space-between;padding:15px 0 40px 5px;font-size:10px;color:var(--ios-text-secondary);border-right:1px solid #eee}
+.chart-viewport{overflow-x:auto;margin-left:45px;height:100%}
+.chart-wrapper{height:160px}
+.history-scroll{max-height:280px;overflow-y:auto;border-radius:10px;border:1px solid var(--ios-gray);margin-top:15px}
+table{width:100%;border-collapse:collapse;background:#fff}
+th{background:#fafafa;padding:12px 8px;font-size:11px;text-transform:uppercase;color:var(--ios-text-secondary);text-align:left}
+td{padding:14px 8px;font-size:14px;border-bottom:1px solid #f2f2f7}
+.trend-up{color:var(--ios-red);font-weight:bold}
+.trend-down{color:var(--ios-green);font-weight:bold}
+button{width:100%;max-width:340px;display:block;margin:12px auto;background:var(--ios-blue);color:#fff;border:none;padding:16px;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer}
+button:disabled{background:var(--ios-neutral);color:#888;cursor:not-allowed}
+#toast{position:fixed;top:40px;left:50%;transform:translateX(-50%) translateY(-150px);background:rgba(0,0,0,0.85);color:#fff;padding:14px 28px;border-radius:30px;z-index:10001;transition:transform .5s}
+#toast.visible{transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 <body>
-
-    <div id="lockScreen">
-        <h2 style="color: #333;">PIN erforderlich</h2>
-        <input type="password" id="pinInput" class="pin-input" inputmode="numeric" placeholder="••••">
-        <button onclick="unlockApp()">Entsperren</button>
-    </div>
-
-    <div id="toast">✅ Daten verarbeitet</div>
-
-    <div id="main">
-        <h1 style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--ios-orange)"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro v8.3.27
-        </h1>
-
-        <div class="card">
-            <label>Aktuelle Ablesung</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="date" id="newDate">
-                <div style="flex:1;">
-                    <input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()">
-                    <div id="errorHint" class="error-hint">Wert muss höher als letzter Stand sein!</div>
-                </div>
-            </div>
-            
-            <details style="margin-top: 10px;">
-                <summary style="color:var(--ios-blue); font-size:13px; cursor:pointer; font-weight:700; padding: 5px 0;">⚙️ Einstellungen & Tarife</summary>
-                <div style="margin-top:10px; border-top:1px solid #eee; padding-top:15px;">
-                    <label>Preistabelle (Limit : Cent : Grundpreis)</label>
-                    <textarea id="tiers" rows="2" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div><label>Brennwert</label><input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()"></div>
-                        <div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()"></div>
-                        <div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
-                        <div><label>Anfangsstand</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
-                    </div>
-                    
-                    <label>Datum der ersten Zahlung</label>
-                    <input type="date" id="firstPayDate" oninput="liveUpdate()">
-                    
-                    <label>Sicherheits-PIN</label>
-                    <input type="password" id="pinSetting" placeholder="Nicht gesetzt" oninput="updatePin()">
-                </div>
-            </details>
-        </div>
-
-        <div class="card" id="cardSaldo" style="text-align:center">
-            <label>Aktueller Finanz-Saldo</label>
-            <span class="result-main" id="outSaldo">0,00 €</span>
-            <div id="badgeSaldo" class="badge">Daten werden berechnet...</div>
-        </div>
-
-        <div class="card" id="cardTrend" style="text-align:center">
-            <label>Jahres-Trend (inkl. 10% Puffer)</label>
-            <span class="result-main" id="outYear">0,00 €</span>
-            <div id="badgeTrend" class="badge">Eingabe erforderlich</div>
-        </div>
-
-        <button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
-
-        <div class="card">
-            <label>Verbrauchsanalyse (m³/Tag)</label>
-            <div class="chart-container-outer">
-                <div class="y-axis-labels"><span>Max</span><span>Ø</span><span>0</span></div>
-                <div class="chart-viewport" id="chartView">
-                    <div class="chart-wrapper" id="chartWrap">
-                        <canvas id="mainChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="history-scroll">
-                <table>
-                    <thead><tr><th>Datum</th><th>Stand m³</th><th>Trend</th><th></th></tr></thead>
-                    <tbody id="historyTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doExport()">Export</button>
-            <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px; border:none;" onclick="doImport()">Import</button>
-        </div>
-        
-        <button style="background:none; color:var(--ios-red); border:none; width:100%; margin-top:25px; font-size:12px; font-weight:600;" onclick="doReset()">⚠️ GESAMTE DATENBANK LÖSCHEN</button>
-    </div>
-
-    <script>
-        let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
-        let myChart = null;
-
-        function getActiveTier(kwh, tiers) {
-            for (let t of tiers) {
-                if (kwh <= t.limit) return t;
-            }
-            return tiers[tiers.length - 1];
-        }
-
-        function liveUpdate() {
-            ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
-                localStorage.setItem('gas_pref_' + id, document.getElementById(id).value);
-            });
-
-            const cfg = {
-                bw: parseFloat(document.getElementById('bw').value) || 10.55,
-                zz: parseFloat(document.getElementById('zz').value) || 0.95,
-                pay: parseFloat(document.getElementById('pay').value) || 150,
-                start: parseFloat(document.getElementById('start').value) || 0,
-                tiers: document.getElementById('tiers').value.split('\n').map(l => {
-                    const parts = l.split(':').map(Number);
-                    return { limit: parts[0], cent: parts[1]/100, base: parts[2] };
-                })
-            };
-
-            // VALIDIERUNG GEGEN RÜCKWÄRTS-EINGABE
-            const meterIn = document.getElementById('newMeter');
-            const errorHint = document.getElementById('errorHint');
-            const lastVal = db.length > 0 ? db[db.length-1].m : cfg.start;
-            const inputVal = parseFloat(meterIn.value);
-
-            let isValid = true;
-            if (meterIn.value !== "" && inputVal <= lastVal) {
-                isValid = false;
-                meterIn.classList.add('input-error');
-                errorHint.style.display = "block";
-            } else {
-                meterIn.classList.remove('input-error');
-                errorHint.style.display = "none";
-            }
-            document.getElementById('saveBtn').disabled = !isValid || meterIn.value === "";
-
-            const curM = meterIn.value !== "" ? inputVal : (db.length > 0 ? lastVal : null);
-            const curD = document.getElementById('newDate').value;
-
-            if (curM !== null && db.length > 0) {
-                const totalKwh = (curM - cfg.start) * cfg.bw * cfg.zz;
-                const daysTotal = Math.max(1, (new Date(curD) - new Date(db[0].d)) / 86400000);
-                const globalAvg = (curM - db[0].m) / daysTotal;
-                
-                const tier = getActiveTier(totalKwh, cfg.tiers);
-                const costNow = (totalKwh * tier.cent) + ((tier.base * 12 / 365) * daysTotal);
-                
-                // SALDO
-                const sPay = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(db[0].d);
-                let pCnt = 0; 
-                let cD = new Date(sPay);
-                while(cD <= new Date(curD) && pCnt < 12) { 
-                    pCnt++; 
-                    cD.setMonth(cD.getMonth()+1); 
-                }
-                const currentSaldo = (pCnt * cfg.pay) - costNow;
-                
-                const outS = document.getElementById('outSaldo');
-                outS.innerText = currentSaldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-                outS.style.color = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-                
-                const bS = document.getElementById('badgeSaldo');
-                bS.innerText = currentSaldo >= 0 ? "Im Guthaben" : "In der Nachzahlung";
-                bS.className = "badge " + (currentSaldo >= 0 ? "bg-good" : "bg-danger");
-                document.getElementById('cardSaldo').style.borderColor = currentSaldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-
-                // PROGNOSE & TEXTE
-                const yearKwh = (globalAvg * 365) * cfg.bw * cfg.zz;
-                const yTier = getActiveTier(yearKwh, cfg.tiers);
-                const yearCost = (yearKwh * yTier.cent) + (yTier.base * 12);
-                const recPay = (yearCost / 12) * 1.10; // +10% Puffer
-                
-                document.getElementById('outYear').innerText = yearCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-                
-                const ratio = yearCost / (cfg.pay * 12);
-                let tCl, tTx;
-
-                if (ratio > 1.15) { 
-                    tCl = "bg-danger"; tTx = "Abschlag zu niedrig! Empfehlung: " + recPay.toFixed(0) + " €"; 
-                } else if (ratio > 1.05) { 
-                    tCl = "bg-warn"; tTx = "Knappe Deckung! Empfehlung: " + recPay.toFixed(0) + " €"; 
-                } else if (ratio < 0.85) { 
-                    tCl = "bg-info"; tTx = "Abschlag zu hoch! Empfehlung: " + recPay.toFixed(0) + " €"; 
-                } else { 
-                    tCl = "bg-good"; tTx = "Abschlag passt! (Ideal: " + recPay.toFixed(0) + " €)"; 
-                }
-                
-                const bT = document.getElementById('badgeTrend');
-                bT.className = "badge " + tCl; bT.innerText = tTx;
-                document.getElementById('cardTrend').style.borderColor = (ratio > 1.05) ? "var(--ios-orange)" : (ratio < 0.85 ? "var(--ios-blue)" : "var(--ios-green)");
-
-                // TABELLE
-                const tbody = document.getElementById('historyTable');
-                tbody.innerHTML = '';
-                for (let i = db.length - 1; i >= 0; i--) {
-                    let trendIcon = "→"; let trendClass = "";
-                    if (i > 0) {
-                        const diffDays = (new Date(db[i].d) - new Date(db[i-1].d)) / 86400000;
-                        const intervalAvg = (db[i].m - db[i-1].m) / diffDays;
-                        if (intervalAvg > globalAvg * 1.12) { trendIcon = "↗︎"; trendClass = "trend-up"; }
-                        else if (intervalAvg < globalAvg * 0.88) { trendIcon = "↘︎"; trendClass = "trend-down"; }
-                    }
-                    tbody.innerHTML += `<tr>
-                        <td>${new Date(db[i].d).toLocaleDateString()}</td>
-                        <td>${db[i].m.toFixed(2)}</td>
-                        <td class="${trendClass}">${trendIcon}</td>
-                        <td><button style="color:var(--ios-red); background:none; width:auto; margin:0; padding:0; border:none;" onclick="delEntry(${db[i].id})">✕</button></td>
-                    </tr>`;
-                }
-                drawChart();
-            }
-        }
-
-        function drawChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            const labels = [], data = [];
-            for (let i = 1; i < db.length; i++) {
-                const d = (new Date(db[i].d) - new Date(db[i-1].d)) / 86400000;
-                labels.push(new Date(db[i].d).toLocaleDateString());
-                data.push(d > 0 ? ((db[i].m - db[i-1].m) / d).toFixed(2) : 0);
-            }
-            document.getElementById('chartWrap').style.width = Math.max(window.innerWidth - 90, db.length * 55) + 'px';
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, { 
-                type: 'bar', 
-                data: { labels, datasets: [{ data, backgroundColor: '#007AFF', borderRadius: 6 }] }, 
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } } 
-            });
-        }
-
-        function doSave() {
-            const m = parseFloat(document.getElementById('newMeter').value);
-            const d = document.getElementById('newDate').value;
-            db.push({ d, m, id: Date.now() });
-            db.sort((a,b) => new Date(a.d) - new Date(b.d));
-            localStorage.setItem('gas_db_v8', JSON.stringify(db));
-            document.getElementById('newMeter').value = "";
-            const t = document.getElementById('toast'); t.classList.add('visible'); 
-            setTimeout(() => t.classList.remove('visible'), 2500);
-            liveUpdate();
-        }
-
-        function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
-        function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
-        function doImport() { const s = prompt("JSON:"); if(s) { db = JSON.parse(s); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } }
-        function doReset() { if(confirm("RESET?") && prompt("LÖSCHEN")==="LÖSCHEN") { localStorage.clear(); location.reload(); } }
-        function updatePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
-        function unlockApp() { if(document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) { document.getElementById('lockScreen').style.display = "none"; liveUpdate(); } }
-
-        window.onload = () => {
-            ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
-                const v = localStorage.getItem('gas_pref_' + id); 
-                if(v) document.getElementById(id).value = v;
-            });
-            document.getElementById('newDate').valueAsDate = new Date();
-            if(localStorage.getItem('gas_pin_v8')) {
-                document.getElementById('lockScreen').style.display = "flex";
-            } else {
-                liveUpdate();
-            }
-        };
-    </script>
+<div id="lockScreen"><h2>PIN erforderlich</h2><input type="password" id="pinInput" class="pin-input" inputmode="numeric" placeholder="••••"><button onclick="unlockApp()">Entsperren</button></div>
+<div id="toast">✅ Gespeichert</div>
+<div id="main">
+<h1 style="text-align:center;margin-bottom:20px">GasZähler Pro v8.3.30</h1>
+<div class="card"><label>Ablesung</label>
+<div class="input-row">
+<div class="input-group"><input type="date" id="newDate"></div>
+<div class="input-group"><input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()"><div id="errorHint" class="error-hint">Wert zu niedrig!</div></div>
+</div>
+<details><summary style="color:var(--ios-blue);font-size:13px;cursor:pointer;font-weight:700">⚙️ Einstellungen</summary>
+<div style="margin-top:15px;border-top:1px solid #eee;padding-top:15px">
+<label>Preise (Limit:Cent:Grundpreis)</label><textarea id="tiers" rows="2" style="height:auto!important" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+<div><label>Brennwert</label><input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()"></div>
+<div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()"></div>
+<div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
+<div><label>Start m³</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
+</div>
+<label style="margin-top:10px">Datum 1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()">
+<label>App-PIN</label><input type="password" id="pinSetting" oninput="updatePin()">
+</div></details></div>
+<div class="card" id="cardSaldo" style="text-align:center"><label>Finanz-Saldo (Ist)</label><span class="result-main" id="outSaldo">0,00 €</span><div id="badgeSaldo" class="badge">Berechne...</div></div>
+<div class="card" id="cardTrend" style="text-align:center"><label>Jahres-Prognose (+10% Puffer)</label><span class="result-main" id="outYear">0,00 €</span><div id="badgeTrend" class="badge">Eingabe fehlt</div></div>
+<button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
+<div class="card"><label>Verbrauch m³/Tag</label>
+<div class="chart-container-outer"><div class="y-axis-labels"><span>Max</span><span>Ø</span><span>0</span></div><div class="chart-viewport" id="chartView"><div class="chart-wrapper" id="chartWrap"><canvas id="mainChart"></canvas></div></div></div>
+<div class="history-scroll"><table><thead><tr><th>Datum</th><th>Stand</th><th>Trend</th><th></th></tr></thead><tbody id="historyTable"></tbody></table></div></div>
+<div style="display:flex;gap:10px;margin-top:10px"><button style="flex:1;background:var(--ios-gray);color:#000;padding:12px;font-size:14px;border-radius:10px" onclick="doExport()">Backup</button><button style="flex:1;background:var(--ios-gray);color:#000;padding:12px;font-size:14px;border-radius:10px" onclick="doImport()">Restore</button></div>
+<button style="background:none;color:red;border:none;width:100%;margin-top:20px;font-size:12px" onclick="doReset()">⚠️ DATENBANK LÖSCHEN</button>
+</div>
+<script>
+let db=JSON.parse(localStorage.getItem('gas_db_v8'))||[];let myChart=null;
+function getActiveTier(k,t){for(let s of t)if(k<=s.limit)return s;return t[t.length-1]}
+function liveUpdate(){
+['bw','zz','pay','start','tiers','firstPayDate'].forEach(i=>{localStorage.setItem('gas_pref_'+i,document.getElementById(i).value)});
+const c={bw:parseFloat(document.getElementById('bw').value)||10.55,zz:parseFloat(document.getElementById('zz').value)||0.95,pay:parseFloat(document.getElementById('pay').value)||150,start:parseFloat(document.getElementById('start').value)||0,tiers:document.getElementById('tiers').value.split('\n').map(l=>{const p=l.split(':').map(Number);return{limit:p[0],cent:p[1]/100,base:p[2]}})};
+const mI=document.getElementById('newMeter'),eH=document.getElementById('errorHint'),lV=db.length>0?db[db.length-1].m:c.start,v=parseFloat(mI.value);
+let ok=true;if(mI.value!==""&&v<=lV){ok=false;mI.classList.add('input-error');eH.style.display="block"}else{mI.classList.remove('input-error');eH.style.display="none"}
+document.getElementById('saveBtn').disabled=!ok||mI.value==="";const cM=(mI.value!=="")?v:(db.length>0?lV:null),cD=document.getElementById('newDate').value;
+if(cM!==null&&db.length>0){const k=(cM-c.start)*c.bw*c.zz,d=Math.max(1,(new Date(cD)-new Date(db[0].d))/86400000),a=(cM-db[0].m)/d,t=getActiveTier(k,c.tiers),co=(k*t.cent)+((t.base*12/365)*d),sP=document.getElementById('firstPayDate').value?new Date(document.getElementById('firstPayDate').value):new Date(db[0].d);
+let pC=0,dD=new Date(sP);while(dD<=new Date(cD)&&pC<12){pC++;dD.setMonth(dD.getMonth()+1)}const sa=(pC*c.pay)-co;
+document.getElementById('outSaldo').innerText=sa.toLocaleString('de-DE',{style:'currency',currency:'EUR'});document.getElementById('outSaldo').style.color=sa>=0?"var(--ios-green)":"var(--ios-red)";
+document.getElementById('badgeSaldo').innerText=sa>=0?"Im Guthaben":"In der Nachzahlung";document.getElementById('badgeSaldo').className="badge "+(sa>=0?"bg-good":"bg-danger");
+document.getElementById('cardSaldo').style.borderColor=sa>=0?"var(--ios-green)":"var(--ios-red)";const yK=(a*365)*c.bw*c.zz,yT=getActiveTier(yK,c.tiers),yC=(yK*yT.cent)+(yT.base*12),rP=(yC/12)*1.1;
+document.getElementById('outYear').innerText=yC.toLocaleString('de-DE',{style:'currency',currency:'EUR'});const ra=yC/(c.pay*12);let cl,tx;
+if(ra>1.15){cl="bg-danger";tx="Abschlag zu niedrig! Empfehlung: "+rP.toFixed(0)+" €"}else if(ra>1.05){cl="bg-warn";tx="Knappe Deckung! Empfehlung: "+rP.toFixed(0)+" €"}else if(ra<.85){cl="bg-info";tx="Abschlag zu hoch! Empfehlung: "+rP.toFixed(0)+" €"}else{cl="bg-good";tx="Abschlag passt! (Ideal: "+rP.toFixed(0)+" €)"}
+document.getElementById('badgeTrend').className="badge "+cl;document.getElementById('badgeTrend').innerText=tx;
+document.getElementById('cardTrend').style.borderColor=ra>1.05?"var(--ios-orange)":(ra<.85?"var(--ios-blue)":"var(--ios-green)");
+const tb=document.getElementById('historyTable');tb.innerHTML='';for(let i=db.length-1;i>=0;i--){let tr="→",tc="";if(i>0){const vD=(db[i].m-db[i-1].m)/((new Date(db[i].d)-new Date(db[i-1].d))/86400000);if(vD>a*1.12){tr="↗︎";tc="trend-up"}else if(vD<a*.88){tr="↘︎";tc="trend-down"}}
+tb.innerHTML+=`<tr><td>${new Date(db[i].d).toLocaleDateString()}</td><td>${db[i].m.toFixed(2)}</td><td class="${tc}">${tr}</td><td><button style="color:red;background:none;border:none;width:auto;margin:0" onclick="delEntry(${db[i].id})">✕</button></td></tr>`}
+drawChart(lbls=[],dts=[]);}}
+function drawChart(){const ctx=document.getElementById('mainChart').getContext('2d');const lb=[],dt=[];for(let i=1;i<db.length;i++){const d=(new Date(db[i].d)-new Date(db[i-1].d))/86400000;lb.push(new Date(db[i].d).toLocaleDateString());dt.push(d>0?((db[i].m-db[i-1].m)/d).toFixed(2):0)}
+document.getElementById('chartWrap').style.width=Math.max(window.innerWidth-90,db.length*55)+'px';if(myChart)myChart.destroy();
+myChart=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{data:dt,backgroundColor:'#007AFF',borderRadius:6}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{display:false},x:{grid:{display:false}}}}})}
+function doSave(){const m=parseFloat(document.getElementById('newMeter').value),d=document.getElementById('newDate').value;db.push({d,m,id:Date.now()});db.sort((a,b)=>new Date(a.d)-new Date(b.d));localStorage.setItem('gas_db_v8',JSON.stringify(db));document.getElementById('newMeter').value="";liveUpdate();const t=document.getElementById('toast');t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),2500)}
+function delEntry(id){if(confirm("Löschen?")){db=db.filter(x=>x.id!==id);localStorage.setItem('gas_db_v8',JSON.stringify(db));liveUpdate()}}
+function doExport(){navigator.clipboard.writeText(JSON.stringify(db)).then(()=>alert("Kopiert!"))}
+function doImport(){const s=prompt("JSON:");if(s){db=JSON.parse(s);localStorage.setItem('gas_db_v8',JSON.stringify(db));liveUpdate()}}
+function doReset(){if(confirm("RESET?")&&prompt("LÖSCHEN")==="LÖSCHEN"){localStorage.clear();location.reload()}}
+function updatePin(){localStorage.setItem('gas_pin_v8',document.getElementById('pinSetting').value)}
+function unlockApp(){if(document.getElementById('pinInput').value===localStorage.getItem('gas_pin_v8')){document.getElementById('lockScreen').style.display="none";liveUpdate()}}
+window.onload=()=>{['bw','zz','pay','start','tiers','firstPayDate'].forEach(i=>{const v=localStorage.getItem('gas_pref_'+i);if(v)document.getElementById(i).value=v});document.getElementById('newDate').valueAsDate=new Date();if(localStorage.getItem('gas_pin_v8'))document.getElementById('lockScreen').style.display="flex";else liveUpdate()};
+</script>
 </body>
 </html>
