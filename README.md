@@ -1,60 +1,59 @@
-# ⚖️ GasZähler Pro v8.3.14
-> **High-End Energiemonitoring & Finanzprognose**
-> Eine professionelle Single-Page-Application (SPA) im nativen iOS-Design zur präzisen Erfassung, Analyse und Simulation von Gasverbrauchsdaten.
+# ⚖️ GasZähler Pro v8.3.15
+> **Präzises Energiemonitoring & Finanzprognose im iOS-Design.**
+> Eine autarke Web-Applikation zur Erfassung, Analyse und Echtzeit-Simulation deines Gasverbrauchs.
 
 ---
 
-## 💎 Release Notes v8.3.14
-* **Layout-Architektur:** Korrektur des Grids für das Start-Zahlungsdatum (kein Overflow mehr auf iPhone SE/Mini).
-* **Ergonomie-Update:** Dynamische Button-Skalierung (max. 350px) für bessere Bedienbarkeit auf iPads und Desktops.
-* **Eingabe-Validierung:** Visuelles Feedback bei unplausiblen Zählerständen (Vermeidung von Negativ-Verbräuchen).
+## 💎 Release Notes v8.3.15
+* **Grid-Stabilisierung:** Das Eingabefeld "Datum der 1. Zahlung" nutzt nun die volle Breite des Einstellungsrasters, um Darstellungsfehler auf Mobilgeräten zu eliminieren.
+* **Ergonomie-Update:** Alle Aktionsschaltflächen wurden auf eine maximale Breite von 320px begrenzt und zentriert, was die Bedienbarkeit auf Tablets und Desktops massiv verbessert.
+* **Smart-Layout:** Adaptive Spaltenanpassung im Einstellungsmenü für bessere Lesbarkeit.
 
 ---
 
-## 🚦 Das Intelligente Ampel-System (Deep Dive)
-Die App nimmt dir die Interpretation der nackten Zahlen ab. Hier ist die Logik hinter den Status-Badges:
+## 🚦 Intelligentes Status-System (Ampel-Logik)
+Die App bietet eine sofortige visuelle Rückmeldung über deinen finanziellen Status:
 
-### 1. Saldo-Ampel (Echtzeit-Finanzcheck)
-Diese Ampel beantwortet die Frage: *"Habe ich bis heute genug Abschlag bezahlt?"*
-* 🟢 **Guthaben:** Die Summe der geleisteten Abschläge (basierend auf dem Datum der 1. Zahlung) ist höher als die tatsächlichen Kosten der verbrauchten kWh.
-* 🔴 **Nachzahlung:** Die aktuellen Kosten übersteigen die bereits geleisteten Zahlungen. Zeit für eine manuelle Rücklage.
+### 1. Saldo-Ampel (Ist-Zustand)
+Prüft, ob deine bisherigen Abschlagszahlungen die aktuell verbrauchten Kosten decken:
+* 🟢 **Guthaben:** Die Summe deiner Abschläge ist höher als die Kosten des realen Verbrauchs.
+* 🔴 **Nachzahlung:** Die verbrauchten kWh kosten bereits mehr, als du bisher eingezahlt hast.
 
-### 2. Prognose-Ampel (Jahres-Trendanalyse)
-Hier wird der aktuelle Durchschnittsverbrauch auf 365 Tage hochgerechnet und mit der Jahressumme deiner Abschläge verglichen.
-* 🔵 **Blau (Überzahlung):** Du zahlst deutlich zu viel (>10% Puffer). Senkung der Abschläge möglich.
-* 🟢 **Grün (Zielkurs):** Dein Verbrauch passt perfekt zu deinen Zahlungen (Abweichung < 5%).
-* 🟠 **Orange (Warnung):** Du liegst leicht über dem Soll (5% bis 15% Mehrverbrauch). 
-* 🔴 **Rot (Kritisch):** Dein prognostizierter Jahresverbrauch liegt >15% über deinem Zahlplan. Eine hohe Nachzahlung bei der Jahresabrechnung droht!
-
----
-
-## 🛠 Technische Kern-Module & Logik
-
-### 1. Die Thermische Rechen-Engine
-Gas wird in Volumen ($m^3$) gemessen, aber in Energie ($kWh$) bezahlt. Die App berechnet dies präzise:
-
-* **Brennwert ($H_s$):** Energiegehalt pro $m^3$ (standardmäßig ca. 10.5 bis 11.5).
-* **Zustandszahl ($z$):** Korrekturfaktor für Temperatur und Luftdruck am Standort.
-* **Formel:** $$E_{\text{kWh}} = (V_{\text{neu}} - V_{\text{start}}) \cdot H_s \cdot z$$
-
-### 2. Dynamische Staffeltarife
-Unterstützt komplexe Versorgungsverträge durch Eingabe im Format `Limit:Cent:Grundpreis`. Die App wählt automatisch die günstigste Staffel basierend auf der Prognose.
-
-### 3. Trend-Analyse & Historie
-* **Trend-Pfeile:** Vergleicht den aktuellen Intervall-Verbrauch mit dem globalen Durchschnitt.
-* **Scrollable Charts:** Visualisierung der täglichen Lastgänge via Chart.js, optimiert für Touch-Gesten.
+### 2. Prognose-Ampel (Jahres-Trend)
+Berechnet die Wahrscheinlichkeit einer Nachzahlung am Ende des Abrechnungszeitraums:
+* 🔵 **Blau (Überzahlung):** Deine Abschläge sind viel zu hoch angesetzt (>10% Puffer).
+* 🟢 **Grün (Ideal):** Dein Verbrauch deckt sich fast exakt mit deinem Zahlplan.
+* 🟠 **Orange (Warnung):** Ein leichter Mehrverbrauch (5-15%) wurde registriert.
+* 🔴 **Rot (Kritisch):** Hohe Nachzahlungsgefahr (>15% über Plan).
 
 ---
 
-## 🔒 Sicherheit & Datenschutz
-* **Local-First:** 100% datenschutzkonform. Daten werden im `localStorage` des Browsers sandboxed gespeichert.
-* **PIN-Protection:** AES-inspirierter Zugriffsschutz durch den integrierten Lock-Screen.
-* **Daten-Souveränität:** Manuelle Export- und Importfunktion via JSON-Backup-Strings.
+## 🛠 Technische Grundlagen
+
+### 1. Energie-Berechnung
+Die Umrechnung von Volumen ($m^3$) in Energie ($kWh$) erfolgt nach der thermischen Formel:
+
+
+
+**Formel:** $E_{kWh} = (V_{Differenz}) \cdot H_s \cdot z$
+* **Brennwert ($H_s$):** Energiegehalt des Gases (siehe Abrechnung).
+* **Zustandszahl ($z$):** Korrekturfaktor für Temperatur und Druck.
+
+### 2. Visualisierung
+* **Trend-Charts:** Dynamische Balkendiagramme visualisieren den täglichen Lastgang.
+* **Trend-Pfeile:** Direkter Vergleich des aktuellen Intervalls mit dem globalen Durchschnitt (↗︎, ↘︎, →).
 
 ---
 
-## 🚀 Setup-Anleitung
-1. **Einstellungen öffnen:** Klicke auf das Zahnrad-Symbol.
-2. **Parameter setzen:** Brennwert und z-Zahl laut letzter Abrechnung eintragen.
-3. **Zahlplan:** Datum der 1. Zahlung und monatlichen Abschlag hinterlegen.
-4. **Erfassung:** Ersten Zählerstand als "Start-m³" eintragen oder direkt in die Historie speichern.
+## 🔒 Sicherheit & Privatsphäre
+* **Local Storage:** Daten werden sandboxed im Browser gespeichert. Kein Cloud-Zwang.
+* **PIN-Sperre:** Schutz deiner Finanzdaten vor unbefugtem Zugriff.
+* **Datenhoheit:** Export und Import der Historie via JSON-Schnittstelle möglich.
+
+---
+
+## 🚀 Inbetriebnahme
+1. Öffne die **Einstellungen** (Zahnrad-Symbol).
+2. Trage **Brennwert** und **z-Zahl** deiner letzten Rechnung ein.
+3. Hinterlege das **Datum der 1. Zahlung** und deinen **Abschlag**.
+4. Speichere deinen ersten Zählerstand – GasZähler Pro übernimmt die Analyse.
