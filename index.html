@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.71</title>
+    <title>GasZähler Pro v8.3.72</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -15,37 +15,13 @@
         
         .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid var(--ios-neutral); }
 
-        /* DER DEFINITIVE GRID-FIX FÜR 50/50 OBEN */
-        .input-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            width: 100%; 
-        }
-        .input-group { min-width: 0; } /* Verhindert das Ausbrechen bei langem Inhalt */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .input-group { min-width: 0; }
         
-        input, textarea { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid var(--ios-neutral); 
-            border-radius: 10px; 
-            font-size: 16px; 
-            background: #fff; 
-            height: 48px; 
-            appearance: none; -webkit-appearance: none;
-        }
-        
+        input, textarea { width: 100%; padding: 10px; border: 1px solid var(--ios-neutral); border-radius: 10px; font-size: 16px; background: #fff; height: 48px; outline: none; }
         label { display: block; margin-bottom: 4px; font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
 
-        /* SCROLL-BEREICH DIAGRAMM */
-        .scroll-wrapper { 
-            width: 100%; 
-            overflow-x: auto; 
-            background: #fff; 
-            border-radius: 10px; 
-            border: 1px solid var(--ios-gray); 
-            -webkit-overflow-scrolling: touch; 
-        }
+        .scroll-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: 10px; border: 1px solid var(--ios-gray); -webkit-overflow-scrolling: touch; }
         .chart-area { height: 220px; width: 1000px; padding: 10px; }
 
         .table-scroll-container { max-height: 250px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--ios-gray); background: #fff; }
@@ -58,8 +34,12 @@
         .bg-good { background: #E7F9ED; color: var(--ios-green); }
         .bg-danger { background: #FFEBEB; color: var(--ios-red); }
 
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: all 0.3s ease; }
         button:disabled { opacity: 0.4; }
+        
+        /* Speicher-Bestätigung Animation */
+        .btn-success { background: var(--ios-green) !important; scale: 0.98; }
+
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -72,7 +52,7 @@
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0;">🔥 GasZähler Pro v8.3.71</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0;">🔥 GasZähler Pro v8.3.72</h1>
 
     <div class="card">
         <div class="input-grid">
@@ -251,7 +231,17 @@
 
     function doSave() { 
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
-        document.getElementById('newMeter').value = ""; refreshAll(); 
+        const btn = document.getElementById('saveBtn');
+        const oldTxt = btn.innerText;
+        btn.innerText = "✅ GESPEICHERT";
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerText = oldTxt;
+            btn.classList.remove('btn-success');
+            document.getElementById('newMeter').value = ""; 
+            refreshAll(); 
+        }, 800);
     }
 
     function doExport() { const pkg = { db, prefs: { bw: document.getElementById('bw').value, zz: document.getElementById('zz').value, pay: document.getElementById('pay').value, start: document.getElementById('start').value, tiers: document.getElementById('tiers').value, firstPayDate: document.getElementById('firstPayDate').value, pin: localStorage.getItem('gas_pin_v8') } }; navigator.clipboard.writeText(JSON.stringify(pkg)).then(() => alert("Backup kopiert!")); }
