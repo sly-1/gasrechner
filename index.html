@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.5</title>
+    <title>GasZähler Pro v8.5.6</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -35,7 +35,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.5</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.6</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -144,8 +144,8 @@
 
             const bT = document.getElementById('badgeTrend');
             
-            // WIEDER DA: Empfohlene Abschlags Summe
-            bT.innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${bufferedMonthly.toFixed(2)} € / Monat`;
+            // KORREKTUR: Empfohlener Abschlag gerundet auf volle Euro
+            bT.innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${Math.round(bufferedMonthly)} € / Monat`;
             
             if (cfg.pay > bufferedMonthly * 1.15) bT.className = "badge bg-blue";
             else if (cfg.pay >= bufferedMonthly - 1) bT.className = "badge bg-green";
@@ -192,8 +192,6 @@
         const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
         document.getElementById('newMeter').value = ""; 
-        
-        // WIEDER DA: Bestätigung beim Speichern
         btn.classList.add('btn-success');
         btn.innerText = "Gespeichert! ✅";
         setTimeout(() => {
