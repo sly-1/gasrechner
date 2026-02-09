@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.49</title>
+    <title>GasZähler Pro v8.3.50</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -33,7 +33,7 @@
             color: #000;
         }
 
-        /* --- UI KOMPONENTEN --- */
+        /* --- KORRIGIERTES LAYOUT --- */
         .card {
             background: var(--ios-card);
             padding: 20px;
@@ -47,23 +47,31 @@
         .input-row { 
             display: flex; 
             gap: 12px; 
-            margin-bottom: 15px; 
+            margin-bottom: 15px;
+            width: 100%; /* Nutzt die gesamte Breite der Karte */
         }
 
         .input-group { 
-            flex: 1; 
+            flex: 1; /* Beide Felder teilen sich den Platz */
+            display: flex;
+            flex-direction: column;
         }
 
         input, textarea {
-            width: 100%;
+            width: 100%; /* Zwingt das Feld, die Gruppe auszufüllen */
+            display: block;
             padding: 12px;
             border: 1px solid var(--ios-neutral);
             border-radius: 10px;
             font-size: 16px;
             background: #fff;
-            height: 48px;
-            outline: none;
+            height: 48px; /* Optimale Touch-Größe */
+            font-family: inherit;
+            -webkit-appearance: none;
         }
+
+        /* Spezifische Anpassung für Textarea */
+        textarea { height: auto; min-height: 60px; }
 
         label {
             display: block;
@@ -74,6 +82,7 @@
             font-weight: 700;
         }
 
+        /* --- UI ELEMENTE --- */
         .result-main {
             font-size: 34px;
             font-weight: 800;
@@ -82,7 +91,6 @@
             letter-spacing: -1px;
         }
 
-        /* --- AMPEL & STATUS --- */
         .badge {
             display: inline-block;
             padding: 8px 14px;
@@ -99,11 +107,7 @@
         .trend-up { color: var(--ios-red); font-weight: bold; }
         .trend-down { color: var(--ios-green); font-weight: bold; }
 
-        /* --- TABELLE & CHART --- */
-        .chart-container {
-            height: 200px;
-            margin-top: 10px;
-        }
+        .chart-container { height: 200px; margin-top: 10px; }
 
         .history-scroll {
             max-height: 300px;
@@ -113,28 +117,10 @@
             margin-top: 20px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #fafafa; padding: 12px 10px; font-size: 11px; color: var(--ios-text-secondary); text-align: left; text-transform: uppercase; }
+        td { padding: 14px 10px; font-size: 14px; border-bottom: 1px solid #f2f2f7; background: #fff; }
 
-        th {
-            background: #fafafa;
-            padding: 12px 10px;
-            font-size: 11px;
-            color: var(--ios-text-secondary);
-            text-align: left;
-            text-transform: uppercase;
-        }
-
-        td {
-            padding: 14px 10px;
-            font-size: 14px;
-            border-bottom: 1px solid #f2f2f7;
-            background: #fff;
-        }
-
-        /* --- BUTTONS --- */
         button {
             width: 100%;
             background: var(--ios-blue);
@@ -164,7 +150,7 @@
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 22px; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.49</h1>
+    <h1 style="text-align:center; font-size: 22px; margin-bottom: 25px;">🔥 GasZähler Pro v8.3.50</h1>
 
     <div class="card">
         <label>Ablesung</label>
@@ -200,7 +186,7 @@
     <div class="card" id="cardSaldo" style="text-align:center">
         <label>Finanz-Saldo (Ist-Stand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge">Lade Daten...</div>
+        <div id="badgeSaldo" class="badge">Daten werden geladen...</div>
     </div>
 
     <div class="card" id="cardTrend" style="text-align:center">
@@ -312,7 +298,7 @@
             renderChart(workingDb);
         } else {
             if(myChart) myChart.destroy();
-            document.getElementById('historyTable').innerHTML = '<tr><td colspan="4" style="text-align:center">Keine Daten.</td></tr>';
+            document.getElementById('historyTable').innerHTML = '<tr><td colspan="4" style="text-align:center">Keine Daten vorhanden.</td></tr>';
         }
     }
 
