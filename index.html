@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.78</title>
+    <title>GasZähler Pro v8.3.79</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -11,13 +11,13 @@
             --ios-text-secondary: #8E8E93; --ios-green: #34C759;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 10px; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 10px; overflow-x: hidden; }
         
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; }
 
-        /* TABELLEN-LAYOUT FÜR DEFINITIVE STABILITÄT */
-        .layout-table { width: 100%; border-spacing: 0; border-collapse: collapse; }
-        .layout-table td { padding: 0; vertical-align: bottom; }
+        /* TABELLEN-LAYOUT FÜR OBERE ZEILE */
+        .top-grid { width: 100%; display: table; border-spacing: 8px 0; margin-left: -8px; }
+        .grid-cell { display: table-cell; vertical-align: bottom; }
         
         input, textarea { 
             width: 100%; height: 44px; padding: 8px; 
@@ -29,8 +29,13 @@
         .result-main { font-size: 32px; font-weight: 800; display: block; text-align: center; margin: 5px 0; }
         .badge { display: block; width: fit-content; margin: 8px auto; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-align: center; }
 
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; margin-top: 10px; }
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; margin-top: 5px; }
         
+        /* FIX FÜR DIE TABELLE UNTEN */
+        .table-container { max-height: 180px; overflow-y: auto; border: 1px solid #E5E5EA; border-radius: 10px; margin-top: 10px; background: #fff; }
+        table.history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.history-table td { padding: 10px; border-bottom: 1px solid #F2F2F7; }
+
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -43,21 +48,19 @@
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 16px; margin: 5px 0;">🔥 GasZähler Pro v8.3.78</h1>
+    <h1 style="text-align:center; font-size: 16px; margin: 5px 0;">🔥 GasZähler Pro v8.3.79</h1>
 
     <div class="card">
-        <table class="layout-table">
-            <tr>
-                <td style="width: 130px; padding-right: 10px;">
-                    <label>Datum</label>
-                    <input type="date" id="newDate" oninput="liveUpdate()">
-                </td>
-                <td>
-                    <label>Stand (m³)</label>
-                    <input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()">
-                </td>
-            </tr>
-        </table>
+        <div class="top-grid">
+            <div class="grid-cell" style="width: 135px;">
+                <label>Datum</label>
+                <input type="date" id="newDate" oninput="liveUpdate()">
+            </div>
+            <div class="grid-cell">
+                <label>Stand (m³)</label>
+                <input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()">
+            </div>
+        </div>
         
         <details style="margin-top:15px;">
             <summary style="color:var(--ios-blue); font-size:12px; font-weight:700; cursor:pointer;">⚙️ Einstellungen & PIN</summary>
@@ -93,9 +96,9 @@
     <button id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
-        <canvas id="mainChart" style="height:150px; width:100%;"></canvas>
-        <div style="max-height: 150px; overflow-y: auto; margin-top:10px;">
-            <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+        <canvas id="mainChart" style="height:140px; width:100%;"></canvas>
+        <div class="table-container">
+            <table class="history-table">
                 <tbody id="historyTable"></tbody>
             </table>
         </div>
@@ -183,15 +186,16 @@
                 cS.style.borderLeftColor = "#FF3B30";
             }
 
-            renderTable(wDb, avg); renderChart(wDb);
+            renderTable(wDb); renderChart(wDb);
         }
     }
 
-    function renderTable(data, avg) {
+    function renderTable(data) {
         const tb = document.getElementById('historyTable'); tb.innerHTML = '';
         [...data].reverse().forEach(e => {
             const style = e.id === 'pre' ? 'font-style:italic; color:#007AFF;' : '';
-            tb.innerHTML += `<tr style="${style}"><td style="padding:6px; border-bottom:1px solid #eee;">${new Date(e.d).toLocaleDateString()}</td><td style="padding:6px; border-bottom:1px solid #eee; text-align:right;">${e.m.toFixed(3)} m³</td></tr>`;
+            const delBtn = e.id !== 'pre' ? `<span style="color:red; float:right;" onclick="delEntry(${e.id})">✕</span>` : '';
+            tb.innerHTML += `<tr style="${style}"><td>${new Date(e.d).toLocaleDateString()}</td><td style="text-align:right;">${e.m.toFixed(3)} m³ ${delBtn}</td></tr>`;
         });
     }
 
@@ -204,8 +208,8 @@
         }
         if(myChart) myChart.destroy();
         myChart = new Chart(document.getElementById('mainChart').getContext('2d'), { 
-            type: 'bar', data: { labels: lb, datasets: [{ data: val, backgroundColor: '#007AFF' }] }, 
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+            type: 'bar', data: { labels: lb, datasets: [{ data: val, backgroundColor: '#007AFF', borderRadius: 4 }] }, 
+            options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } } 
         });
     }
 
@@ -219,9 +223,10 @@
         }, 800);
     }
 
-    function doExport() { const pkg = { db, prefs: { bw: document.getElementById('bw').value, zz: document.getElementById('zz').value, pay: document.getElementById('pay').value, start: document.getElementById('start').value, tiers: document.getElementById('tiers').value, firstPayDate: document.getElementById('firstPayDate').value, pin: localStorage.getItem('gas_pin_v8') } }; navigator.clipboard.writeText(JSON.stringify(pkg)).then(() => alert("Backup kopiert!")); }
-    function doImport() { const s = prompt("JSON einfügen:"); if(!s) return; try { const data = JSON.parse(s); db = data.db; refreshAll(); alert("Import erfolgreich!"); } catch(e) { alert("Fehler!"); } }
-    function doReset() { if (confirm("Wirklich alles löschen?") && prompt("Bitte 'LÖSCHEN' eingeben:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
+    function delEntry(id) { if(confirm("Eintrag löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
+    function doExport() { navigator.clipboard.writeText(JSON.stringify({db, pin: localStorage.getItem('gas_pin_v8')})).then(() => alert("Backup kopiert!")); }
+    function doImport() { const s = prompt("JSON:"); if(!s) return; try { const data = JSON.parse(s); db = data.db; refreshAll(); } catch(e) { alert("Fehler!"); } }
+    function doReset() { if (confirm("Alles löschen?") && prompt("Typ LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
     window.onload = () => {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
