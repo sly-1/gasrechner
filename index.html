@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.8</title>
+    <title>GasZähler Pro v8.6.0</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -39,7 +39,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.8</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.6.0</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -58,10 +58,11 @@
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.95" oninput="liveUpdate()"></div>
                     <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
+                    <div><label>Zahlungen/Jahr</label><input type="number" id="payCount" value="11" oninput="liveUpdate()"></div>
+                    <div><label>1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()"></div>
                 </div>
-                <div style="display: flex; gap: 8px; margin-top:8px;">
-                    <div style="flex:1;"><label>1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()"></div>
-                    <div style="flex:1;"><label>PIN</label><input type="password" id="pinSetting" placeholder="PIN" oninput="savePin()"></div>
+                <div style="margin-top:8px;">
+                    <label>PIN</label><input type="password" id="pinSetting" placeholder="PIN" oninput="savePin()">
                 </div>
             </div>
         </details>
@@ -102,7 +103,7 @@
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
-        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
+        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate', 'payCount'].forEach(id => {
             const el = document.getElementById(id); if(el) localStorage.setItem('gas_pref_' + id, el.value);
         });
         liveUpdate();
@@ -117,6 +118,7 @@
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
             pay: parseFloat(document.getElementById('pay').value) || 0,
             start: parseFloat(document.getElementById('start').value) || 0,
+            payCount: parseInt(document.getElementById('payCount').value) || 11,
             tiers: document.getElementById('tiers').value.split('\n').map(l => {
                 const p = l.split(':').map(Number); return { limit: p[0]||999999, cent: (p[1]||0)/100, base: p[2]||0 };
             })
@@ -148,14 +150,18 @@
             const projKwh = avgKwhDay * 365;
 
             const tier = cfg.tiers.find(t => projKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
-            const baseMonthly = ((projKwh * tier.cent) + (tier.base * 12)) / 12;
-            const bufferedMonthly = baseMonthly * 1.10;
+            const totalYearCost = (projKwh * tier.cent) + (tier.base * 12);
+            const bufferedYearCost = totalYearCost * 1.10;
+            
+            const recPay = bufferedYearCost / cfg.payCount;
+            const basePayPerCount = totalYearCost / cfg.payCount;
 
-            document.getElementById('badgeTrend').innerHTML = `Prognose: ${(bufferedMonthly * 12).toFixed(2)} €<br>Empfehlung: ${Math.round(bufferedMonthly)} € / Monat`;
+            document.getElementById('badgeTrend').innerHTML = `Prognose: ${bufferedYearCost.toFixed(2)} €<br>Empfehlung: ${Math.round(recPay)} € / Monat (${cfg.payCount}x)`;
+            
             const bT = document.getElementById('badgeTrend');
-            if (cfg.pay > bufferedMonthly * 1.15) bT.className = "badge bg-blue";
-            else if (cfg.pay >= bufferedMonthly - 1) bT.className = "badge bg-green";
-            else if (cfg.pay >= baseMonthly) bT.className = "badge bg-orange";
+            if (cfg.pay > recPay * 1.15) bT.className = "badge bg-blue";
+            else if (cfg.pay >= recPay - 1) bT.className = "badge bg-green";
+            else if (cfg.pay >= basePayPerCount) bT.className = "badge bg-orange";
             else bT.className = "badge bg-red";
 
             const costSoFar = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
@@ -167,7 +173,7 @@
             if (saldo > 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Aktuelles Guthaben"; }
             else { bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus"; }
 
-            // STATS BERECHNUNG
+            // STATS
             const now = new Date();
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
             const monEntries = wDb.filter(e => new Date(e.d) >= startOfMonth);
@@ -176,7 +182,7 @@
                 document.getElementById('statMonth').innerText = consumed.toFixed(1) + " m³";
             }
             document.getElementById('statDay').innerText = (avgKwhDay / (cfg.bw * cfg.zz)).toFixed(2) + " m³";
-            document.getElementById('statCostDay').innerText = ((bufferedMonthly * 12) / 365).toFixed(2) + " €";
+            document.getElementById('statCostDay').innerText = (bufferedYearCost / 365).toFixed(2) + " €";
 
             renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz));
         }
@@ -217,7 +223,7 @@
     function doReset() { if (confirm("RESET?") && prompt("LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
     window.onload = () => {
-        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
+        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate', 'payCount'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
         const p = localStorage.getItem('gas_pin_v8'); if(p) document.getElementById('pinSetting').value = p;
         document.getElementById('newDate').valueAsDate = new Date(); refreshAll();
     };
