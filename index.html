@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.35</title>
+    <title>GasZähler Pro v8.3.36</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -80,10 +80,10 @@
     <button onclick="unlockApp()">Entsperren</button>
 </div>
 
-<div id="toast">✅ Daten aktualisiert</div>
+<div id="toast">✅ Aktualisiert</div>
 
 <div id="main">
-    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.35</h1>
+    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.36</h1>
 
     <div class="card">
         <label>Ablesung</label>
@@ -160,9 +160,16 @@
         return tiers[tiers.length - 1];
     }
 
+    function refreshAll() {
+        db.sort((a,b) => new Date(a.d) - new Date(b.d));
+        localStorage.setItem('gas_db_v8', JSON.stringify(db));
+        liveUpdate();
+    }
+
     function liveUpdate() {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
-            localStorage.setItem('gas_pref_' + id, document.getElementById(id).value);
+            const el = document.getElementById(id);
+            if(el) localStorage.setItem('gas_pref_' + id, el.value);
         });
 
         const cfg = {
@@ -194,33 +201,32 @@
         }
         document.getElementById('saveBtn').disabled = !ok || mIn.value === "";
 
-        // WICHTIG: Erstelle tempDb für die Berechnung
-        let tDb = [...db];
+        let displayDb = [...db];
         if (ok && mIn.value !== "") {
-            tDb.push({ d: curD, m: val, id: 0 });
-            tDb.sort((a,b) => new Date(a.d) - new Date(b.d));
+            displayDb.push({ d: curD, m: val, id: "preview" });
+            displayDb.sort((a,b) => new Date(a.d) - new Date(b.d));
         }
 
-        if (tDb.length > 0) {
-            // Berechnung immer auf Basis des chronologisch letzten Eintrags
-            const last = tDb[tDb.length - 1];
+        if (displayDb.length > 0) {
+            const first = displayDb[0];
+            const last = displayDb[displayDb.length - 1];
+            
             const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
-            const totalDays = Math.max(1, (new Date(last.d) - new Date(tDb[0].d)) / 86400000);
-            const dailyAvg = (last.m - tDb[0].m) / totalDays;
+            const totalDays = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
+            const dailyAvg = (last.m - first.m) / totalDays;
 
             const tier = getActiveTier((dailyAvg * 365 * cfg.bw * cfg.zz), cfg.tiers);
             const currentCost = (totalKwh * tier.cent) + ((tier.base * 12 / 365) * totalDays);
 
-            const sP = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(tDb[0].d);
+            const sP = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let payCount = 0; let dD = new Date(sP);
             while (dD <= new Date(last.d) && payCount < 12) { payCount++; dD.setMonth(dD.getMonth() + 1); }
 
             const saldo = (payCount * cfg.pay) - currentCost;
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             document.getElementById('outSaldo').style.color = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
-            document.getElementById('badgeSaldo').innerText = saldo >= 0 ? "Im Guthaben" : "In der Nachzahlung";
             document.getElementById('badgeSaldo').className = "badge " + (saldo >= 0 ? "bg-good" : "bg-danger");
-            document.getElementById('cardSaldo').style.borderColor = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+            document.getElementById('badgeSaldo').innerText = saldo >= 0 ? "Im Guthaben" : "In der Nachzahlung";
 
             const yKwh = (dailyAvg * 365) * cfg.bw * cfg.zz;
             const yTier = getActiveTier(yKwh, cfg.tiers);
@@ -236,21 +242,26 @@
             else { cl="bg-good"; tx="Abschlag passt! (Ideal: "+recPay.toFixed(0)+" €)"; }
             document.getElementById('badgeTrend').className = "badge " + cl;
             document.getElementById('badgeTrend').innerText = tx;
-            document.getElementById('cardTrend').style.borderColor = ratio > 1.05 ? "var(--ios-orange)" : (ratio < 0.85 ? "var(--ios-blue)" : "var(--ios-green)");
 
             const tb = document.getElementById('historyTable'); tb.innerHTML = '';
-            for (let i = tDb.length - 1; i >= 0; i--) {
+            for (let i = displayDb.length - 1; i >= 0; i--) {
                 let tr = "→", tc = "";
                 if (i > 0) {
-                    const diffM = tDb[i].m - tDb[i-1].m;
-                    const diffD = (new Date(tDb[i].d) - new Date(tDb[i-1].d)) / 86400000;
+                    const diffM = displayDb[i].m - displayDb[i-1].m;
+                    const diffD = (new Date(displayDb[i].d) - new Date(displayDb[i-1].d)) / 86400000;
                     const vD = diffM / diffD;
                     if (vD > dailyAvg * 1.12) { tr = "↗︎"; tc = "trend-up"; }
                     else if (vD < dailyAvg * 0.88) { tr = "↘︎"; tc = "trend-down"; }
                 }
-                tb.innerHTML += `<tr><td>${new Date(tDb[i].d).toLocaleDateString()}</td><td>${tDb[i].m.toFixed(2)}</td><td class="${tc}">${tr}</td><td><button style="color:red; background:none; border:none; width:auto; margin:0;" onclick="delEntry(${tDb[i].id})">✕</button></td></tr>`;
+                const isPre = displayDb[i].id === "preview";
+                tb.innerHTML += `<tr style="${isPre?'opacity:0.5;background:#f9f9f9':''}">
+                    <td>${new Date(displayDb[i].d).toLocaleDateString()}</td>
+                    <td>${displayDb[i].m.toFixed(3)}</td>
+                    <td class="${tc}">${tr}</td>
+                    <td>${isPre?'':`<button style="color:red;background:none;border:none;width:auto;margin:0;padding:0" onclick="delEntry(${displayDb[i].id})">✕</button>`}</td>
+                </tr>`;
             }
-            drawChart(tDb);
+            drawChart(displayDb);
         }
     }
 
@@ -274,27 +285,23 @@
         const m = parseFloat(document.getElementById('newMeter').value);
         const d = document.getElementById('newDate').value;
         db.push({ d, m, id: Date.now() });
-        db.sort((a,b) => new Date(a.d) - new Date(b.d));
-        localStorage.setItem('gas_db_v8', JSON.stringify(db));
         document.getElementById('newMeter').value = "";
-        liveUpdate();
+        refreshAll();
         const t = document.getElementById('toast'); t.classList.add('visible');
         setTimeout(() => t.classList.remove('visible'), 2500);
     }
 
     function delEntry(id) {
-        if (id === 0) return; // Nicht für Vorschau-Eintrag
         if (confirm("Eintrag löschen?")) {
             db = db.filter(x => x.id !== id);
-            localStorage.setItem('gas_db_v8', JSON.stringify(db));
-            liveUpdate();
+            refreshAll();
         }
     }
 
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() {
         const s = prompt("JSON:");
-        if (s) { try { db = JSON.parse(s); localStorage.setItem('gas_db_v8', JSON.stringify(db)); liveUpdate(); } catch(e) { alert("Fehler!"); } }
+        if (s) { try { db = JSON.parse(s); refreshAll(); } catch(e) { alert("Fehler!"); } }
     }
     function doReset() {
         if (confirm("LÖSCHEN?") && prompt("LÖSCHEN") === "LÖSCHEN") { localStorage.clear(); location.reload(); }
@@ -302,7 +309,7 @@
     function updatePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
     function unlockApp() {
         if (document.getElementById('pinInput').value === localStorage.getItem('gas_pin_v8')) {
-            document.getElementById('lockScreen').style.display = "none"; liveUpdate();
+            document.getElementById('lockScreen').style.display = "none"; refreshAll();
         } else { alert("Falsch"); }
     }
     window.onload = () => {
@@ -312,7 +319,7 @@
         });
         document.getElementById('newDate').valueAsDate = new Date();
         if (localStorage.getItem('gas_pin_v8')) document.getElementById('lockScreen').style.display = "flex";
-        else liveUpdate();
+        else refreshAll();
     };
 </script>
 </body>
