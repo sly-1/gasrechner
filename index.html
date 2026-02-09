@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.63</title>
+    <title>GasZähler Pro v8.3.64</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -14,24 +14,22 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--ios-bg); margin: 0; padding: 15px; color: #000; }
         
-        .card { background: var(--ios-card); padding: 20px; border-radius: 14px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid var(--ios-neutral); transition: border-color 0.3s; }
+        .card { background: var(--ios-card); padding: 20px; border-radius: 14px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-left: 6px solid var(--ios-neutral); }
 
-        /* 50/50 INPUTS */
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
         .input-group { flex: 1; min-width: 0; }
-        input, textarea { width: 100%; display: block; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; font-size: 16px; background: #fff; height: 50px; -webkit-appearance: none; }
+        input, textarea { width: 100%; display: block; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; font-size: 16px; background: #fff; height: 50px; }
 
-        /* CHART: FIXED Y-AXIS SCROLL */
-        .chart-outer { position: relative; width: 100%; background: #fff; border-radius: 10px; border: 1px solid var(--ios-gray); overflow: hidden; height: 240px; }
-        .chart-y-axis { position: absolute; left: 0; top: 0; bottom: 0; width: 40px; background: #fff; z-index: 10; border-right: 1px solid #f2f2f7; }
-        .chart-scroll-box { width: 100%; overflow-x: auto; padding-left: 40px; height: 100%; -webkit-overflow-scrolling: touch; }
+        /* --- CHART SCROLL FIX --- */
+        .chart-outer { position: relative; width: 100%; background: #fff; border-radius: 10px; border: 1px solid var(--ios-gray); overflow: hidden; height: 240px; display: flex; }
+        .chart-y-axis { position: absolute; left: 0; top: 0; bottom: 0; width: 45px; background: #fff; z-index: 10; border-right: 1px solid #f2f2f7; }
+        .chart-scroll-box { flex: 1; overflow-x: auto; padding-left: 45px; -webkit-overflow-scrolling: touch; }
         .chart-content { height: 220px; min-width: 600px; }
 
-        /* TABLE: VERTICAL SCROLL + STICKY HEADER */
         .table-scroll-container { max-height: 300px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--ios-gray); background: #fff; }
         table { width: 100%; border-collapse: collapse; }
         th { position: sticky; top: 0; z-index: 20; background: #fafafa; padding: 12px 10px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; border-bottom: 2px solid var(--ios-gray); text-align: left; }
-        td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid #f2f2f7; text-align: left; }
+        td { padding: 12px 10px; font-size: 14px; border-bottom: 1px solid #f2f2f7; }
 
         .result-main { font-size: 34px; font-weight: 800; display: block; margin: 5px 0; letter-spacing: -1px; }
         .badge { display: inline-block; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 8px; }
@@ -41,8 +39,6 @@
         .bg-info { background: #E5F1FF; color: var(--ios-blue); }
 
         button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        button:disabled { background: var(--ios-neutral); opacity: 0.6; }
-        label { display: block; margin-bottom: 5px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -55,30 +51,25 @@
 </div>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 20px;">🔥 GasZähler Pro v8.3.63</h1>
+    <h1 style="text-align:center; font-size: 20px;">🔥 GasZähler Pro v8.3.64</h1>
 
     <div class="card">
         <label>Ablesung</label>
         <div class="input-row">
             <div class="input-group"><input type="date" id="newDate" oninput="liveUpdate()"></div>
-            <div class="input-group">
-                <input type="number" id="newMeter" step="0.001" placeholder="m³ Stand" oninput="liveUpdate()">
-                <div id="plausiError" style="color:var(--ios-red); font-size:10px; display:none; margin-top:4px; font-weight:bold;">Wert passt nicht!</div>
-            </div>
+            <div class="input-group"><input type="number" id="newMeter" step="0.001" placeholder="m³" oninput="liveUpdate()"></div>
         </div>
         <details>
-            <summary style="color:var(--ios-blue); font-size:13px; font-weight:700; cursor:pointer;">⚙️ Einstellungen & Backup</summary>
+            <summary style="color:var(--ios-blue); font-weight:700;">⚙️ Einstellungen</summary>
             <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
-                <label>Tarife (Limit:Cent:Grundpreis)</label>
-                <textarea id="tiers" rows="2" oninput="liveUpdate()" style="height: auto; margin-bottom:10px;">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
+                <textarea id="tiers" rows="2" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div><label>Brennwert</label><input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()"></div>
-                    <div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()"></div>
-                    <div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
-                    <div><label>Start m³</label><input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()"></div>
+                    <input type="number" id="bw" value="10.550" step="0.001" oninput="liveUpdate()">
+                    <input type="number" id="zz" value="0.9500" step="0.0001" oninput="liveUpdate()">
+                    <input type="number" id="pay" value="150" oninput="liveUpdate()">
+                    <input type="number" id="start" value="0" step="0.1" oninput="liveUpdate()">
                 </div>
-                <label style="margin-top:10px;">Datum 1. Zahlung</label>
-                <input type="date" id="firstPayDate" oninput="liveUpdate()">
+                <input type="date" id="firstPayDate" oninput="liveUpdate()" style="margin-top:10px;">
                 <input type="password" id="pinSetting" oninput="savePin()" placeholder="PIN setzen" style="margin-top:10px;">
             </div>
         </details>
@@ -99,7 +90,7 @@
     <button id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
-        <label>Verbrauch m³/Tag (Wischen →)</label>
+        <label>Verbrauch (Wischen →)</label>
         <div class="chart-outer">
             <canvas id="yAxisStatic" class="chart-y-axis"></canvas>
             <div class="chart-scroll-box">
@@ -120,11 +111,13 @@
         <button style="flex:1; background:var(--ios-gray); color:#000;" onclick="doExport()">Backup</button>
         <button style="flex:1; background:var(--ios-gray); color:#000;" onclick="doImport()">Restore</button>
     </div>
+
+    <button style="background:none; color:var(--ios-red); font-size:12px; margin-top:30px; border:1px solid #ff3b3022;" onclick="doReset()">♻️ App zurücksetzen & Daten löschen</button>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
-    let myChart = null; let yAxisChart = null;
+    let myChart = null, yAxisChart = null;
 
     function savePin() { localStorage.setItem('gas_pin_v8', document.getElementById('pinSetting').value); }
     function unlockApp() {
@@ -143,8 +136,8 @@
     }
 
     function liveUpdate() {
-        const mField = document.getElementById('newMeter'); const dField = document.getElementById('newDate');
-        const val = parseFloat(mField.value); const dStr = dField.value;
+        const mField = document.getElementById('newMeter'), dField = document.getElementById('newDate');
+        const val = parseFloat(mField.value), dStr = dField.value;
         let isValid = true;
         if (!isNaN(val) && dStr !== "") {
             const currentD = new Date(dStr);
@@ -152,8 +145,6 @@
             const after = db.filter(e => new Date(e.d) > currentD).sort((a,b) => new Date(a.d) - new Date(b.d))[0];
             if ((before && val < before.m) || (after && val > after.m)) isValid = false;
         }
-        mField.style.backgroundColor = isValid ? "#fff" : "#FFEBEB";
-        document.getElementById('plausiError').style.display = isValid ? "none" : "block";
         document.getElementById('saveBtn').disabled = !isValid || isNaN(val) || dStr === "";
 
         const cfg = {
@@ -180,8 +171,8 @@
             const ratio = yCost / (cfg.pay * 12);
             let cl="bg-good", tx="Abschlag passt!", bc="var(--ios-green)";
             if(ratio > 1.1) { cl="bg-danger"; tx="Zu niedrig! Empf: "+Math.round((yCost/12)*1.1)+"€"; bc="var(--ios-red)"; }
-            else if(ratio > 1.02) { cl="bg-warn"; tx="Knappe Deckung"; bc="var(--ios-orange)"; }
             else if(ratio < 0.90) { cl="bg-info"; tx="Zu hoch! Empf: "+Math.round((yCost/12)*1.1)+"€"; bc="var(--ios-blue)"; }
+            else if(ratio > 1.02) { cl="bg-warn"; tx="Knappe Deckung"; bc="var(--ios-orange)"; }
             document.getElementById('badgeTrend').className = "badge "+cl; document.getElementById('badgeTrend').innerText = tx;
             document.getElementById('cardTrend').style.borderColor = bc;
 
@@ -208,7 +199,7 @@
                 const v = diff > 0 ? (data[idx].m-data[idx-1].m)/diff : 0;
                 if(v > avg*1.15) { s="↗︎"; color="red"; } else if(v < avg*0.85) { s="↘︎"; color="green"; }
             }
-            tb.innerHTML += `<tr style="${e.id==='pre'?'opacity:0.5':''}"><td>${new Date(e.d).toLocaleDateString()}</td><td>${e.m.toFixed(3)}</td><td style="font-weight:bold;color:${color}">${s}</td><td>${e.id==='pre'?'⏳':`<button style="color:red;background:none;padding:0;width:auto;margin:0;border:none;font-size:18px" onclick="delEntry(${e.id})">✕</button>`}</td></tr>`;
+            tb.innerHTML += `<tr style="${e.id==='pre'?'opacity:0.5':''}"><td>${new Date(e.d).toLocaleDateString()}</td><td>${e.m.toFixed(3)}</td><td style="font-weight:bold;color:${color}">${s}</td><td>${e.id==='pre'?'':'<button style="color:red;background:none;width:auto;padding:0;margin:0;" onclick="delEntry('+e.id+')">✕</button>'}</td></tr>`;
         });
     }
 
@@ -226,8 +217,14 @@
 
     function doSave() { db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); document.getElementById('newMeter').value = ""; refreshAll(); }
     function doExport() { const pkg = { db, prefs: { bw: document.getElementById('bw').value, zz: document.getElementById('zz').value, pay: document.getElementById('pay').value, start: document.getElementById('start').value, tiers: document.getElementById('tiers').value, firstPayDate: document.getElementById('firstPayDate').value, pin: localStorage.getItem('gas_pin_v8') } }; navigator.clipboard.writeText(JSON.stringify(pkg)).then(() => alert("Backup kopiert!")); }
-    function doImport() { const s = prompt("JSON:"); if(!s) return; try { const data = JSON.parse(s); db = data.db; Object.keys(data.prefs).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = data.prefs[k]; }); if(data.prefs.pin) localStorage.setItem('gas_pin_v8', data.prefs.pin); refreshAll(); } catch(e) { alert("Fehler!"); } }
+    function doImport() { const s = prompt("JSON:"); if(!s) return; try { const data = JSON.parse(s); db = data.db; Object.keys(data.prefs).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = data.prefs[k]; }); refreshAll(); } catch(e) { alert("Fehler!"); } }
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
+    
+    function doReset() {
+        if (confirm("Wirklich alles löschen?") && prompt("Bitte 'LÖSCHEN' eingeben:") === "LÖSCHEN") {
+            localStorage.clear(); location.reload();
+        }
+    }
 
     window.onload = () => {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
