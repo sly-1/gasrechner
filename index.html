@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.14</title>
+    <title>GasZähler Pro v8.3.15</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -21,10 +21,10 @@
         label { display: block; margin-bottom: 4px; font-size: 11px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 600; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--ios-neutral); border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 5px; font-family: inherit; }
         
-        /* Layout Grid & Field Fixes */
+        /* Layout Grid Fix v8.3.15 */
         .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .full-width { grid-column: span 2; }
-        #firstPaymentDate { width: 100%; max-width: 100%; } /* Verhindert das Ausbrechen im Grid */
+        #firstPaymentDate { width: 100%; display: block; } /* Explizite Fixierung */
         
         /* Sticky Chart Layout */
         .chart-container-outer { position: relative; width: 100%; background: #fafafa; border-radius: 8px; border: 1px solid var(--ios-gray); overflow: hidden; height: 160px; }
@@ -48,26 +48,23 @@
         .badge-warn { background: #FFF4E5; color: var(--ios-orange); border-color: var(--ios-orange); }
         .badge-info { background: #E5F1FF; color: var(--ios-blue); border-color: var(--ios-blue); }
 
-        /* Button Fixes: Zentriert & kontrollierte Breite */
+        /* Button Fix v8.3.15: Keine unendliche Breite mehr */
         button { 
-            width: auto; 
-            min-width: 140px; 
-            max-width: 100%; 
+            width: 100%; 
+            max-width: 320px; /* Begrenzung */
+            display: block;
+            margin: 10px auto; /* Zentrierung */
             background: var(--ios-blue); 
             color: white; 
             border: none; 
-            padding: 16px 24px; 
+            padding: 16px; 
             border-radius: 12px; 
             font-size: 17px; 
             font-weight: 600; 
             cursor: pointer; 
-            display: block; 
-            margin: 10px auto; 
         }
-        #saveBtn { width: 100%; max-width: 350px; } /* Speziell für den Haupt-Action-Button */
-        
-        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; margin: 0; flex: 1; min-width: 100px; }
-        .btn-danger-text { background: transparent; color: var(--ios-red); padding: 5px; font-size: 14px; margin-top: 20px; border: none; width: 100%; text-align: center; }
+        .btn-secondary { background: var(--ios-gray); color: #000; padding: 12px; font-size: 14px; margin: 0; }
+        .btn-danger-text { background: transparent; color: var(--ios-red); padding: 5px; font-size: 14px; margin-top: 20px; border: none; width: 100%; max-width: none; text-align: center; }
         
         #saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: white; padding: 12px 24px; border-radius: 25px; z-index: 9999; transition: transform 0.4s; }
         #saveToast.show { transform: translateX(-50%) translateY(0); }
@@ -85,7 +82,7 @@
     <div id="mainContent">
         <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="#FF9500"><path d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/></svg>
-            GasZähler Pro
+            GasZähler Pro v8.3.15
         </h1>
         
         <div class="card">
@@ -150,9 +147,9 @@
             </div>
         </div>
         
-        <div style="display:flex; gap:8px; margin-top:10px;">
-            <button class="btn-secondary" onclick="exportBackup()">Export</button>
-            <button class="btn-secondary" onclick="importBackup()">Import</button>
+        <div style="display:flex; gap:8px; margin-top:10px; justify-content: center;">
+            <button class="btn-secondary" onclick="exportBackup()" style="max-width: 155px;">Export</button>
+            <button class="btn-secondary" onclick="importBackup()" style="max-width: 155px;">Import</button>
         </div>
         <button class="btn-danger-text" onclick="secureClear()">⚠️ Datenbank löschen</button>
     </div>
@@ -205,8 +202,8 @@
                 const tier = getTier(totalKwh);
                 const currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
                 const monthly = parseFloat(document.getElementById('monthlyPayment').value)||0;
-                const firstPayInput = document.getElementById('firstPaymentDate').value;
-                const firstPay = firstPayInput ? new Date(firstPayInput) : new Date();
+                const firstPayVal = document.getElementById('firstPaymentDate').value;
+                const firstPay = firstPayVal ? new Date(firstPayVal) : new Date(history[0].date);
                 
                 let count = 0; let checkDate = new Date(firstPay);
                 while(checkDate <= new Date(curDate) && count < 12) { count++; checkDate.setMonth(checkDate.getMonth()+1); }
@@ -249,7 +246,7 @@
                         const d = (h.meter - prev.meter) / ((new Date(h.date)-new Date(prev.date))/86400000);
                         trend = d > globalAvg * 1.1 ? '↗︎' : (d < globalAvg * 0.9 ? '↘︎' : '→');
                     }
-                    body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td>${trend}</td><td>${h.meter.toFixed(2)}</td><td style="text-align:right;">${calculateCost(h.meter, h.date).toFixed(2)}€</td><td style="text-align:right;"><button style="color:red; background:none; border:none; width:auto; min-width:unset; padding:0; font-size:16px; margin:0;" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
+                    body.innerHTML += `<tr><td>${new Date(h.date).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})}</td><td>${trend}</td><td>${h.meter.toFixed(2)}</td><td style="text-align:right;">${calculateCost(h.meter, h.date).toFixed(2)}€</td><td style="text-align:right;"><button style="color:red; background:none; border:none; width:auto; padding:0; font-size:16px; margin:0; display:inline;" onclick="deleteEntry(${h.id})">×</button></td></tr>`;
                 }
                 updateChart();
             }
@@ -302,7 +299,7 @@
         function savePin() { localStorage.setItem('gas_app_pin', document.getElementById('appPin').value); }
         function deleteEntry(id) { if(confirm("Eintrag löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Kopiert!")); }
-        function importBackup() { const c = prompt("Backup-String einfügen:"); if(c) { try { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } catch(e) { alert("Fehler beim Import!"); } } }
+        function importBackup() { const c = prompt("Backup-String einfügen:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         
         document.getElementById('readingDate').valueAsDate = new Date();
         initAuth();
