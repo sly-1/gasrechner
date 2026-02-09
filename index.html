@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.5.3</title>
+    <title>GasZähler Pro v8.5.4</title>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
@@ -11,27 +11,21 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; padding-bottom: 100px; }
-        
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
-        
-        /* FIX: Sauberes Tabellen-Scrolling */
         .scroll-area { max-height: 300px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; -webkit-overflow-scrolling: touch; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .data-table th { background: #f8f8f8; padding: 10px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
         .data-table td { padding: 12px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
-
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         input, textarea { width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; }
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
-        
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
         .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-blue { background-color: var(--ios-blue) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
-        
         .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; margin: 10px 0; cursor: pointer; }
         .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
         .btn-warn { background: var(--ios-red) !important; }
@@ -40,7 +34,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.3</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.5.4</h1>
 
     <div class="card">
         <table class="fixed-table">
@@ -60,26 +54,24 @@
                     <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
                 </div>
-                <label style="margin-top:8px;">Erste Zahlung / PIN</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="date" id="firstPayDate" oninput="liveUpdate()">
-                    <input type="password" id="pinSetting" placeholder="PIN" oninput="savePin()">
+                <div style="display: flex; gap: 8px; margin-top:8px;">
+                    <div style="flex:1;"><label>1. Zahlung</label><input type="date" id="firstPayDate" oninput="liveUpdate()"></div>
+                    <div style="flex:1;"><label>PIN</label><input type="password" id="pinSetting" placeholder="PIN" oninput="savePin()"></div>
                 </div>
             </div>
         </details>
     </div>
 
     <div class="card">
-        <label style="text-align:center;">Finanz-Status (inkl. 10% Puffer)</label>
+        <label style="text-align:center;">Finanz-Status</label>
         <span style="font-size:24px; font-weight:800; display:block; text-align:center; margin: 5px 0;" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge bg-gray">Warte...</div>
-        <div id="badgeTrend" class="badge bg-gray">Prognose wird berechnet...</div>
+        <div id="badgeSaldo" class="badge bg-gray">Lade...</div>
+        <div id="badgeTrend" class="badge bg-gray">Lade...</div>
     </div>
 
     <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
-        <label style="text-align:center; display:block; margin-bottom:10px;">Verbrauchshistorie</label>
         <div class="scroll-area">
             <table class="data-table">
                 <thead><tr><th>Datum</th><th>Stand</th><th>Trend</th><th>m³/Tag</th><th>Del</th></tr></thead>
@@ -123,7 +115,6 @@
             })
         };
 
-        // PLAUSIBILITÄT
         let isInvalid = isNaN(mVal) || dVal === "";
         if(!isInvalid && db.length > 0) {
             const nD = new Date(dVal);
@@ -144,27 +135,29 @@
             const daysUsed = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
             const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
             const avgKwhDay = (last.m - first.m) / daysUsed * cfg.bw * cfg.zz;
-            const projectedYearKwh = avgKwhDay * 365;
+            const projKwh = avgKwhDay * 365;
 
-            const tier = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
-            const yearBaseCost = (projectedYearKwh * tier.cent) + (tier.base * 12);
-            const yearBuffered = yearBaseCost * 1.10;
-            const monthlyNeed = yearBuffered / 12;
+            const tier = cfg.tiers.find(t => projKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const baseMonthly = ((projKwh * tier.cent) + (tier.base * 12)) / 12;
+            const bufferedMonthly = baseMonthly * 1.10;
 
-            document.getElementById('badgeTrend').innerText = "Prognose: " + yearBuffered.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if (cfg.pay > monthlyNeed * 1.15) bT.className = "badge bg-blue";
-            else if (cfg.pay >= monthlyNeed - 0.5) bT.className = "badge bg-green";
-            else bT.className = "badge bg-red";
+            bT.innerText = "Prognose: " + (bufferedMonthly * 12).toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            
+            // FIX: Abschlagsdynamik Logik
+            if (cfg.pay > bufferedMonthly * 1.15) { bT.className = "badge bg-blue"; bT.innerText += " (💎 Hoch)"; }
+            else if (cfg.pay >= bufferedMonthly - 1) { bT.className = "badge bg-green"; bT.innerText += " (✅ Ideal)"; }
+            else if (cfg.pay >= baseMonthly) { bT.className = "badge bg-orange"; bT.innerText += " (⚠️ Puffer knapp)"; }
+            else { bT.className = "badge bg-red"; bT.innerText += " (🚨 Zu niedrig!)"; }
 
-            const actualCostBuffered = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
+            const costSoFar = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
-            const saldo = (pMonths * cfg.pay) - actualCostBuffered;
+            const saldo = (pMonths * cfg.pay) - costSoFar;
             
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
-            if (saldo > 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; }
+            if (saldo > 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Aktuelles Guthaben"; }
             else { bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus"; }
 
             renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz));
@@ -193,19 +186,14 @@
         });
     }
 
-    function doSave() { 
-        db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
-        document.getElementById('newMeter').value = ""; refreshAll(); 
-    }
+    function doSave() { db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); document.getElementById('newMeter').value = ""; refreshAll(); }
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
-    function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Backup in Zwischenablage!")); }
-    function doImport() { const s = prompt("Backup-JSON einfügen:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Fehler!");} } }
-    function doReset() { if (confirm("ALLES LÖSCHEN?") && prompt("Typ LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
+    function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
+    function doImport() { const s = prompt("JSON:"); if(s) { try { db = JSON.parse(s); refreshAll(); } catch(e){alert("Error!");} } }
+    function doReset() { if (confirm("RESET?") && prompt("LÖSCHEN:") === "LÖSCHEN") { localStorage.clear(); location.reload(); } }
 
     window.onload = () => {
-        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
-            const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v;
-        });
+        ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => { const v = localStorage.getItem('gas_pref_' + id); if(v) document.getElementById(id).value = v; });
         const p = localStorage.getItem('gas_pin_v8'); if(p) document.getElementById('pinSetting').value = p;
         document.getElementById('newDate').valueAsDate = new Date(); refreshAll();
     };
