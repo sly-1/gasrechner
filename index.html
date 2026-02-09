@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.91</title>
+    <title>GasZähler Pro v8.3.92</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -11,7 +11,16 @@
             --ios-green: #34C759; --ios-gray: #8E8E93;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; }
+        
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: var(--ios-bg); 
+            margin: 0; padding: 8px; 
+            width: 100%; 
+            overflow-x: hidden;
+            /* Extra Platz unten, damit man bei offener Tastatur scrollen kann */
+            padding-bottom: 300px; 
+        }
         
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
@@ -35,11 +44,10 @@
         .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
         .data-table td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
 
-        /* BUTTON FIX: Breite bleibt immer 100% */
         .btn-main { 
             width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; 
             padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: background 0.2s; 
-            margin: 0; cursor: pointer;
+            margin: 5px 0; cursor: pointer;
         }
         .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
         .btn-warn { background: var(--ios-red) !important; }
@@ -47,13 +55,13 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.91</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.92</h1>
 
-    <div class="card">
+    <div class="card" id="inputCard">
         <table class="fixed-table">
             <tr>
                 <td><label>Datum</label><input type="date" id="newDate" oninput="liveUpdate()"></td>
-                <td><label>Stand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()"></td>
+                <td><label>Stand (m³)</label><input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()" onfocus="this.scrollIntoView({behavior:'smooth'})"></td>
             </tr>
         </table>
         
@@ -80,13 +88,13 @@
 
     <div class="card">
         <label style="text-align:center;">Finanz-Saldo (Ist)</label>
-        <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
+        <span style="font-size:24px; font-weight:800; display:block; text-align:center;" id="outSaldo">0,00 €</span>
         <div id="badgeSaldo" class="badge bg-gray">Warte...</div>
     </div>
 
     <div class="card">
         <label style="text-align:center;">Jahres-Prognose</label>
-        <span style="font-size:30px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
+        <span style="font-size:24px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
         <div id="badgeTrend" class="badge bg-gray">Warte...</div>
     </div>
 
@@ -127,7 +135,6 @@
         const mVal = parseFloat(document.getElementById('newMeter').value);
         const dVal = document.getElementById('newDate').value;
         const saveBtn = document.getElementById('saveBtn');
-        
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
@@ -146,9 +153,7 @@
             if(prev && mVal < prev.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert < " + prev.m; }
             else if(next && mVal > next.m) { isInvalid = true; saveBtn.innerText = "⚠️ Wert > " + next.m; }
             else { saveBtn.innerText = "💾 Stand speichern"; }
-            
-            if(isInvalid) saveBtn.classList.add('btn-warn');
-            else saveBtn.classList.remove('btn-warn');
+            if(isInvalid) saveBtn.classList.add('btn-warn'); else saveBtn.classList.remove('btn-warn');
         }
         saveBtn.disabled = isInvalid;
 
@@ -175,9 +180,7 @@
             const saldo = (pMonths * cfg.pay) - costSoFar;
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
-            if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
-            else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
-
+            if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
             renderTable(wDb, totalAvg); renderChart(wDb);
         }
     }
@@ -196,7 +199,7 @@
             tb.innerHTML += `<tr style="${e.id==='pre'?'color:var(--ios-blue);font-style:italic;':''}">
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
-                <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
+                <td style="color:${pCol}; font-weight:bold; font-size:16px;">${pfeil}</td>
                 <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);font-weight:bold;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
@@ -220,19 +223,12 @@
     function doSave() { 
         const btn = document.getElementById('saveBtn');
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
-        
         document.getElementById('newMeter').value = ""; 
         btn.innerHTML = "✅ Gespeichert!";
-        btn.style.backgroundColor = "var(--ios-green)"; // Direkt-Zuweisung für Safari-Stabilität
+        btn.style.backgroundColor = "var(--ios-green)";
         btn.disabled = true;
-
         refreshAll(); 
-
-        setTimeout(() => {
-            btn.innerHTML = "💾 Stand speichern";
-            btn.style.backgroundColor = ""; // Reset auf CSS-Standard
-            liveUpdate();
-        }, 2000);
+        setTimeout(() => { btn.innerHTML = "💾 Stand speichern"; btn.style.backgroundColor = ""; liveUpdate(); }, 2000);
     }
 
     function delEntry(id) { if(confirm("Löschen?")) { db = db.filter(x => x.id !== id); refreshAll(); } }
