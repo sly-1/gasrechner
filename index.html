@@ -3,57 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.76</title>
+    <title>GasZähler Pro v8.3.77</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
-            --ios-text-secondary: #8E8E93; --ios-green: #34C759; --ios-gray: #E5E5EA;
+            --ios-text-secondary: #8E8E93; --ios-green: #34C759;
         }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--ios-bg); margin: 0; padding: 10px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 10px; }
         
-        .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; }
+        .card { background: var(--ios-card); padding: 15px; border-radius: 14px; margin-bottom: 12px; border-left: 6px solid #D1D1D6; overflow: hidden; }
 
-        /* DER TABELLEN-FIX FÜR DIE OBERE ZEILE */
-        .top-table { width: 100%; border-spacing: 5px; border-collapse: separate; margin: -5px; }
-        .top-table td { width: 50%; vertical-align: bottom; padding: 0; }
+        /* DER FIX: Festes Datum, flexibler Stand */
+        .input-row { display: flex; align-items: flex-end; gap: 10px; width: 100%; }
+        .date-container { width: 140px; flex-shrink: 0; }
+        .meter-container { flex-grow: 1; }
         
         input, textarea { 
-            width: 100% !important; height: 44px; padding: 8px; 
+            width: 100%; height: 48px; padding: 10px; 
             border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff;
+            display: block;
         }
 
-        label { display: block; margin-bottom: 2px; font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
+        label { display: block; margin-bottom: 4px; font-size: 10px; color: var(--ios-text-secondary); text-transform: uppercase; font-weight: 700; }
 
-        .result-main { font-size: 32px; font-weight: 800; display: block; text-align: center; margin: 5px 0; }
-        .badge { display: block; width: fit-content; margin: 8px auto; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .result-main { font-size: 32px; font-weight: 800; display: block; text-align: center; margin: 5px 0; letter-spacing: -1px; }
+        .badge { display: block; width: fit-content; margin: 8px auto; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-align: center; }
 
-        .scroll-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: 10px; border: 1px solid var(--ios-gray); }
-        .chart-area { height: 200px; width: 1000px; }
-
-        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; margin-top: 10px; }
+        button { width: 100%; background: var(--ios-blue); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; margin-top: 5px; }
+        button:disabled { opacity: 0.3; }
+        
+        .scroll-wrapper { width: 100%; overflow-x: auto; border-radius: 10px; border: 1px solid #E5E5EA; margin-top: 10px; }
+        .chart-area { height: 180px; width: 600px; }
     </style>
 </head>
 <body>
 
 <div id="main">
-    <h1 style="text-align:center; font-size: 16px; margin: 5px 0;">🔥 GasZähler Pro v8.3.76</h1>
+    <h1 style="text-align:center; font-size: 16px; margin: 5px 0;">🔥 GasZähler Pro v8.3.77</h1>
 
     <div class="card">
-        <table class="top-table">
-            <tr>
-                <td><label>Datum</label><input type="date" id="newDate" oninput="liveUpdate()"></td>
-                <td><label>Stand (m³)</label><input type="number" id="newMeter" placeholder="0.000" oninput="liveUpdate()"></td>
-            </tr>
-        </table>
+        <div class="input-row">
+            <div class="date-container">
+                <label>Datum</label>
+                <input type="date" id="newDate" oninput="liveUpdate()">
+            </div>
+            <div class="meter-container">
+                <label>Stand (m³)</label>
+                <input type="number" id="newMeter" step="0.001" placeholder="0.000" oninput="liveUpdate()">
+            </div>
+        </div>
         
-        <details style="margin-top:10px;">
-            <summary style="color:var(--ios-blue); font-size:12px; font-weight:700;">⚙️ Einstellungen</summary>
+        <details style="margin-top:15px;">
+            <summary style="color:var(--ios-blue); font-size:12px; font-weight:700; cursor:pointer;">⚙️ Einstellungen & Tarife</summary>
             <div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
-                <label>Tarife</label>
-                <textarea id="tiers" rows="2" style="height:55px;" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px;">
+                <label>Tarif-Log (Limit:Cent:Grundpreis)</label>
+                <textarea id="tiers" rows="2" style="height:60px;" oninput="liveUpdate()">6000:12.80:5.36&#10;99999:11.79:10.41</textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px;">
                     <div><label>Brennwert</label><input type="number" id="bw" value="10.550" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.9500" oninput="liveUpdate()"></div>
                     <div><label>Abschlag €</label><input type="number" id="pay" value="150" oninput="liveUpdate()"></div>
@@ -68,21 +75,21 @@
     <div class="card" id="cardSaldo">
         <label style="text-align: center;">Finanz-Saldo (Ist-Stand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
-        <div id="badgeSaldo" class="badge">Lade...</div>
+        <div id="badgeSaldo" class="badge">Berechne...</div>
     </div>
 
     <div class="card" id="cardTrend">
         <label style="text-align: center;">Jahres-Prognose (+10% Puffer)</label>
         <span class="result-main" id="outYear">0,00 €</span>
-        <div id="badgeTrend" class="badge">Lade...</div>
+        <div id="badgeTrend" class="badge">Berechne...</div>
     </div>
 
     <button id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
         <div class="scroll-wrapper"><div class="chart-area"><canvas id="mainChart"></canvas></div></div>
-        <div style="max-height: 200px; overflow-y: auto; margin-top:10px;">
-            <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+        <div style="max-height: 150px; overflow-y: auto; margin-top:10px;">
+            <table style="width:100%; border-collapse: collapse; font-size: 13px;">
                 <tbody id="historyTable"></tbody>
             </table>
         </div>
@@ -103,8 +110,8 @@
     }
 
     function liveUpdate() {
-        const mField = document.getElementById('newMeter'), dField = document.getElementById('newDate');
-        const val = parseFloat(mField.value), dStr = dField.value;
+        const mVal = parseFloat(document.getElementById('newMeter').value);
+        const dVal = document.getElementById('newDate').value;
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
@@ -115,33 +122,33 @@
             })
         };
 
-        document.getElementById('saveBtn').disabled = isNaN(val) || dStr === "";
+        document.getElementById('saveBtn').disabled = isNaN(mVal) || dVal === "";
 
         let wDb = [...db]; 
-        if (!isNaN(val)) { wDb.push({ d: dStr, m: val, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
+        if (!isNaN(mVal)) { wDb.push({ d: dVal, m: mVal, id: 'pre' }); wDb.sort((a,b) => new Date(a.d) - new Date(b.d)); }
 
         if (wDb.length > 0) {
             const last = wDb[wDb.length-1], first = wDb[0];
-            const daysTotal = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
-            const avg = wDb.length > 1 ? (last.m - first.m) / daysTotal : 0;
+            const days = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
+            const avg = (last.m - first.m) / days;
             const yKwh = (avg * 365) * cfg.bw * cfg.zz;
             const tier = cfg.tiers.find(t => yKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
-            
+
             // PROGNOSE
             const yCost = (yKwh * tier.cent * 1.1) + (tier.base * 12);
             document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
             if(yCost > (cfg.pay * 12)) {
-                bT.style.cssText = "background:#FFEBEB; color:#FF3B30;";
+                bT.style.backgroundColor = "#FFEBEB"; bT.style.color = "#FF3B30";
                 bT.innerText = "Erhöhen auf " + Math.round(yCost/12) + "€";
             } else {
-                bT.style.cssText = "background:#E7F9ED; color:#34C759;";
+                bT.style.backgroundColor = "#E7F9ED"; bT.style.color = "#34C759";
                 bT.innerText = "Abschlag passt!";
             }
 
             // SALDO
             const kwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
-            const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * daysTotal);
+            const costSoFar = (kwhSoFar * tier.cent) + ((tier.base * 12 / 365) * days);
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
             const saldo = (pMonths * cfg.pay) - costSoFar;
@@ -150,10 +157,10 @@
             const bS = document.getElementById('badgeSaldo');
             const cS = document.getElementById('cardSaldo');
             if(saldo >= 0) {
-                bS.style.cssText = "background:#E7F9ED; color:#34C759;"; bS.innerText = "Guthaben";
+                bS.style.backgroundColor = "#E7F9ED"; bS.style.color = "#34C759"; bS.innerText = "Guthaben";
                 cS.style.borderLeftColor = "#34C759";
             } else {
-                bS.style.cssText = "background:#FFEBEB; color:#FF3B30;"; bS.innerText = "Nachzahlung";
+                bS.style.backgroundColor = "#FFEBEB"; bS.style.color = "#FF3B30"; bS.innerText = "Nachzahlung";
                 cS.style.borderLeftColor = "#FF3B30";
             }
 
@@ -165,7 +172,7 @@
         const tb = document.getElementById('historyTable'); tb.innerHTML = '';
         [...data].reverse().forEach(e => {
             const style = e.id === 'pre' ? 'font-style:italic; color:#007AFF;' : '';
-            tb.innerHTML += `<tr style="${style}"><td style="padding:8px; border-bottom:1px solid #eee;">${new Date(e.d).toLocaleDateString()}</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${e.m.toFixed(3)} m³</td></tr>`;
+            tb.innerHTML += `<tr style="${style}"><td style="padding:6px; border-bottom:1px solid #eee;">${new Date(e.d).toLocaleDateString()}</td><td style="padding:6px; border-bottom:1px solid #eee; text-align:right;">${e.m.toFixed(3)} m³</td></tr>`;
         });
     }
 
@@ -185,7 +192,12 @@
 
     function doSave() { 
         db.push({ d: document.getElementById('newDate').value, m: parseFloat(document.getElementById('newMeter').value), id: Date.now() }); 
-        document.getElementById('newMeter').value = ""; refreshAll(); 
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "✅ GESPEICHERT"; btn.style.backgroundColor = "#34C759";
+        setTimeout(() => {
+            btn.innerText = "💾 Stand speichern"; btn.style.backgroundColor = "#007AFF";
+            document.getElementById('newMeter').value = ""; refreshAll(); 
+        }, 800);
     }
 
     window.onload = () => {
