@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.9</title>
+    <title>GasZähler Pro v8.3.9 Final</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -24,10 +24,9 @@
         .result-container { text-align: center; padding: 10px 0; }
         .result-price { font-size: 32px; font-weight: 800; display: block; transition: opacity 0.2s; }
         
-        /* Preview Styling */
         .is-preview { opacity: 0.45; font-style: italic; }
-        .preview-label { font-size: 10px; text-transform: uppercase; display: block; margin-top: -5px; color: var(--ios-text-secondary); display: none; }
-        .is-preview + .preview-label { display: block; }
+        .preview-label { font-size: 10px; text-transform: uppercase; display: block; margin-top: -5px; color: var(--ios-text-secondary); visibility: hidden; }
+        .is-preview + .preview-label { visibility: visible; }
 
         .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 10px; border: 1px solid transparent; }
         .badge-good { background: #E7F9ED; color: var(--ios-green); border-color: var(--ios-green); }
@@ -134,19 +133,18 @@
         function getTier(kwh) {
             const raw = document.getElementById('priceTiers').value || "6000:12.80:5.36\n99999:11.79:10.41";
             const lines = raw.split('\n');
-            let selectedTier = { price: 0, base: 0 };
+            let tier = { price: 0, base: 0 };
             for (let line of lines) {
                 const parts = line.split(':').map(Number);
                 if (parts.length === 3) {
-                    selectedTier = { price: parts[1]/100, base: parts[2] };
-                    if (kwh <= parts[0]) return selectedTier;
+                    tier = { price: parts[1]/100, base: parts[2] };
+                    if (kwh <= parts[0]) return tier;
                 }
             }
-            return selectedTier;
+            return tier;
         }
 
         function renderAll() {
-            // Speichern der Einstellungen
             const ids = ['brennwert', 'zZahl', 'firstPaymentDate', 'paymentCount', 'monthlyPayment', 'startOffset', 'priceTiers'];
             ids.forEach(id => localStorage.setItem('gas_' + id, document.getElementById(id).value));
 
@@ -155,11 +153,7 @@
             const curMeter = isPreview ? parseFloat(meterInput.value) : (history.length > 0 ? history[history.length-1].meter : null);
             const curDate = document.getElementById('readingDate').value;
 
-            // Preview Styling auf Preise anwenden
-            document.querySelectorAll('.result-price').forEach(el => {
-                if(isPreview) el.classList.add('is-preview');
-                else el.classList.remove('is-preview');
-            });
+            document.querySelectorAll('.result-price').forEach(el => isPreview ? el.classList.add('is-preview') : el.classList.remove('is-preview'));
 
             if (curMeter && history.length > 0) {
                 const bw = parseFloat(document.getElementById('brennwert').value)||1, zz = parseFloat(document.getElementById('zZahl').value)||1, off = parseFloat(document.getElementById('startOffset').value)||0;
@@ -168,13 +162,14 @@
                 
                 const tier = getTier(totalKwh), currentCost = (totalKwh * tier.price) + ((tier.base * 12 / 365) * totalDays);
                 const firstPay = new Date(document.getElementById('firstPaymentDate').value), monthly = parseFloat(document.getElementById('monthlyPayment').value)||0, pCount = parseInt(document.getElementById('paymentCount').value)||12;
-                
                 let count = 0; let checkDate = new Date(firstPay);
                 while(checkDate <= new Date(curDate) && count < pCount) { count++; checkDate.setMonth(checkDate.getMonth()+1); }
                 
                 const balance = (count * monthly) - currentCost;
-                document.getElementById('balanceOutput').innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-                document.getElementById('balanceOutput').style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                const balOut = document.getElementById('balanceOutput');
+                balOut.innerText = balance.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+                balOut.style.color = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+                document.getElementById('financeArea').style.borderColor = balance >= 0 ? "var(--ios-green)" : "var(--ios-red)";
                 
                 const bBadge = document.getElementById('balanceBadge');
                 bBadge.innerText = balance >= 0 ? "✅ Guthaben" : "⚠️ Nachzahlung";
@@ -186,17 +181,21 @@
                 
                 const safeIdeal = Math.round((yearTotal / pCount) * 1.10);
                 const ratio = yearTotal / (monthly * pCount);
+                
+                // AMPEL FUNKTION
                 let pColor = "var(--ios-green)", pClass = "badge-good", pText = "Abschlag perfekt";
                 if (ratio < 0.90) { pColor = "var(--ios-blue)"; pClass = "badge-info"; pText = "Zu hoch!"; }
                 else if (ratio > 1.15) { pColor = "var(--ios-red)"; pClass = "badge-danger"; pText = "Erhöhen!"; }
                 else if (ratio > 1.05) { pColor = "var(--ios-orange)"; pClass = "badge-warn"; pText = "Knapp"; }
 
-                document.getElementById('yearPrice').innerText = yearTotal.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-                document.getElementById('yearPrice').style.color = pColor;
+                const yPrice = document.getElementById('yearPrice');
+                yPrice.innerText = yearTotal.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+                yPrice.style.color = pColor;
+                document.getElementById('predictionArea').style.borderColor = pColor;
                 document.getElementById('yearInfo').innerText = `Ø ${globalAvg.toFixed(2)} m³/Tag | ${yearKwh.toFixed(0)} kWh/Jahr`;
                 document.getElementById('predictionBadge').innerText = pText;
                 document.getElementById('predictionBadge').className = "status-badge " + pClass;
-                document.getElementById('idealAbschlagBox').innerHTML = `💡 Sicherer Abschlag: <b>${safeIdeal} €</b><br><small>(Basierend auf Bestpreis + 10%)</small>`;
+                document.getElementById('idealAbschlagBox').innerHTML = `💡 Sicherer Abschlag: <b>${safeIdeal} €</b><br><small>(Bestpreis + 10%)</small>`;
 
                 const body = document.getElementById('historyBody'); body.innerHTML = '';
                 for (let i = history.length - 1; i >= 0; i--) {
@@ -229,7 +228,6 @@
             if (!document.getElementById('priceTiers').value) {
                 document.getElementById('priceTiers').value = "6000:12.80:5.36\n99999:11.79:10.41";
             }
-            
             const p = localStorage.getItem('gas_app_pin');
             if (p && p.trim() !== "") {
                 document.getElementById('lockScreen').style.display = "flex";
@@ -257,11 +255,13 @@
             localStorage.setItem('gas_history_v7', JSON.stringify(history));
             document.getElementById('meter').value = ""; 
             renderAll();
-            document.getElementById('saveToast').classList.add('show'); 
-            setTimeout(() => document.getElementById('saveToast').classList.remove('show'), 2000);
+            // TOAST ANIMATION
+            const toast = document.getElementById('saveToast');
+            toast.classList.add('show'); 
+            setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        function deleteEntry(id) { if(confirm("Eintrag löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
+        function deleteEntry(id) { if(confirm("Löschen?")) { history = history.filter(e => e.id !== id); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function exportBackup() { navigator.clipboard.writeText(JSON.stringify(history)).then(() => alert("Backup kopiert!")); }
         function importBackup() { const c = prompt("Backup einfügen:"); if(c) { history = JSON.parse(c); localStorage.setItem('gas_history_v7', JSON.stringify(history)); renderAll(); } }
         function clearHistory() { if (confirm("ALLE Daten löschen?") && confirm("Wirklich?")) { history = []; localStorage.setItem('gas_history_v7', JSON.stringify(history)); location.reload(); } }
