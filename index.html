@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.86</title>
+    <title>GasZähler Pro v8.3.87</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,19 +13,17 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; }
         
-        /* HARTER LAYOUT LOCK */
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
         
         input, textarea { 
-            width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; -webkit-appearance: none;
+            width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none;
         }
 
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
 
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
         
-        /* AMPEL-KLASSEN */
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
@@ -43,6 +41,8 @@
 </head>
 <body>
 
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.87</h1>
+
     <div class="card">
         <table class="fixed-table">
             <tr>
@@ -58,7 +58,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div><label>BW</label><input type="number" id="bw" value="10.55" oninput="liveUpdate()"></div>
                     <div><label>z-Zahl</label><input type="number" id="zz" value="0.95" oninput="liveUpdate()"></div>
-                    <div><label>Abschlag</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
+                    <div><label>Abschlag €</label><input type="number" id="pay" value="199" oninput="liveUpdate()"></div>
                     <div><label>Start m³</label><input type="number" id="start" value="0" oninput="liveUpdate()"></div>
                 </div>
                 <table class="fixed-table" style="margin-top:8px;">
@@ -83,7 +83,7 @@
         <div id="badgeTrend" class="badge bg-gray">Daten fehlen</div>
     </div>
 
-    <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Speichern</button>
+    <button class="btn-main" id="saveBtn" onclick="doSave()" disabled>💾 Stand speichern</button>
 
     <div class="card">
         <div class="chart-box"><canvas id="mainChart"></canvas></div>
@@ -96,7 +96,7 @@
         <button class="btn-util" onclick="doExport()">Backup</button>
         <button class="btn-util" onclick="doImport()">Restore</button>
     </div>
-    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">ALLES LÖSCHEN</button>
+    <button style="width:100%; background:none; color:var(--ios-red); border:none; margin:20px 0; text-decoration:underline; font-size:11px;" onclick="doReset()">♻️ ALLES LÖSCHEN</button>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
@@ -179,7 +179,7 @@
                 <td>${new Date(e.d).toLocaleDateString('de-DE')}</td>
                 <td><b>${e.m.toFixed(3)}</b></td>
                 <td style="color:${pCol}; font-weight:bold; font-size:18px;">${pfeil}</td>
-                <td>${e.id==='pre'?'':'<span style="color:red;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
+                <td>${e.id==='pre'?'':'<span style="color:var(--ios-red);font-weight:bold;font-size:18px;" onclick="delEntry('+e.id+')">✕</span>'}</td>
             </tr>`;
         });
     }
