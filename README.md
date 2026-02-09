@@ -1,4 +1,4 @@
-# ⛽ GasZähler Pro v8.3.11 – Ultimate Control Edition
+# ⛽ GasZähler Pro v8.3.12 – Ultimate Control Edition
 
 **GasZähler Pro** ist eine hochpräzise, datenschutzorientierte Progressive Web App (PWA), die speziell für Hausbesitzer und Mieter entwickelt wurde, um die volle Kontrolle über Gaskosten und Verbrauchsverhalten zu behalten. 
 
@@ -6,58 +6,59 @@ Keine Cloud, kein Abo, keine Datenweitergabe – alles bleibt lokal auf deinem G
 
 ---
 
-## 🚀 Die Highlights der v8.3.11
+## 🚀 Die Highlights der v8.3.12
 
-### 1. Intelligente Finanz-Ampel (Dual-Status)
+### 1. Dynamisches UI-Management (NEU)
+Um die App auch nach jahrelanger Nutzung übersichtlich zu halten, wurden neue Navigations-Konzepte eingeführt:
+* **Wischbares Diagramm:** Das Verbrauchs-Chart wird nicht mehr horizontal zusammengepresst. Pro Eintrag erhält das Chart 45px Breite. Über ein Scroll-Fenster kannst du bequem durch die Zeit wischen. Die App fokussiert beim Start automatisch den aktuellsten Datenpunkt ganz rechts.
+* **Kompakte Einstellungen:** Durch ein neues Grid-Layout stehen zusammengehörige Werte (wie Brennwert & z-Zahl) nun nebeneinander. Dies reduziert die Höhe des Einstellungsmenüs um über 50%.
+* **Scroll-Historie:** Die Tabelle der vergangenen Ablesungen ist nun in einem festen Container mit "Sticky-Header" gekapselt. Die Spaltenüberschriften bleiben beim Scrollen immer sichtbar.
+
+### 2. Intelligente Finanz-Ampel (Dual-Status)
 Die App bewertet deine finanzielle Situation in Echtzeit auf zwei Ebenen:
-* **Der Kontostand:** Vergleicht gezahlte Abschläge mit verbrauchtem Gas. 
-    * 🟢 **Grün:** Du hast ein Guthaben.
-    * 🔴 **Rot:** Du bist im Minus (Nachzahlungsgefahr).
-* **Die Prognose:** Analysiert, ob dein monatlicher Abschlag für das restliche Jahr reicht.
-    * 🔵 **Blau:** Abschlag viel zu hoch (Geld verschenkt).
-    * 🟢 **Grün:** Abschlag ist perfekt eingestellt.
-    * 🟠 **Orange:** Warnung, es könnte knapp werden.
-    * 🔴 **Rot:** Sofortige Erhöhung empfohlen, um Nachzahlungen zu vermeiden.
+* **Der Kontostand (Current Balance):** Vergleicht deine bisher gezahlten Abschläge mit den real aufgelaufenen Kosten.
+    * 🟢 **Grün:** Du hast aktuell ein Guthaben.
+    * 🔴 **Rot:** Du bist im Minus (Nachzahlungsgefahr zum jetzigen Zeitpunkt).
+* **Die Prognose (Prediction):** Analysiert, ob dein gewählter monatlicher Abschlag für das restliche Jahr basierend auf deinem Durchschnittsverbrauch ausreicht.
+    * 🔵 **Blau:** Dein Abschlag ist viel zu hoch (Geld verschenkt).
+    * 🟢 **Grün:** Dein Abschlag ist perfekt auf deinen Verbrauch abgestimmt.
+    * 🟠 **Orange:** Warnung, es wird zum Ende des Jahres knapp.
+    * 🔴 **Rot:** Sofortige Erhöhung empfohlen, um hohe Nachzahlungen zu vermeiden.
 
-### 2. Bestpreis-Abrechnungs-Engine
-Viele Gasanbieter nutzen Preisstaffeln (z.B. günstigerer Arbeitspreis ab 6.000 kWh). 
+### 3. Bestpreis-Abrechnungs-Engine
+Viele Gasanbieter nutzen Preisstaffeln (z.B. Wechsel des Arbeitspreises ab 6.000 kWh). 
 * Die App prüft bei jedem Eintrag automatisch, in welche Staffel deine Jahresprognose fällt.
 * Die Kosten werden sofort auf Basis des voraussichtlich günstigsten Tarifs berechnet.
 
-### 3. Daten-Integrität (Plausibilitäts-Check)
-Ein Gaszähler läuft niemals rückwärts. 
-* **Schutzfunktion:** Die App blockiert Eingaben, die niedriger als der letzte gespeicherte Stand sind.
-* **Visuelles Feedback:** Das Eingabefeld färbt sich rot, falls ein Tippfehler vorliegt.
-
-### 4. Optimierte Benutzeroberfläche
-* **Scrollable History:** Die Tabellenansicht ist in einem festen Fenster gekapselt. Auch nach Jahren der Nutzung bleibt die App kompakt und der "Speichern"-Button sofort erreichbar.
-* **Sticky Header:** Die Spaltenüberschriften bleiben beim Scrollen der Historie immer sichtbar.
-* **Live-Preview:** Alle Berechnungen (Guthaben, Prognose) werden bereits *während* des Tippens als "Vorschau" (kursiv/gegraut) angezeigt.
+### 4. Daten-Integrität & Plausibilität
+Ein mechanischer Gaszähler läuft niemals rückwärts. 
+* **Plausibilitäts-Schutz:** Die App blockiert das Speichern von Werten, die niedriger als der letzte Stand sind.
+* **Live-Vorschau:** Alle Berechnungen (Guthaben, Prognose, Trend) werden bereits *während* des Tippens als "Vorschau" (kursiv) visualisiert.
 
 ---
 
 ## 🛠 Technische Details & Einrichtung
 
-### Umrechnungsformel
-Die App berechnet die thermische Energie nach der Standardformel:
-$kWh = m^3 \times Brennwert \times Zustandszahl$
+### Die Berechnungslogik
+Die App nutzt die offizielle Formel zur Ermittlung der thermischen Energie:
+$$kWh = m^3 \times Brennwert \times Zustandszahl$$
 
 ### Preis-Staffeln konfigurieren
-Trage deine Tarife in den Einstellungen wie folgt ein (Limit:Cent:Grundpreis):
-`6000:12.80:5.36` (Bis 6.000 kWh)
-`99999:11.79:10.41` (Ab 6.001 kWh)
+Trage deine Tarife in den Einstellungen zeilenweise wie folgt ein (`Limit:Arbeitspreis_Cent:Grundpreis_Euro`):
+* `6000:12.80:5.36` (Bis 6.000 kWh: 12,80 ct/kWh und 5,36 € Grundpreis/Monat)
+* `99999:11.79:10.41` (Ab 6.001 kWh: 11,79 ct/kWh und 10,41 € Grundpreis/Monat)
 
-### Installation als App
-1.  Öffne die HTML-Datei in deinem mobilen Browser (Safari/Chrome).
-2.  Wähle **"Zum Home-Bildschirm hinzufügen"**.
-3.  Die App startet nun ohne Browser-Leiste im Vollbildmodus.
+### Installation als PWA
+1. Öffne die Datei in deinem mobilen Browser (z.B. Safari auf iOS).
+2. Tippe auf das **Teilen-Icon** und wähle **"Zum Home-Bildschirm hinzufügen"**.
+3. Die App wird nun mit eigenem Icon auf deinem Homescreen installiert und startet im Vollbildmodus ohne Browser-Leisten.
 
 ---
 
 ## 🔒 Datenschutz & Sicherheit
-* **Lokal:** Alle Daten werden im `LocalStorage` deines Browsers gespeichert.
-* **PIN-Schutz:** Aktiviere in den Einstellungen eine 4-stellige PIN, um unbefugten Zugriff zu verhindern.
-* **Backup-System:** Nutze die Export-Funktion, um deine Daten als Text-String zu sichern (z.B. in einer Notiz-App).
+* **Offline-First:** 100% der Daten werden im `LocalStorage` deines Browsers gespeichert.
+* **PIN-Schutz:** Optional kannst du in den Einstellungen eine PIN vergeben. Die App sperrt sich bei jedem Schließen automatisch.
+* **Backup:** Über die Export/Import-Funktion kannst du deine Daten jederzeit als Text-String sichern.
 
 ---
 *Entwickelt für maximale Transparenz in Zeiten steigender Energiekosten.*
