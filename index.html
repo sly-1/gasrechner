@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.94</title>
+    <title>GasZähler Pro v8.3.95</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --ios-blue: #007AFF; --ios-red: #FF3B30; --ios-bg: #F2F2F7; --ios-card: #FFFFFF;
-            --ios-green: #34C759; --ios-gray: #8E8E93;
+            --ios-green: #34C759; --ios-gray: #8E8E93; --ios-orange: #FF9500;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); margin: 0; padding: 8px; width: 100%; overflow-x: hidden; padding-bottom: 300px; }
+        
         .fixed-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 5px; }
         .fixed-table td { width: 50%; padding: 0 4px; vertical-align: bottom; }
+        
         input, textarea { width: 100% !important; height: 44px; padding: 8px; border: 1px solid #D1D1D6; border-radius: 10px; font-size: 16px; background: #fff; appearance: none; }
         label { display: block; margin-bottom: 3px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; font-weight: 700; }
         .card { background: var(--ios-card); padding: 12px; border-radius: 14px; margin-bottom: 10px; border-left: 5px solid #D1D1D6; }
+        
         .badge { display: block; width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 800; text-align: center; color: white; margin-top: 8px; }
         .bg-red { background-color: var(--ios-red) !important; }
         .bg-green { background-color: var(--ios-green) !important; }
+        .bg-orange { background-color: var(--ios-orange) !important; }
         .bg-gray { background-color: var(--ios-gray) !important; }
+
         .chart-box { width: 100%; height: 160px; margin: 10px 0; }
         .scroll-area { max-height: 200px; overflow-y: auto; background: #fff; border-radius: 8px; border: 1px solid #eee; }
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .data-table th { background: #f8f8f8; padding: 8px 4px; font-size: 10px; color: var(--ios-gray); text-transform: uppercase; border-bottom: 1px solid #eee; position: sticky; top: 0; }
         .data-table td { padding: 10px 4px; border-bottom: 1px solid #F2F2F7; text-align: center; }
+
         .btn-main { width: 100% !important; display: block; background: var(--ios-blue); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 17px; font-weight: 600; transition: background 0.2s; margin: 5px 0; cursor: pointer; }
         .btn-main:disabled { background: #D1D1D6; color: #8E8E93; cursor: not-allowed; }
         .btn-warn { background: var(--ios-red) !important; }
@@ -33,7 +39,7 @@
 </head>
 <body>
 
-    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.94</h1>
+    <h1 style="text-align:center; font-size: 18px; margin: 5px 0 12px 0;">🔥 GasZähler Pro v8.3.95</h1>
 
     <div class="card" id="inputCard">
         <table class="fixed-table">
@@ -71,7 +77,7 @@
     </div>
 
     <div class="card">
-        <label style="text-align:center;">Jahres-Prognose (+10%)</label>
+        <label style="text-align:center;">Jahres-Prognose (+10% Puffer)</label>
         <span style="font-size:24px; font-weight:800; display:block; text-align:center;" id="outYear">0,00 €</span>
         <div id="badgeTrend" class="badge bg-gray">Warte...</div>
     </div>
@@ -110,8 +116,7 @@
     }
 
     function liveUpdate() {
-        const mInput = document.getElementById('newMeter');
-        const mVal = parseFloat(mInput.value);
+        const mVal = parseFloat(document.getElementById('newMeter').value);
         const dVal = document.getElementById('newDate').value;
         const saveBtn = document.getElementById('saveBtn');
         
@@ -145,35 +150,44 @@
             const last = wDb[wDb.length-1], first = wDb[0];
             const daysUsed = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
             
-            // kWh Berechnung
             const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
-            const avgKwhPerDay = (last.m - first.m) / daysUsed * cfg.bw * cfg.zz;
-            const projectedYearKwh = avgKwhPerDay * 365;
+            const avgKwhDay = (last.m - first.m) / daysUsed * cfg.bw * cfg.zz;
+            const projectedYearKwh = avgKwhDay * 365;
 
-            // Tarif-Fallen-Check & Kosten (PROGNOSE)
-            const tierY = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
-            const yearCosts = (projectedYearKwh * tierY.cent * 1.10) + (tierY.base * 12);
-            
-            document.getElementById('outYear').innerText = yearCosts.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            // Kosten & Tarife
+            const tier = cfg.tiers.find(t => projectedYearKwh <= t.limit) || cfg.tiers[cfg.tiers.length-1];
+            const yearBase = (projectedYearKwh * tier.cent) + (tier.base * 12);
+            const yearBuffered = (projectedYearKwh * tier.cent * 1.10) + (tier.base * 12);
+            const neededPayBuffered = yearBuffered / 12;
+
+            // PROGNOSE ANZEIGE
+            document.getElementById('outYear').innerText = yearBuffered.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bT = document.getElementById('badgeTrend');
-            if(yearCosts > (cfg.pay * 12)) { bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig ("+Math.round(yearCosts/12)+"€)"; }
-            else { bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag passt"; }
+            if (cfg.pay >= neededPayBuffered - 0.5) {
+                bT.className = "badge bg-green"; bT.innerText = "✅ Abschlag sicher";
+            } else if (cfg.pay >= (yearBase / 12)) {
+                bT.className = "badge bg-orange"; bT.innerText = "⚠️ Puffer angegriffen (" + Math.round(neededPayBuffered) + "€ empf.)";
+            } else {
+                bT.className = "badge bg-red"; bT.innerText = "🚨 Abschlag zu niedrig (" + Math.round(neededPayBuffered) + "€ empf.)";
+            }
 
-            // SALDO BERECHNUNG (Live)
-            const tierS = cfg.tiers.find(t => (totalKwh / daysUsed * 365) <= t.limit) || cfg.tiers[cfg.tiers.length-1];
-            const actualCost = (totalKwh * tierS.cent * 1.10) + (tierS.base * (daysUsed / 30.44)); 
-            
-            // Zahlungs-Monate
+            // SALDO ANZEIGE
+            const actualCostBuffered = (totalKwh * tier.cent * 1.10) + (tier.base * (daysUsed / 30.44));
             const sDate = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let pMonths = 0; let cD = new Date(sDate); while(cD <= new Date(last.d)) { pMonths++; cD.setMonth(cD.getMonth()+1); }
+            const saldo = (pMonths * cfg.pay) - actualCostBuffered;
             
-            const saldo = (pMonths * cfg.pay) - actualCost;
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             const bS = document.getElementById('badgeSaldo');
-            if(saldo >= 0) { bS.className = "badge bg-green"; bS.innerText = "💰 Guthaben"; } 
-            else { bS.className = "badge bg-red"; bS.innerText = "⚠️ Nachzahlung"; }
+            if (saldo >= 0) {
+                bS.className = "badge bg-green"; bS.innerText = "💰 Im Budget";
+            } else if (saldo > -(actualCostBuffered * 0.09)) {
+                bS.className = "badge bg-orange"; bS.innerText = "⚠️ Puffer-Verbrauch";
+            } else {
+                bS.className = "badge bg-red"; bS.innerText = "🚨 Reales Minus";
+            }
 
-            renderTable(wDb, avgKwhPerDay / (cfg.bw * cfg.zz)); renderChart(wDb);
+            renderTable(wDb, avgKwhDay / (cfg.bw * cfg.zz)); renderChart(wDb);
         }
     }
 
