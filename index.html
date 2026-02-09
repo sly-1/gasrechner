@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GasZähler Pro v8.3.36</title>
+    <title>GasZähler Pro v8.3.37</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -73,18 +73,14 @@
     </style>
 </head>
 <body>
-
 <div id="lockScreen">
     <h2>PIN erforderlich</h2>
     <input type="password" id="pinInput" class="pin-input" inputmode="numeric" placeholder="••••">
     <button onclick="unlockApp()">Entsperren</button>
 </div>
-
 <div id="toast">✅ Aktualisiert</div>
-
 <div id="main">
-    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.36</h1>
-
+    <h1 style="text-align:center; margin-bottom: 20px;">🔥 GasZähler Pro v8.3.37</h1>
     <div class="card">
         <label>Ablesung</label>
         <div class="input-row">
@@ -94,7 +90,6 @@
                 <div id="errorHint" class="error-hint">Wert unlogisch!</div>
             </div>
         </div>
-        
         <details>
             <summary style="color:var(--ios-blue); font-size:13px; cursor:pointer; font-weight:700;">⚙️ Einstellungen</summary>
             <div style="margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
@@ -113,21 +108,17 @@
             </div>
         </details>
     </div>
-
     <div class="card" id="cardSaldo" style="text-align:center">
         <label>Finanz-Saldo (Ist-Stand)</label>
         <span class="result-main" id="outSaldo">0,00 €</span>
         <div id="badgeSaldo" class="badge">Berechne...</div>
     </div>
-
     <div class="card" id="cardTrend" style="text-align:center">
         <label>Jahres-Prognose (+10% Puffer)</label>
         <span class="result-main" id="outYear">0,00 €</span>
         <div id="badgeTrend" class="badge">Eingabe fehlt</div>
     </div>
-
     <button id="saveBtn" onclick="doSave()">💾 Stand speichern</button>
-
     <div class="card">
         <label>Verbrauch m³/Tag</label>
         <div class="chart-container-outer">
@@ -143,35 +134,29 @@
             </table>
         </div>
     </div>
-
     <div style="display:flex; gap:10px; margin-top:10px;">
         <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px;" onclick="doExport()">Backup</button>
         <button style="flex:1; background:var(--ios-gray); color:#000; padding:12px; font-size:14px; border-radius:10px;" onclick="doImport()">Restore</button>
     </div>
     <button style="background:none; color:red; border:none; width:100%; margin-top:20px; font-size:12px;" onclick="doReset()">⚠️ DATENBANK LÖSCHEN</button>
 </div>
-
 <script>
     let db = JSON.parse(localStorage.getItem('gas_db_v8')) || [];
     let myChart = null;
-
     function getActiveTier(kwh, tiers) {
         for (let t of tiers) if (kwh <= t.limit) return t;
         return tiers[tiers.length - 1];
     }
-
     function refreshAll() {
         db.sort((a,b) => new Date(a.d) - new Date(b.d));
         localStorage.setItem('gas_db_v8', JSON.stringify(db));
         liveUpdate();
     }
-
     function liveUpdate() {
         ['bw', 'zz', 'pay', 'start', 'tiers', 'firstPayDate'].forEach(id => {
             const el = document.getElementById(id);
             if(el) localStorage.setItem('gas_pref_' + id, el.value);
         });
-
         const cfg = {
             bw: parseFloat(document.getElementById('bw').value) || 10.55,
             zz: parseFloat(document.getElementById('zz').value) || 0.95,
@@ -182,12 +167,10 @@
                 return { limit: p[0], cent: p[1]/100, base: p[2] };
             })
         };
-
         const mIn = document.getElementById('newMeter');
         const curD = document.getElementById('newDate').value;
         const val = parseFloat(mIn.value);
         let ok = true;
-
         if (mIn.value !== "") {
             let bef = db.filter(x => x.d < curD).sort((a,b) => new Date(b.d) - new Date(a.d))[0];
             let aft = db.filter(x => x.d > curD).sort((a,b) => new Date(a.d) - new Date(b.d))[0];
@@ -200,49 +183,43 @@
             }
         }
         document.getElementById('saveBtn').disabled = !ok || mIn.value === "";
-
         let displayDb = [...db];
         if (ok && mIn.value !== "") {
             displayDb.push({ d: curD, m: val, id: "preview" });
             displayDb.sort((a,b) => new Date(a.d) - new Date(b.d));
         }
-
         if (displayDb.length > 0) {
             const first = displayDb[0];
             const last = displayDb[displayDb.length - 1];
-            
-            const totalKwh = (last.m - cfg.start) * cfg.bw * cfg.zz;
-            const totalDays = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
-            const dailyAvg = (last.m - first.m) / totalDays;
-
-            const tier = getActiveTier((dailyAvg * 365 * cfg.bw * cfg.zz), cfg.tiers);
-            const currentCost = (totalKwh * tier.cent) + ((tier.base * 12 / 365) * totalDays);
-
+            const totalDaysElapsed = Math.max(1, (new Date(last.d) - new Date(first.d)) / 86400000);
+            const totalMeterDiff = last.m - first.m;
+            const dailyAvgMeter = totalMeterDiff / totalDaysElapsed;
+            const consumedKwhSoFar = (last.m - cfg.start) * cfg.bw * cfg.zz;
+            const currentTier = getActiveTier((dailyAvgMeter * 365 * cfg.bw * cfg.zz), cfg.tiers);
+            const costSoFar = (consumedKwhSoFar * currentTier.cent) + ((currentTier.base * 12 / 365) * totalDaysElapsed);
             const sP = document.getElementById('firstPayDate').value ? new Date(document.getElementById('firstPayDate').value) : new Date(first.d);
             let payCount = 0; let dD = new Date(sP);
             while (dD <= new Date(last.d) && payCount < 12) { payCount++; dD.setMonth(dD.getMonth() + 1); }
-
-            const saldo = (payCount * cfg.pay) - currentCost;
+            const saldo = (payCount * cfg.pay) - costSoFar;
             document.getElementById('outSaldo').innerText = saldo.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
             document.getElementById('outSaldo').style.color = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
             document.getElementById('badgeSaldo').className = "badge " + (saldo >= 0 ? "bg-good" : "bg-danger");
             document.getElementById('badgeSaldo').innerText = saldo >= 0 ? "Im Guthaben" : "In der Nachzahlung";
-
-            const yKwh = (dailyAvg * 365) * cfg.bw * cfg.zz;
-            const yTier = getActiveTier(yKwh, cfg.tiers);
-            const yCost = (yKwh * yTier.cent) + (yTier.base * 12);
-            const recPay = (yCost / 12) * 1.10;
-            document.getElementById('outYear').innerText = yCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
-            
-            const ratio = yCost / (cfg.pay * 12);
+            document.getElementById('cardSaldo').style.borderColor = saldo >= 0 ? "var(--ios-green)" : "var(--ios-red)";
+            const projectedYearlyKwh = (dailyAvgMeter * 365) * cfg.bw * cfg.zz;
+            const yearlyTier = getActiveTier(projectedYearlyKwh, cfg.tiers);
+            const projectedYearlyCost = (projectedYearlyKwh * yearlyTier.cent) + (yearlyTier.base * 12);
+            const recommendedPay = (projectedYearlyCost / 12) * 1.10;
+            document.getElementById('outYear').innerText = projectedYearlyCost.toLocaleString('de-DE', {style:'currency', currency:'EUR'});
+            const ratio = projectedYearlyCost / (cfg.pay * 12);
             let cl, tx;
-            if (ratio > 1.15) { cl="bg-danger"; tx="Abschlag zu niedrig! Empfehlung: "+recPay.toFixed(0)+" €"; }
-            else if (ratio > 1.05) { cl="bg-warn"; tx="Knappe Deckung! Empfehlung: "+recPay.toFixed(0)+" €"; }
-            else if (ratio < 0.85) { cl="bg-info"; tx="Abschlag zu hoch! Empfehlung: "+recPay.toFixed(0)+" €"; }
-            else { cl="bg-good"; tx="Abschlag passt! (Ideal: "+recPay.toFixed(0)+" €)"; }
+            if (ratio > 1.15) { cl="bg-danger"; tx="Abschlag zu niedrig! Empfehlung: "+recommendedPay.toFixed(0)+" €"; }
+            else if (ratio > 1.05) { cl="bg-warn"; tx="Knappe Deckung! Empfehlung: "+recommendedPay.toFixed(0)+" €"; }
+            else if (ratio < 0.85) { cl="bg-info"; tx="Abschlag zu hoch! Empfehlung: "+recommendedPay.toFixed(0)+" €"; }
+            else { cl="bg-good"; tx="Abschlag passt! (Ideal: "+recommendedPay.toFixed(0)+" €)"; }
             document.getElementById('badgeTrend').className = "badge " + cl;
             document.getElementById('badgeTrend').innerText = tx;
-
+            document.getElementById('cardTrend').style.borderColor = ratio > 1.05 ? "var(--ios-orange)" : (ratio < 0.85 ? "var(--ios-blue)" : "var(--ios-green)");
             const tb = document.getElementById('historyTable'); tb.innerHTML = '';
             for (let i = displayDb.length - 1; i >= 0; i--) {
                 let tr = "→", tc = "";
@@ -250,8 +227,8 @@
                     const diffM = displayDb[i].m - displayDb[i-1].m;
                     const diffD = (new Date(displayDb[i].d) - new Date(displayDb[i-1].d)) / 86400000;
                     const vD = diffM / diffD;
-                    if (vD > dailyAvg * 1.12) { tr = "↗︎"; tc = "trend-up"; }
-                    else if (vD < dailyAvg * 0.88) { tr = "↘︎"; tc = "trend-down"; }
+                    if (vD > dailyAvgMeter * 1.12) { tr = "↗︎"; tc = "trend-up"; }
+                    else if (vD < dailyAvgMeter * 0.88) { tr = "↘︎"; tc = "trend-down"; }
                 }
                 const isPre = displayDb[i].id === "preview";
                 tb.innerHTML += `<tr style="${isPre?'opacity:0.5;background:#f9f9f9':''}">
@@ -264,7 +241,6 @@
             drawChart(displayDb);
         }
     }
-
     function drawChart(dataArr) {
         const ctx = document.getElementById('mainChart').getContext('2d');
         const lb = [], dt = [];
@@ -280,7 +256,6 @@
             options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
         });
     }
-
     function doSave() {
         const m = parseFloat(document.getElementById('newMeter').value);
         const d = document.getElementById('newDate').value;
@@ -290,14 +265,12 @@
         const t = document.getElementById('toast'); t.classList.add('visible');
         setTimeout(() => t.classList.remove('visible'), 2500);
     }
-
     function delEntry(id) {
         if (confirm("Eintrag löschen?")) {
             db = db.filter(x => x.id !== id);
             refreshAll();
         }
     }
-
     function doExport() { navigator.clipboard.writeText(JSON.stringify(db)).then(() => alert("Kopiert!")); }
     function doImport() {
         const s = prompt("JSON:");
